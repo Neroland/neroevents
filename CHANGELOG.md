@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0-alpha.1] - 2026-10-11
+
+Optional NeroEconomy seams. No blocks, items or recipes yet.
+
+### Added
+
+- **NeroEconomy seams** (NeroEconomy stays optional; NeroEvents builds, loads and runs without it):
+  - `economy/MarketShockRequests` asks NeroEconomy for a temporary price multiplier on an item or tag
+    through Neroland Core's threshold channel `neroevents:market_shock_request`, validating the request
+    first. Needs only Core.
+  - `economy/EconomySignals` hears NeroEconomy's world signals (sector index, market shocks, Reserve,
+    House stock) and hands them to hooks the event system can register. Needs only Core; does nothing
+    until a hook exists.
+  - `economy/EventEconomy` charges event entry fees (`event_entry`) and pays budgeted event rewards
+    (`event_reward`), returning an outcome with a player-facing message.
+- Wiki page *NeroEconomy integration*.
+
+### Changed
+
+- NeroEconomy is declared as an optional dependency on every loader (Fabric `suggests`, NeoForge
+  `optional`, Forge `mandatory = false`, floor `0.3.0-beta.1`) and compiled `compileOnly`.
+- Neroland Core (floor 1.13.0) is now a required dependency, and NeroEvents ships anonymous, opt-out
+  crash reporting (see PRIVACY.md).
+
 ## [0.2.0-alpha.1] - 2026-09-24
 
 EMI compatibility. No gameplay, id, tag or config change.

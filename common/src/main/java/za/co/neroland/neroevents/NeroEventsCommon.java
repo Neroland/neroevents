@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import za.co.neroland.neroevents.config.NeroEventsConfig;
+import za.co.neroland.neroevents.economy.EconomySignals;
+import za.co.neroland.neroevents.economy.EventEconomy;
 import za.co.neroland.neroevents.platform.Services;
 import za.co.neroland.neroevents.telemetry.NeroEventsTelemetry;
 
@@ -38,5 +40,13 @@ public final class NeroEventsCommon {
         //    telemetryEnabled=false); stays inert while the build's DSN is the placeholder
         //    (see NeroEventsTelemetry's PLACEHOLDER_DSN guard).
         NeroEventsTelemetry.init();
+
+        // 3. NeroEconomy's world signals (sector index, market shocks, Reserve, House stock), heard class-free
+        //    through Core's ThresholdEvents. Dormant until the event system adds a hook.
+        EconomySignals.init();
+
+        // 4. Optional NeroEconomy bridge for paid events and rewards. Touches NeroEconomy only when it is
+        //    loaded and new enough; claims must happen here, before the first server starts.
+        EventEconomy.init();
     }
 }
