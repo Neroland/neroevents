@@ -1,6 +1,6 @@
 # NeroEvents
 
-> Part of the [Neroland](../neroland-mc-ecosystem) sci-fi Minecraft mod ecosystem, built on **Neroland Core**.
+> Part of the Neroland sci-fi Minecraft mod ecosystem, built on **Neroland Core**.
 
 **Status:** barebones multiloader skeleton — version `0.0.1-alpha.1`. No gameplay content yet.
 
@@ -30,9 +30,13 @@ The build is the repo root, with a flattened cross-loader structure driven by St
           :fabric:26.1.2:build :fabric:26.2:build :fabric:26.3:build   # all nine
 ```
 
+## Privacy & telemetry
+
+> **Telemetry notice:** NeroEvents sends anonymous error reports (stack trace + mod/game
+> versions only — never IPs, usernames, UUIDs, or world data) to the developers via Sentry
+> (EU servers) so crashes can be fixed. On by default — opt out any time by setting `telemetryEnabled = false`
+> in `config/neroevents.properties`. Full details:
+> [PRIVACY.md](https://github.com/Neroland/neroevents/blob/main/PRIVACY.md).
+
 See [`AGENTS.md`](AGENTS.md) / [`CLAUDE.md`](CLAUDE.md) for agent and contributor context.
 
-## Planning docs
-
-Design, feature and dependency docs for this mod live in the umbrella repo under
-[`../neroland-mc-ecosystem/neroevents`](../neroland-mc-ecosystem/neroevents).
