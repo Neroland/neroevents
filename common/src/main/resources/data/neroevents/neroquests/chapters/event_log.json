@@ -1,0 +1,14 @@
+{
+  "title": "chapter.neroevents.event_log.title",
+  "icon": "minecraft:bell",
+  "allow_server_scope": true,
+  "quests": [
+    { "quest": "neroevents:event_log/first_call", "x": 0, "y": 0 },
+    { "quest": "neroevents:event_log/supply_run", "x": 2, "y": 1 },
+    { "quest": "neroevents:event_log/raid_repelled", "x": 2, "y": -1 },
+    { "quest": "neroevents:event_log/boss_contributor", "x": 4, "y": -1 },
+    { "quest": "neroevents:event_log/world_first_event", "x": 0, "y": 3 },
+    { "quest": "neroevents:event_log/seasoned_server", "x": 2, "y": 3 },
+    { "quest": "neroevents:event_log/giant_slain", "x": 4, "y": 3 }
+  ]
+}

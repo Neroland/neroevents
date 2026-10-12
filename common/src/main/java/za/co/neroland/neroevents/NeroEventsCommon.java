@@ -7,6 +7,7 @@ import za.co.neroland.neroevents.config.NeroEventsConfig;
 import za.co.neroland.neroevents.economy.EconomySignals;
 import za.co.neroland.neroevents.economy.EventEconomy;
 import za.co.neroland.neroevents.platform.Services;
+import za.co.neroland.neroevents.progression.QuestHooks;
 import za.co.neroland.neroevents.telemetry.NeroEventsTelemetry;
 
 /**
@@ -48,5 +49,9 @@ public final class NeroEventsCommon {
         // 4. Optional NeroEconomy bridge for paid events and rewards. Touches NeroEconomy only when it is
         //    loaded and new enough; claims must happen here, before the first server starts.
         EventEconomy.init();
+
+        // 5. Quest-pack hook listener (Core progression events only; no quest-mod dependency). Each loader
+        //    feeds QuestHooks.tick from the server tick for login delivery of hooks that opened offline.
+        QuestHooks.init();
     }
 }

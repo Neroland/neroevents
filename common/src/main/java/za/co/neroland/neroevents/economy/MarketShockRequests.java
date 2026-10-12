@@ -88,7 +88,8 @@ public final class MarketShockRequests {
 
     private static void send(String scope, long value, long minutes, boolean apply) {
         try {
-            ThresholdEvents.fire(new ThresholdEvents.ThresholdCrossing(CHANNEL, scope, value, minutes, apply));
+            ThresholdEvents.fire(NeroEventsCommon.MOD_ID,
+                    new ThresholdEvents.ThresholdCrossing(CHANNEL, scope, value, minutes, apply));
         } catch (RuntimeException | LinkageError failure) {
             NeroEventsCommon.LOGGER.debug("[NeroEvents] A market-shock request could not be sent ({}).",
                     failure.getClass().getName());

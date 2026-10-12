@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0-alpha.1] - 2026-10-11
+
+NeroQuests quest pack and the progression seams it reads. Requires Neroland Core 1.15.0. Still no
+blocks, items or events: the chapter's quests become completable as event content lands.
+
+### Added
+
+- **NeroQuests quest pack** — chapter `neroevents:event_log` "Event Log", 7 quests (4 personal, 3 server
+  "world log") — that appears in the quest book when NeroQuests is installed; inert otherwise, no
+  dependency in any form. Nothing opens its gates or fires its channels yet, so every quest stays open
+  until the event scheduler, participation tracking and supply drops ship. `supply_run` reads the
+  `supply_claimed` record for now and moves to `collect_item` once a drop item exists.
+- **Record gates** (player scope, no `requires`, never checked for access):
+  `neroevents:first_participation`, `supply_claimed`, `raid_repelled`, `boss_contributor`, and the hook
+  gate `neroevents:hook/supply_beacon`.
+- `progression/EventMilestones` — one `record...(server, uuid)` per gate (offline-capable) and one
+  `fire...()` per world channel: `neroevents:event_resolved` (scope = event type id, value = world
+  resolved count, threshold = rung) and `neroevents:boss_defeated` (scope = boss event type id, falling).
+  Scopes are event types, never participants, positions or regions. The future resolve step calls these.
+- `progression/QuestHooks` — listens on Core's progression events for `hook/supply_beacon`, wired once
+  from common init with login delivery from the server tick on every loader. The Supply Beacon item does
+  not exist yet, so the current effect is a chat notice (`message.neroevents.supply_beacon_pending`,
+  once per login) and the gate is left open as a pending claim; `setSupplyBeaconDelivery` installs the
+  real hand-over later, which closes the gate to re-arm it.
+- Wiki page *NeroQuests integration*.
+
+### Changed
+
+- Neroland Core floor raised to **1.15.0** (offline-capable `ProgressionGates.open/close/isOpen` and
+  sourced `ThresholdEvents.fire`). `MarketShockRequests` now fires with `neroevents` as its source.
+- Privacy: the new record gates are player-scope rows in Core's progression store (covered by Core's
+  PRIVACY.md and its shared erasure hook). `QuestHooks` keeps two process-local UUID sets for login
+  detection and the once-per-login notice; nothing is logged or broadcast.
+
 ## [0.3.0-alpha.1] - 2026-10-11
 
 Optional NeroEconomy seams. No blocks, items or recipes yet.

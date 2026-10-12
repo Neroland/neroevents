@@ -53,8 +53,11 @@ nothing is ever sent before the config — and therefore your choice — has bee
 ## Player data
 
 NeroEvents does not currently store any player data of its own — no player UUIDs, names, positions or
-gameplay records are written to the world save or anywhere else. Neroland Core (a required
-dependency) documents its own data handling in its own PRIVACY.md.
+gameplay records are written to the world save or anywhere else. Its progression records (the
+`neroevents:first_participation`, `supply_claimed`, `raid_repelled`, `boss_contributor` and
+`hook/supply_beacon` gates, none of which this version opens yet) are player-scope rows in Neroland
+Core's progression store, covered by Core's PRIVACY.md and erased through Core's shared erasure hook.
+Neroland Core (a required dependency) documents its own data handling in its own PRIVACY.md.
 
 ## Legal basis and your rights (GDPR / POPIA)
 

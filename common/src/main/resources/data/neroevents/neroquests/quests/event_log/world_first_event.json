@@ -1,0 +1,13 @@
+{
+  "title": "quest.neroevents.event_log.world_first_event.title",
+  "description": "quest.neroevents.event_log.world_first_event.desc",
+  "icon": "minecraft:clock",
+  "prerequisites": [],
+  "objectives": [
+    { "type": "neroquests:custom_event", "channel": "neroevents:event_resolved", "direction": "rising", "min_value": 1, "audience": "world" }
+  ],
+  "rewards": [
+    { "type": "neroquests:xp", "amount": 100 }
+  ],
+  "scope": "server"
+}

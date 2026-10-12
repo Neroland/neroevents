@@ -1,0 +1,15 @@
+{
+  "title": "quest.neroevents.event_log.supply_run.title",
+  "description": "quest.neroevents.event_log.supply_run.desc",
+  "icon": "minecraft:chest",
+  "prerequisites": ["neroevents:event_log/first_call"],
+  "objectives": [
+    { "type": "neroquests:gate_open", "gate": "neroevents:supply_claimed" }
+  ],
+  "rewards": [
+    { "type": "neroquests:xp", "amount": 150 },
+    { "type": "neroquests:currency", "amount": 100 },
+    { "type": "neroquests:mod_hook", "gate": "neroevents:hook/supply_beacon" }
+  ],
+  "scope": "player"
+}

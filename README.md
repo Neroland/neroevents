@@ -2,7 +2,7 @@
 
 > Part of the Neroland sci-fi Minecraft mod ecosystem, built on **Neroland Core**.
 
-**Status:** barebones multiloader skeleton — version `0.3.0-alpha.1`. No gameplay content yet; optional NeroEconomy seams are in place.
+**Status:** barebones multiloader skeleton — version `0.4.0-alpha.1`. No gameplay content yet; optional NeroEconomy seams and the NeroQuests quest pack are in place.
 
 ## Build targets
 
@@ -56,6 +56,22 @@ NeroEvents has no events yet; these are the ready-to-use seams the event system 
   acceptable. With NeroEconomy absent, run events free and without credit rewards.
 - Shock requests and signals name goods, sectors or places, never a player. All of this runs on the server
   thread.
+
+## Developer notes: NeroQuests quest pack
+
+NeroEvents ships a NeroQuests quest pack — chapter `neroevents:event_log` *Event Log*, 7 quests — as plain
+data under `common/src/main/resources/data/neroevents/neroquests/`. NeroQuests is **optional**: the pack
+appears in the quest book when NeroQuests is installed and is inert otherwise (no dependency of any kind).
+Nothing in this build opens the pack's gates or fires its channels, so its quests become completable as
+event content lands. The seams it reads live in `common/src/main/java/za/co/neroland/neroevents/progression/`:
+
+| Class | What it does |
+| --- | --- |
+| `EventMilestones` | One `record...(server, uuid)` per record gate (`first_participation`, `supply_claimed`, `raid_repelled`, `boss_contributor`; offline-capable) and one `fire...()` per world channel (`event_resolved`, `boss_defeated`). Channel scope is an event type id, never a participant, position or region. |
+| `QuestHooks` | Hears the `neroevents:hook/supply_beacon` hook gate that NeroQuests opens when a player completes *Supply Run*. Until the Supply Beacon item exists it sends a pending notice and leaves the gate open; `setSupplyBeaconDelivery` installs the real hand-over. |
+
+Record and hook gates have no `requires` and are never checked for access. See
+[wiki/NeroQuests-Integration.md](wiki/NeroQuests-Integration.md).
 
 ## Privacy & telemetry
 

@@ -1,0 +1,13 @@
+{
+  "title": "quest.neroevents.event_log.seasoned_server.title",
+  "description": "quest.neroevents.event_log.seasoned_server.desc",
+  "icon": "minecraft:writable_book",
+  "prerequisites": ["neroevents:event_log/world_first_event"],
+  "objectives": [
+    { "type": "neroquests:custom_event", "channel": "neroevents:event_resolved", "direction": "rising", "min_value": 25, "audience": "world" }
+  ],
+  "rewards": [
+    { "type": "neroquests:xp", "amount": 250 }
+  ],
+  "scope": "server"
+}
