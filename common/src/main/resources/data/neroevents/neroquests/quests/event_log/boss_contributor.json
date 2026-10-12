@@ -1,0 +1,14 @@
+{
+  "title": "quest.neroevents.event_log.boss_contributor.title",
+  "description": "quest.neroevents.event_log.boss_contributor.desc",
+  "icon": "minecraft:netherite_sword",
+  "prerequisites": ["neroevents:event_log/raid_repelled"],
+  "objectives": [
+    { "type": "neroquests:gate_open", "gate": "neroevents:boss_contributor" }
+  ],
+  "rewards": [
+    { "type": "neroquests:xp", "amount": 400 },
+    { "type": "neroquests:currency", "amount": 300 }
+  ],
+  "scope": "player"
+}

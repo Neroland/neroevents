@@ -1,0 +1,14 @@
+{
+  "title": "quest.neroevents.event_log.raid_repelled.title",
+  "description": "quest.neroevents.event_log.raid_repelled.desc",
+  "icon": "minecraft:shield",
+  "prerequisites": ["neroevents:event_log/first_call"],
+  "objectives": [
+    { "type": "neroquests:gate_open", "gate": "neroevents:raid_repelled" }
+  ],
+  "rewards": [
+    { "type": "neroquests:xp", "amount": 200 },
+    { "type": "neroquests:currency", "amount": 150 }
+  ],
+  "scope": "player"
+}

@@ -1,0 +1,13 @@
+{
+  "title": "quest.neroevents.event_log.giant_slain.title",
+  "description": "quest.neroevents.event_log.giant_slain.desc",
+  "icon": "minecraft:wither_skeleton_skull",
+  "prerequisites": [],
+  "objectives": [
+    { "type": "neroquests:custom_event", "channel": "neroevents:boss_defeated", "direction": "falling", "audience": "world" }
+  ],
+  "rewards": [
+    { "type": "neroquests:xp", "amount": 300 }
+  ],
+  "scope": "server"
+}

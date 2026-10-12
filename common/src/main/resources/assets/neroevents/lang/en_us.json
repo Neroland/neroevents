@@ -1,0 +1,19 @@
+{
+  "chapter.neroevents.event_log.title": "Event Log",
+  "economy_result.neroevents.absent": "This needs NeroEconomy, which is not installed on this server.",
+  "message.neroevents.supply_beacon_pending": "A Supply Beacon is reserved for you. NeroEvents will hand it over once supply drops arrive.",
+  "quest.neroevents.event_log.boss_contributor.desc": "Pull your weight against a world boss. Meet the contribution floor when the giant falls and the record is yours.",
+  "quest.neroevents.event_log.boss_contributor.title": "Boss Contributor",
+  "quest.neroevents.event_log.first_call.desc": "Take part in your first server event and see it through to the end. Any event counts, as long as you did your share.",
+  "quest.neroevents.event_log.first_call.title": "First Call",
+  "quest.neroevents.event_log.giant_slain.desc": "The whole server, together: bring down a world boss. Logged once for the world the first time one falls.",
+  "quest.neroevents.event_log.giant_slain.title": "Giant Slain",
+  "quest.neroevents.event_log.raid_repelled.desc": "Hold the line when a raid comes. Be among the defenders when the last raider falls.",
+  "quest.neroevents.event_log.raid_repelled.title": "Raid Repelled",
+  "quest.neroevents.event_log.seasoned_server.desc": "Twenty-five events resolved on this world. A server that has seen a few things.",
+  "quest.neroevents.event_log.seasoned_server.title": "Seasoned Server",
+  "quest.neroevents.event_log.supply_run.desc": "Reach a supply drop and claim it before anyone else does. The event log remembers who got there.",
+  "quest.neroevents.event_log.supply_run.title": "Supply Run",
+  "quest.neroevents.event_log.world_first_event.desc": "The first event on this world has run its course. Every server's history starts somewhere.",
+  "quest.neroevents.event_log.world_first_event.title": "World's First Event"
+}

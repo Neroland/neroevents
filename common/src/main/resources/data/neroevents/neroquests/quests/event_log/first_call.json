@@ -1,0 +1,14 @@
+{
+  "title": "quest.neroevents.event_log.first_call.title",
+  "description": "quest.neroevents.event_log.first_call.desc",
+  "icon": "minecraft:bell",
+  "prerequisites": [],
+  "objectives": [
+    { "type": "neroquests:gate_open", "gate": "neroevents:first_participation" }
+  ],
+  "rewards": [
+    { "type": "neroquests:xp", "amount": 100 },
+    { "type": "neroquests:currency", "amount": 50 }
+  ],
+  "scope": "player"
+}

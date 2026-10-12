@@ -52,11 +52,32 @@ subprojects {
                 password = providers.gradleProperty('gpr.key').orElse(providers.environmentVariable('GITHUB_TOKEN')).getOrNull()
             }
         }
+        // NeroEconomy (optional, compileOnly) from GitHub Packages — declared ONLY when credentials are
+        // present, so a token-less local build never touches it (mavenLocal() above serves local devs).
+        def gprUser = providers.gradleProperty('gpr.user').orElse(providers.environmentVariable('GITHUB_ACTOR')).getOrNull()
+        def gprKey = providers.gradleProperty('gpr.key').orElse(providers.environmentVariable('GITHUB_TOKEN')).getOrNull()
+        if (gprUser != null && gprKey != null) {
+            maven {
+                name = 'NeroEconomyGitHubPackages'
+                url = 'https://maven.pkg.github.com/Neroland/neroeconomy'
+                credentials {
+                    username = gprUser
+                    password = gprKey
+                }
+                content { includeGroup 'za.co.neroland.neroeconomy' }
+            }
+        }
         mavenCentral()
         maven { url 'https://maven.fabricmc.net/' }
         maven { url 'https://maven.neoforged.net/releases/' }
         maven { url 'https://maven.minecraftforge.net/' }
         maven { name = 'BlameJared'; url = 'https://maven.blamejared.com/' } // JEI
+        // CurseMaven — EMI Unofficial Port (optional EMI compat). Restricted to its group so nothing else resolves here.
+        maven {
+            name = 'CurseMaven'
+            url = 'https://cursemaven.com'
+            content { includeGroup 'curse.maven' }
+        }
     }
 
     // Generate static Eclipse projects (.project/.classpath) ONLY for the version
@@ -66,6 +87,101 @@ subprojects {
     // Java extension would reject the nested node ("not a valid java project"). Keeping
     // branch parents as plain folders lets VS Code import each node as a standalone project.
     def isNode = project.parent != null && project.parent.parent != null
+
+    // Stonecutter only preprocesses a node's own src/ tree; the shared common/ source above is spliced
+    // in raw, so it could never carry `//? if >=26.3 {` blocks. Route it through Stonecutter's public
+    // process() API for every NON-active node (output under build/generated/stonecutter-common/java).
+    // The active node keeps the raw folder, so the IDE still edits the real files. Keep common/ in the
+    // vcsVersion state, exactly like the loader src/ trees.
+    if (isNode) {
+        afterEvaluate { node ->
+            def sc = node.extensions.findByName('stonecutter')
+            if (sc == null || sc.current.active) {
+                return
+            }
+            def raw = new File(rootProject.ext.commonJava).canonicalFile
+            def outRel = 'build/generated/stonecutter-common/java'
+            def outDir = node.file(outRel)
+            def processCommon = node.tasks.register('stonecutterProcessCommon') {
+                group = 'stonecutter'
+                description = 'Preprocesses the shared common/ Java source for this Minecraft version.'
+                inputs.dir(raw)
+                inputs.property('mc', sc.current.version)
+                outputs.dir(outDir)
+                doLast {
+                    node.delete(outDir)
+                    raw.eachFileRecurse(groovy.io.FileType.FILES) { f ->
+                        def rel = raw.toPath().relativize(f.toPath()).toString().replace('\\', '/')
+                        if (f.name.endsWith('.java') && f.getText('UTF-8').contains('//?')) {
+                            sc.process(f, "${outRel}/${rel}")
+                        } else {
+                            def dst = new File(outDir, rel)
+                            dst.parentFile.mkdirs()
+                            dst.bytes = f.bytes
+                        }
+                    }
+                }
+            }
+            // Re-setting srcDirs resolves every entry to a plain File, which would drop Stonecutter's own
+            // task dependency on its generated sources, so re-attach it to the untouched entries.
+            def scGenerate = node.tasks.findByName('stonecutterGenerate')
+            def javaSrc = node.sourceSets.main.java
+            javaSrc.srcDirs = javaSrc.srcDirs.collect {
+                if (it.canonicalFile == raw) {
+                    return node.files(outDir).builtBy(processCommon)
+                }
+                return scGenerate != null ? node.files(it).builtBy(scGenerate) : it
+            }
+        }
+    }
+
+    // Version-specific resource overlays: common/src/main/resources-<mc> is merged OVER the shared
+    // common/src/main/resources for every node whose Minecraft version is >= <mc> (later overlays win).
+    // Needed where a datapack file's format differs between versions (e.g. 26.3's worldgen/feature).
+    if (isNode) {
+        afterEvaluate { node ->
+            def sc = node.extensions.findByName('stonecutter')
+            if (sc == null) {
+                return
+            }
+            def base = new File(rootProject.ext.commonResources).canonicalFile
+            def verOf = { File d -> d.name.substring('resources-'.length()) }
+            def overlays = (base.parentFile.listFiles() ?: [] as File[]).findAll {
+                it.isDirectory() && it.name.startsWith('resources-') && sc.eval(sc.current.version, ">=" + verOf(it))
+            }.sort { a, b ->
+                def x = verOf(a).tokenize('.')*.toInteger(), y = verOf(b).tokenize('.')*.toInteger()
+                def n = [x.size(), y.size()].max()
+                for (int i = 0; i < n; i++) {
+                    int c = (i < x.size() ? x[i] : 0) <=> (i < y.size() ? y[i] : 0)
+                    if (c != 0) return c
+                }
+                return 0
+            }
+            if (overlays.isEmpty()) {
+                return
+            }
+            // Stage ONLY the overlays, and ADD that directory as an extra resource srcDir — never
+            // rebuild sourceSets.main.resources.srcDirs. Reading srcDirs resolves every entry to a
+            // plain File and discards the task that produces it; re-adding them with a blanket
+            // builtBy(stonecutterGenerate) silently replaced generateModMetadata as the producer of
+            // the generated manifest, so processResources stopped running it and the jar shipped
+            // with no fabric.mod.json / mods.toml. Incremental builds hid it (a manifest from an
+            // earlier run was still on disk); clean builds failed.
+            def outDir = node.file('build/generated/stonecutter-common/resources')
+            def mergeResources = node.tasks.register('mergeCommonResources', Sync) {
+                group = 'stonecutter'
+                description = 'Stages the version-specific common/src/main/resources-<mc> overlays.'
+                duplicatesStrategy = DuplicatesStrategy.INCLUDE // later overlays win over earlier ones
+                overlays.each { from(it) }
+                into(outDir)
+            }
+            // Appended last, so on a duplicate path the overlay wins over the shared common resources.
+            node.sourceSets.main.resources.srcDir(node.files(outDir).builtBy(mergeResources))
+            node.tasks.named('processResources') {
+                duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            }
+        }
+    }
     if (isNode) {
         // Compute the unique name HERE (project = the Gradle project); inside
         // `eclipse.project {}` `project` rebinds to the Eclipse model, which has no `parent`.

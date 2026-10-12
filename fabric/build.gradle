@@ -4,12 +4,15 @@
 plugins {
     id 'net.fabricmc.fabric-loom'
     id 'eclipse'   // for eclipse.synchronizationTasks (VS Code / Buildship import hook)
+    id 'maven-publish'
 }
 
 // MC version comes from the Stonecutter node (e.g. :fabric:26.1.2), not a global property.
 def mc = stonecutter.current.version
 def fabricApi = project.findProperty("fabric_api_version_${mc}")
 def jeiVersion = project.findProperty("jei_version_${mc}")
+def emiFile = project.findProperty("emi_file_fabric_${mc}")
+def nerolandcoreVersion = project.findProperty('nerolandcore_version')
 
 // This node's projectDir is <loader>/versions/<v>; the authoritative loader source +
 // resources live in the BRANCH root (fabric/). Resolve branch-root paths via the parent.
@@ -18,6 +21,36 @@ def branchDir = project.parent.projectDir
 // Distinct, descriptive jar name per cell (the node project is named after the MC version, so the
 // default jar would be "<mc>-<version>.jar" and COLLIDE with the neoforge cell of the same version).
 base { archivesName = "neroevents-fabric-${mc}" }
+
+// Publish this cell's jar as a Maven artifact so other Nero mods can declare NeroEvents a dependency:
+// `za.co.neroland.neroevents:neroevents-fabric-<mc>:<version>`. Mirrors Neroland Core's publishing setup.
+// `./gradlew publishToMavenLocal` installs all nine cells locally for dev. Dependency-free POM on purpose.
+publishing {
+    publications {
+        register('mod', MavenPublication) {
+            groupId = rootProject.mod_group_id
+            artifactId = "neroevents-fabric-${mc}"
+            version = rootProject.mod_version
+            artifact tasks.named('jar')
+        }
+    }
+    // Remote target so a fresh CI runner / clone (empty ~/.m2) can resolve NeroEvents — GitHub Packages
+    // Maven for the NeroEvents repo. `publishToMavenLocal` still works for local dev; `publish` (or
+    // publishModPublicationToGitHubPackagesRepository) pushes here. Auth: gradle props gpr.user/gpr.key,
+    // else env GITHUB_ACTOR/GITHUB_TOKEN (both present in GitHub Actions). Lazy getOrNull() means a
+    // build that doesn't touch this repo (e.g. a contributor with no token) won't fail at configuration.
+    // Privacy (POPIA/GDPR): publishes only build artifacts + version strings, no personal data.
+    repositories {
+        maven {
+            name = 'GitHubPackages'
+            url = 'https://maven.pkg.github.com/Neroland/neroevents'
+            credentials {
+                username = providers.gradleProperty('gpr.user').orElse(providers.environmentVariable('GITHUB_ACTOR')).getOrNull()
+                password = providers.gradleProperty('gpr.key').orElse(providers.environmentVariable('GITHUB_TOKEN')).getOrNull()
+            }
+        }
+    }
+}
 
 // Pull in the shared common source + resources.
 sourceSets.main.java.srcDir rootProject.ext.commonJava
@@ -29,6 +62,20 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     if (fabricApi != null) {
         implementation "net.fabricmc.fabric-api:fabric-api:${fabricApi}"
+    }
+
+    // Neroland Core — REQUIRED shared foundation (config schema). Plain `implementation` (NOT
+    // `include`) — this de-obf 26.x Loom setup omits `mappings`, so there is no intermediary→named
+    // remap and `modImplementation` isn't available. Core ships as its own mod and loads BEFORE
+    // NeroEvents (see fabric.mod.json depends).
+    implementation "za.co.neroland.nerolandcore:nerolandcore-fabric-${mc}:${nerolandcoreVersion}"
+
+    // NeroEconomy — OPTIONAL. compileOnly: never bundled, never a hard requirement. Only the economy bridge
+    // class imports it, and only after isModLoaded("neroeconomy"), so NeroEvents runs without it.
+    compileOnly "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${rootProject.neroeconomy_version}"
+    // Dev clients load NeroEconomy only with -PwithNeroEconomy; the default run proves it stays optional.
+    if (project.hasProperty('withNeroEconomy')) {
+        runtimeOnly "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${rootProject.neroeconomy_version}"
     }
 
     // Sentry SDK (telemetry/NeroEventsTelemetry): compile against it + embed it as a jar-in-jar so the
@@ -44,6 +91,16 @@ dependencies {
         compileOnly "mezz.jei:jei-${mc}-common-api:${jeiVersion}"
         compileOnly "mezz.jei:jei-${mc}-fabric-api:${jeiVersion}"
         runtimeOnly "mezz.jei:jei-${mc}-fabric:${jeiVersion}"
+    }
+
+    // EMI (optional recipe-viewer compat). EMI ships one jar per loader with its API inside, so compile
+    // against the whole jar; it is never published as a dependency. The dev client loads it only with
+    // -PwithEmi, so default runs keep the plain JEI setup.
+    if (emiFile) {
+        compileOnly "curse.maven:emi-unofficial-port-unstable-1544558:${emiFile}"
+        if (project.hasProperty('withEmi')) {
+            runtimeOnly "curse.maven:emi-unofficial-port-unstable-1544558:${emiFile}"
+        }
     }
 }
 
@@ -61,6 +118,7 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
         mod_license          : rootProject.mod_license,
         fabric_loader_version: rootProject.fabric_loader_version,
         minecraft_version    : mc,
+        nerolandcore_version : nerolandcoreVersion,
     ]
     inputs.properties(props)
     expand(props)
