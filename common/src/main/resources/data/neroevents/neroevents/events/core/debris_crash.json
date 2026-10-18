@@ -1,0 +1,28 @@
+{
+  "type": "neroevents:debris_crash",
+  "category": "hazard",
+  "severity": "HAZARD",
+  "display": {
+    "title": "event.neroevents.core.debris_crash.title",
+    "what_to_do": "event.neroevents.core.debris_crash.what_to_do",
+    "announce": "event.neroevents.core.debris_crash.announce"
+  },
+  "weight": 7,
+  "cooldown_ticks": 90000,
+  "announce_ticks": 4800,
+  "duration_ticks": 12000,
+  "destructive": true,
+  "conditions": {
+    "min_online": 1
+  },
+  "bounds": { "kind": "radius", "radius": 64 },
+  "payload": {},
+  "rewards": {
+    "budget": 300,
+    "lines": [
+      { "kind": "currency", "amount": 150 },
+      { "kind": "xp", "amount": 100 },
+      { "kind": "item", "item": "neroevents:salvage_core_fragment", "count": 2 }
+    ]
+  }
+}

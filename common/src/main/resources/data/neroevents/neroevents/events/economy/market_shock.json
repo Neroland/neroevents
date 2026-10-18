@@ -1,0 +1,34 @@
+{
+  "type": "neroevents:market_shock",
+  "category": "economy",
+  "severity": "INFO",
+  "display": {
+    "title": "event.neroevents.market_shock.title",
+    "what_to_do": "event.neroevents.market_shock.what_to_do",
+    "announce": "event.neroevents.market_shock.announce"
+  },
+  "weight": 6,
+  "cooldown_ticks": 144000,
+  "announce_ticks": 6000,
+  "duration_ticks": 54000,
+  "destructive": false,
+  "consent_exempt": false,
+  "location_public": false,
+  "conditions": {
+    "dimensions": ["minecraft:overworld"],
+    "allow_empty_dimension": true,
+    "requires_mods": ["neroeconomy"]
+  },
+  "bounds": { "kind": "dimension" },
+  "payload": {
+    "shocks": [
+      { "key": "#c:ingots/iron", "multiplier": 1.8, "minutes": 45, "narrative": "event.neroevents.market_shock.shortage.iron" },
+      { "key": "#c:ingots/copper", "multiplier": 0.5, "minutes": 45, "narrative": "event.neroevents.market_shock.glut.copper" },
+      { "key": "nerolandcore:nero_alloy_ingot", "multiplier": 2.0, "minutes": 30, "narrative": "event.neroevents.market_shock.shortage.nero_alloy" },
+      { "key": "#c:dusts/redstone", "multiplier": 1.6, "minutes": 60, "narrative": "event.neroevents.market_shock.shortage.redstone" },
+      { "key": "nerolandcore:plasma_glass", "multiplier": 0.6, "minutes": 40, "narrative": "event.neroevents.market_shock.glut.plasma_glass" },
+      { "key": "#c:gems/diamond", "multiplier": 1.4, "minutes": 90, "narrative": "event.neroevents.market_shock.demand.diamond" }
+    ]
+  },
+  "rewards": { "budget": 0, "lines": [] }
+}

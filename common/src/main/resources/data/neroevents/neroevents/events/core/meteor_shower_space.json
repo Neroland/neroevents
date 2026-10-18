@@ -1,0 +1,30 @@
+{
+  "type": "neroevents:meteor_shower",
+  "category": "hazard",
+  "severity": "HAZARD",
+  "display": {
+    "title": "event.neroevents.core.meteor_shower_space.title",
+    "what_to_do": "event.neroevents.core.meteor_shower_space.what_to_do",
+    "announce": "event.neroevents.core.meteor_shower_space.announce"
+  },
+  "weight": 6,
+  "cooldown_ticks": 108000,
+  "announce_ticks": 6000,
+  "duration_ticks": 12000,
+  "destructive": true,
+  "conditions": {
+    "dimension_tag": "neroland:space/dimensions"
+  },
+  "bounds": { "kind": "radius", "radius": 192 },
+  "payload": {
+    "meteor_count": 32,
+    "ore_per_crater": 3
+  },
+  "rewards": {
+    "budget": 400,
+    "lines": [
+      { "kind": "currency", "amount": 200 },
+      { "kind": "xp", "amount": 200 }
+    ]
+  }
+}

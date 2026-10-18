@@ -1,0 +1,24 @@
+{
+  "type": "neroevents:debug_marker",
+  "category": "hazard",
+  "severity": "INFO",
+  "display": {
+    "title": "event.neroevents.debug_marker.title",
+    "what_to_do": "event.neroevents.debug_marker.what_to_do",
+    "announce": "event.neroevents.debug_marker.announce"
+  },
+  "weight": 0,
+  "cooldown_ticks": 0,
+  "announce_ticks": 200,
+  "duration_ticks": 600,
+  "enabled": false,
+  "destructive": false,
+  "consent_exempt": false,
+  "calm_exempt": true,
+  "location_public": true,
+  "conditions": {
+    "allow_empty_dimension": true
+  },
+  "bounds": { "kind": "radius", "radius": 16 },
+  "payload": { "ticks_to_resolve": 400 }
+}

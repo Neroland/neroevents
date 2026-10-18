@@ -1,0 +1,422 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "side": "neroevents:block/salvage_crate_side",
+    "front": "neroevents:block/salvage_crate_front",
+    "lid": "neroevents:block/salvage_crate_lid",
+    "bottom": "neroevents:block/salvage_crate_bottom",
+    "particle": "neroevents:block/salvage_crate_side"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [
+        1,
+        1,
+        1
+      ],
+      "to": [
+        15,
+        12,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#front",
+          "uv": [
+            1,
+            4,
+            15,
+            15
+          ]
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            1,
+            4,
+            15,
+            15
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            1,
+            4,
+            15,
+            15
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            1,
+            4,
+            15,
+            15
+          ]
+        },
+        "up": {
+          "texture": "#bottom",
+          "uv": [
+            1,
+            1,
+            15,
+            15
+          ]
+        },
+        "down": {
+          "texture": "#bottom",
+          "uv": [
+            1,
+            1,
+            15,
+            15
+          ]
+        }
+      }
+    },
+    {
+      "name": "skid_west",
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        4,
+        1,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bottom",
+          "uv": [
+            1,
+            15,
+            4,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#bottom",
+          "uv": [
+            1,
+            15,
+            4,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#bottom",
+          "uv": [
+            1,
+            15,
+            15,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#bottom",
+          "uv": [
+            1,
+            15,
+            15,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#bottom",
+          "uv": [
+            1,
+            1,
+            4,
+            15
+          ],
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "name": "skid_east",
+      "from": [
+        12,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        1,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bottom",
+          "uv": [
+            12,
+            15,
+            15,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#bottom",
+          "uv": [
+            12,
+            15,
+            15,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#bottom",
+          "uv": [
+            1,
+            15,
+            15,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#bottom",
+          "uv": [
+            1,
+            15,
+            15,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#bottom",
+          "uv": [
+            12,
+            1,
+            15,
+            15
+          ],
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "name": "lid",
+      "from": [
+        1,
+        12,
+        1
+      ],
+      "to": [
+        15,
+        14,
+        15
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          12,
+          15
+        ],
+        "axis": "x",
+        "angle": -45,
+        "rescale": false
+      },
+      "faces": {
+        "north": {
+          "texture": "#side",
+          "uv": [
+            1,
+            2,
+            15,
+            4
+          ]
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            1,
+            2,
+            15,
+            4
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            1,
+            2,
+            15,
+            4
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            1,
+            2,
+            15,
+            4
+          ]
+        },
+        "up": {
+          "texture": "#lid",
+          "uv": [
+            1,
+            1,
+            15,
+            15
+          ]
+        },
+        "down": {
+          "texture": "#bottom",
+          "uv": [
+            1,
+            1,
+            15,
+            15
+          ]
+        }
+      }
+    },
+    {
+      "name": "lid_rim",
+      "from": [
+        2,
+        14,
+        2
+      ],
+      "to": [
+        14,
+        15,
+        14
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          12,
+          15
+        ],
+        "axis": "x",
+        "angle": -45,
+        "rescale": false
+      },
+      "faces": {
+        "north": {
+          "texture": "#side",
+          "uv": [
+            2,
+            1,
+            14,
+            2
+          ]
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            2,
+            1,
+            14,
+            2
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            2,
+            1,
+            14,
+            2
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            2,
+            1,
+            14,
+            2
+          ]
+        },
+        "up": {
+          "texture": "#lid",
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ]
+        }
+      }
+    },
+    {
+      "name": "latch",
+      "from": [
+        6,
+        10.5,
+        0
+      ],
+      "to": [
+        10,
+        13.5,
+        1
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          12,
+          15
+        ],
+        "axis": "x",
+        "angle": -45,
+        "rescale": false
+      },
+      "faces": {
+        "north": {
+          "texture": "#front",
+          "uv": [
+            6,
+            1,
+            10,
+            4
+          ]
+        },
+        "east": {
+          "texture": "#front",
+          "uv": [
+            6,
+            1,
+            7,
+            4
+          ]
+        },
+        "west": {
+          "texture": "#front",
+          "uv": [
+            9,
+            1,
+            10,
+            4
+          ]
+        },
+        "up": {
+          "texture": "#front",
+          "uv": [
+            6,
+            1,
+            10,
+            2
+          ]
+        },
+        "down": {
+          "texture": "#front",
+          "uv": [
+            6,
+            3,
+            10,
+            4
+          ]
+        }
+      }
+    }
+  ]
+}

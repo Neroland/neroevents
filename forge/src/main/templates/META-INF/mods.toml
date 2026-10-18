@@ -7,6 +7,7 @@ modId = "${mod_id}"
 version = "${mod_version}"
 displayName = "${mod_name}"
 authors = "${mod_authors}"
+logoFile = "neroevents_logo.png"
 description = '''
 NeroEvents - multiloader build (Forge).
 '''
@@ -41,6 +42,9 @@ side = "BOTH"
 [[dependencies.${mod_id}]]
 modId = "neroeconomy"
 mandatory = false
-versionRange = "[0.3.0-beta.1,)"
+versionRange = "[0.4.0-beta.1,)"
 ordering = "AFTER"
 side = "BOTH"
+
+# Optional siblings, generated from the <x>_compat build flags (floor = the compiled version); empty when off.
+${nerospace_dep}${nerocreatures_dep}${nerocolonies_dep}${neroagriculture_dep}${nerofactions_dep}${opac_dep}

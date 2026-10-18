@@ -1,0 +1,33 @@
+{
+  "type": "neroevents:boss",
+  "category": "boss",
+  "severity": "COMBAT",
+  "display": {
+    "title": "event.neroevents.cinder_tyrant.title",
+    "what_to_do": "event.neroevents.cinder_tyrant.what_to_do",
+    "announce": "event.neroevents.cinder_tyrant.announce"
+  },
+  "weight": 3,
+  "cooldown_ticks": 216000,
+  "announce_ticks": 12000,
+  "duration_ticks": 36000,
+  "enabled": true,
+  "destructive": false,
+  "consent_exempt": false,
+  "calm_exempt": false,
+  "location_public": true,
+  "conditions": {
+    "min_online": 2,
+    "dimension_tag": "neroland:space/dimensions",
+    "requires_mods": ["nerocreatures"]
+  },
+  "bounds": { "kind": "radius", "radius": 64 },
+  "payload": { "boss_id": "nerocreatures:cinder_tyrant" },
+  "rewards": {
+    "budget": 1200,
+    "lines": [
+      { "kind": "currency", "amount": 800 },
+      { "kind": "xp", "amount": 400 }
+    ]
+  }
+}

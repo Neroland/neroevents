@@ -21,9 +21,11 @@ them. Without NeroQuests nothing changes; the chapter is plain data inside the N
 | Giant Slain | the whole server | A world boss fell |
 
 Personal quests are recorded per player; "whole server" quests complete once for everyone. Completing
-*Supply Run* earns a **Supply Beacon**, a one-use item that calls a small private supply drop at your feet
-(never inside someone else's claim). Until that item exists, NeroEvents tells you once per login that a
-beacon is reserved for you and hands it over when supply drops arrive.
+*Supply Run* earns a **Supply Beacon**, a one-use item that asks for a small supply drop where you stand.
+It goes straight into your inventory (if it is full, free a slot and it is handed over at your next login).
+Using it follows every event rule — protected areas, the calm period and the event limits — and if the
+drop cannot be called the beacon is kept and you are told why. Until the server has the supply-drop event
+itself, using the beacon just says so and keeps it.
 
 ## Privacy
 

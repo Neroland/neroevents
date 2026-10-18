@@ -7,13 +7,14 @@ import net.minecraft.server.MinecraftServer;
 
 import za.co.neroland.neroeconomy.api.EconomyCaller;
 import za.co.neroland.neroeconomy.api.EconomyResult;
+import za.co.neroland.neroeconomy.api.MarketShocks;
 import za.co.neroland.neroeconomy.api.SiblingEconomy;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
 
 /**
  * The <b>only</b> class in NeroEvents that imports {@code za.co.neroland.neroeconomy}. NeroEconomy is compiled
- * {@code compileOnly} and is optional, so this class is loaded only after {@link EventEconomy#init()} has seen
+ * {@code compileOnly} and is optional, so this class is loaded only after {@link EventsEconomy#init()} has seen
  * {@code isModLoaded("neroeconomy")}; nothing else may reference NeroEconomy types.
  *
  * <p>Privacy (POPIA/GDPR): takes only the UUID the caller already holds, passes it straight to NeroEconomy,
@@ -27,21 +28,9 @@ final class NeroEconomyBridge {
     private NeroEconomyBridge() {
     }
 
-    /**
-     * NeroEconomy's cross-mod API version, read reflectively so a newer NeroEconomy is not compared against a
-     * constant inlined at compile time. 0 when the field is missing (a NeroEconomy older than 0.3.0).
-     */
-    static int apiVersion() {
-        try {
-            return SiblingEconomy.class.getField("API_VERSION").getInt(null);
-        } catch (ReflectiveOperationException missing) {
-            return 0;
-        }
-    }
-
     /** Claims NeroEvents's handle with its closed set of reason codes. Common init only. */
     static void claim() {
-        caller = SiblingEconomy.claim(NeroEventsCommon.MOD_ID, Set.of(EventEconomy.REASON_ENTRY, EventEconomy.REASON_REWARD));
+        caller = SiblingEconomy.claim(NeroEventsCommon.MOD_ID, Set.of(EventsEconomy.REASON_ENTRY, EventsEconomy.REASON_REWARD));
     }
 
     static EconomyOutcome charge(MinecraftServer server, UUID player, long amount, String reason, String requestKey) {
@@ -54,6 +43,21 @@ final class NeroEconomyBridge {
         EconomyCaller handle = caller;
         if (handle == null) return EconomyOutcome.absentOutcome();
         return outcome(handle.pay(server, player, amount, reason, requestKey));
+    }
+
+    /**
+     * Whether NeroEconomy has an active shock on {@code key} (an item id or {@code #tag}); {@code false} when it
+     * cannot be asked. Read-only: NeroEvents never changes prices itself.
+     */
+    static boolean shockActive(String key) {
+        if (key == null || key.isBlank()) return false;
+        try {
+            return MarketShocks.active(key);
+        } catch (RuntimeException | LinkageError failure) {
+            NeroEventsCommon.LOGGER.debug("[NeroEvents] Could not read NeroEconomy's market shocks ({}).",
+                    failure.getClass().getName());
+            return false;
+        }
     }
 
     private static EconomyOutcome outcome(EconomyResult result) {

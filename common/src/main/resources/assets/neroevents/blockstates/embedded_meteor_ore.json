@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "neroevents:block/embedded_meteor_ore"
+      },
+      {
+        "model": "neroevents:block/embedded_meteor_ore",
+        "y": 90
+      },
+      {
+        "model": "neroevents:block/embedded_meteor_ore",
+        "y": 180
+      },
+      {
+        "model": "neroevents:block/embedded_meteor_ore",
+        "y": 270
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "type": "neroevents:meteor_shower",
+  "category": "hazard",
+  "severity": "HAZARD",
+  "display": {
+    "title": "event.neroevents.core.meteor_shower.title",
+    "what_to_do": "event.neroevents.core.meteor_shower.what_to_do",
+    "announce": "event.neroevents.core.meteor_shower.announce"
+  },
+  "weight": 8,
+  "cooldown_ticks": 108000,
+  "announce_ticks": 6000,
+  "duration_ticks": 12000,
+  "destructive": true,
+  "conditions": {
+    "dimensions": ["minecraft:overworld"],
+    "min_online": 1
+  },
+  "bounds": { "kind": "radius", "radius": 160 },
+  "payload": {},
+  "rewards": {
+    "budget": 300,
+    "lines": [
+      { "kind": "currency", "amount": 150 },
+      { "kind": "xp", "amount": 150 }
+    ]
+  }
+}

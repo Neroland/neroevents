@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "neroevents:block/scorched_panel"
+      },
+      {
+        "model": "neroevents:block/scorched_panel",
+        "y": 90
+      },
+      {
+        "model": "neroevents:block/scorched_panel",
+        "y": 180
+      },
+      {
+        "model": "neroevents:block/scorched_panel",
+        "y": 270
+      }
+    ]
+  }
+}

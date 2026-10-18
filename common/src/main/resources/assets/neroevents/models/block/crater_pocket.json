@@ -1,0 +1,322 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "side": "neroevents:block/crater_pocket_side",
+    "top": "neroevents:block/crater_pocket_top",
+    "glow": "neroevents:block/crater_pocket_glow",
+    "particle": "neroevents:block/crater_pocket_side"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        12,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#side",
+          "uv": [
+            0,
+            4,
+            16,
+            16
+          ],
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            0,
+            4,
+            16,
+            16
+          ],
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            0,
+            4,
+            16,
+            16
+          ],
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            0,
+            4,
+            16,
+            16
+          ],
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#top",
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ]
+        },
+        "down": {
+          "texture": "#side",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "name": "rim_north",
+      "from": [
+        0,
+        12,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            4
+          ],
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#top",
+          "uv": [
+            0,
+            2,
+            16,
+            6
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            2,
+            4
+          ],
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            14,
+            0,
+            16,
+            4
+          ],
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#top",
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "cullface": "up"
+        }
+      }
+    },
+    {
+      "name": "rim_south",
+      "from": [
+        0,
+        12,
+        14
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "south": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            4
+          ],
+          "cullface": "south"
+        },
+        "north": {
+          "texture": "#top",
+          "uv": [
+            0,
+            10,
+            16,
+            14
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            14,
+            0,
+            16,
+            4
+          ],
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            2,
+            4
+          ],
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#top",
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "cullface": "up"
+        }
+      }
+    },
+    {
+      "name": "rim_west",
+      "from": [
+        0,
+        12,
+        2
+      ],
+      "to": [
+        2,
+        16,
+        14
+      ],
+      "faces": {
+        "west": {
+          "texture": "#side",
+          "uv": [
+            2,
+            0,
+            14,
+            4
+          ],
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#top",
+          "uv": [
+            2,
+            2,
+            14,
+            6
+          ],
+          "rotation": 90
+        },
+        "up": {
+          "texture": "#top",
+          "uv": [
+            0,
+            2,
+            2,
+            14
+          ],
+          "cullface": "up"
+        }
+      }
+    },
+    {
+      "name": "rim_east",
+      "from": [
+        14,
+        12,
+        2
+      ],
+      "to": [
+        16,
+        16,
+        14
+      ],
+      "faces": {
+        "east": {
+          "texture": "#side",
+          "uv": [
+            2,
+            0,
+            14,
+            4
+          ],
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#top",
+          "uv": [
+            2,
+            10,
+            14,
+            14
+          ],
+          "rotation": 270
+        },
+        "up": {
+          "texture": "#top",
+          "uv": [
+            14,
+            2,
+            16,
+            14
+          ],
+          "cullface": "up"
+        }
+      }
+    },
+    {
+      "name": "pocket_glow",
+      "from": [
+        2,
+        12.02,
+        2
+      ],
+      "to": [
+        14,
+        12.02,
+        14
+      ],
+      "shade": false,
+      "faces": {
+        "up": {
+          "texture": "#glow",
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ]
+        }
+      }
+    }
+  ]
+}

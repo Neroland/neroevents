@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "neroevents:block/bent_strut"
+    },
+    "facing=east": {
+      "model": "neroevents:block/bent_strut",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "neroevents:block/bent_strut",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "neroevents:block/bent_strut",
+      "y": 270
+    }
+  }
+}

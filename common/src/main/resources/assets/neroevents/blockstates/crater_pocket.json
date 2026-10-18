@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "neroevents:block/crater_pocket"
+      },
+      {
+        "model": "neroevents:block/crater_pocket",
+        "y": 90
+      },
+      {
+        "model": "neroevents:block/crater_pocket",
+        "y": 180
+      },
+      {
+        "model": "neroevents:block/crater_pocket",
+        "y": 270
+      }
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "neroevents:item/supply_beacon",
+    "layer1": "neroevents:item/supply_beacon_lens"
+  }
+}

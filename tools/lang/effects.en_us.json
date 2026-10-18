@@ -1,0 +1,15 @@
+{
+  "command.neroevents.gallery.built": "Gallery built north of you: %s exhibits. Run /neroevents gallery clear here to take it down.",
+  "command.neroevents.gallery.cleared": "Gallery cleared: %s blocks removed, %s gallery entities removed.",
+  "command.neroevents.gallery.creative_only": "The gallery is a creative-mode tool: switch to creative first (and use a test world).",
+  "command.neroevents.gallery.nothing_here": "There is no gallery here. Stand where you ran /neroevents gallery.",
+  "subtitles.neroevents.announce.combat": "Combat alert",
+  "subtitles.neroevents.announce.hazard": "Hazard warning",
+  "subtitles.neroevents.announce.info": "Event announced",
+  "subtitles.neroevents.announce.reward": "Reward available",
+  "subtitles.neroevents.announce.war": "War declared",
+  "subtitles.neroevents.deny": "Action refused",
+  "subtitles.neroevents.event_console.tab": "Console click",
+  "subtitles.neroevents.vote.cast": "Vote cast",
+  "subtitles.neroevents.vote.open": "Vote opened"
+}

@@ -1,5 +1,8 @@
 package za.co.neroland.neroevents.economy;
 
+import java.util.UUID;
+
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
@@ -23,32 +26,28 @@ import za.co.neroland.neroevents.platform.Services;
  * <p>Server thread only. Privacy (POPIA/GDPR): takes the player only to pass their UUID to NeroEconomy;
  * nothing here logs who paid or was paid.
  */
-public final class EventEconomy {
+public final class EventsEconomy {
 
     /** Reason code for an event entry fee (player to the Reserve). */
     public static final String REASON_ENTRY = "event_entry";
     /** Reason code for an event reward (Reserve to player, budgeted). */
     public static final String REASON_REWARD = "event_reward";
 
-    /** Whether NeroEconomy is installed, new enough and claimed. */
+    /** Whether NeroEconomy is installed and claimed. */
     private static volatile boolean active;
 
-    private EventEconomy() {
+    private EventsEconomy() {
     }
 
     /**
      * Hooks NeroEconomy when it is installed. Call once from common init (claims close when the first server
-     * starts). With NeroEconomy absent, or older than API version 1, this does nothing and every call below
-     * returns {@link EconomyOutcome.Status#ABSENT}.
+     * starts). With NeroEconomy absent this does nothing and every call below returns
+     * {@link EconomyOutcome.Status#ABSENT}. There is no runtime version check: the manifests' optional
+     * NeroEconomy floor (the compiled version) guarantees the API, and a link failure is caught below.
      */
     public static void init() {
         if (active || !Services.PLATFORM.isModLoaded("neroeconomy")) return;
         try {
-            int api = NeroEconomyBridge.apiVersion();
-            if (api < 1) {
-                NeroEventsCommon.LOGGER.info("[NeroEvents] NeroEconomy is too old (API version {}); paid events and credit rewards stay off.", api);
-                return;
-            }
             NeroEconomyBridge.claim();
             active = true;
             NeroEventsCommon.LOGGER.info("[NeroEvents] NeroEconomy found; paid events and credit rewards are available.");
@@ -85,8 +84,23 @@ public final class EventEconomy {
      * @param requestKey the reward's key (see {@link RequestKeys}), or {@code null} for no replay protection
      */
     public static EconomyOutcome payReward(ServerPlayer player, long amount, String requestKey) {
+        if (player == null) return active ? EconomyOutcome.invalid() : EconomyOutcome.absentOutcome();
+        return payReward(player.level().getServer(), player.getUUID(), amount, requestKey);
+    }
+
+    /**
+     * Pays an event reward to a participant by UUID, online or offline (the reward resolver's path).
+     *
+     * @param server     the running server
+     * @param player     the participant's UUID (passed straight to NeroEconomy, never logged)
+     * @param amount     the reward in whole credits, more than 0
+     * @param requestKey the grant's key (see {@link RequestKeys}), so a repeated delivery cannot pay twice
+     */
+    public static EconomyOutcome payReward(MinecraftServer server, UUID player, long amount, String requestKey) {
         if (!active) return EconomyOutcome.absentOutcome();
-        if (player == null || amount <= 0L || !RequestKeys.isValidOrNull(requestKey)) return EconomyOutcome.invalid();
-        return NeroEconomyBridge.pay(player.level().getServer(), player.getUUID(), amount, REASON_REWARD, requestKey);
+        if (server == null || player == null || amount <= 0L || !RequestKeys.isValidOrNull(requestKey)) {
+            return EconomyOutcome.invalid();
+        }
+        return NeroEconomyBridge.pay(server, player, amount, REASON_REWARD, requestKey);
     }
 }

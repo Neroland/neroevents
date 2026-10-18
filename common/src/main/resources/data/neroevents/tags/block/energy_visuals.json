@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "nerolandcore:battery", "required": false },
+    { "id": "nerolandcore:creative_battery", "required": false }
+  ]
+}

@@ -6,7 +6,7 @@ name: Sync Modrinth gallery
 # the existing gallery and re-uploads every PNG in a fixed order, featuring the first as the card.
 #
 # Source of truth: neoforge/versions/26.2/runs/client/screenshots/neroevents/*.png (written by the
-# /neroevents capture harness when run from the NeoForge 26.2 client).
+# /nsevgallery capture harness when run from the NeoForge 26.2 client).
 # Requires the same secrets as the description sync: MODRINTH_PROJECT_ID + MODRINTH_API_TOKEN.
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
       DIR: neoforge/versions/26.2/runs/client/screenshots/neroevents
       # Gallery order; the first present file becomes the featured card. Any PNG not listed here is
       # appended afterwards in alphabetical order, so new shots still sync without editing this.
-      ORDER: "rocket_t4 rockets greenxertz_vista cindara_basin glacira_frost orbital_station terraform_after terraform_before machines solar pipes quarry_operating creatures star_guide launch_controller suits meteor_site blocks"
+      ORDER: "hero pods pod_descending meteors debris war_beacon consoles crater_blocks wreck_blocks"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

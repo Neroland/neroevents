@@ -1,0 +1,29 @@
+{
+  "type": "neroevents:supply_drop",
+  "category": "reward",
+  "severity": "REWARD",
+  "display": {
+    "title": "event.neroevents.core.supply_drop.title",
+    "what_to_do": "event.neroevents.core.supply_drop.what_to_do",
+    "announce": "event.neroevents.core.supply_drop.announce"
+  },
+  "weight": 10,
+  "cooldown_ticks": 72000,
+  "announce_ticks": 6000,
+  "duration_ticks": 18000,
+  "calm_exempt": true,
+  "location_public": true,
+  "conditions": {
+    "min_online": 1
+  },
+  "bounds": { "kind": "radius", "radius": 96 },
+  "payload": { "tier": 1 },
+  "rewards": {
+    "budget": 400,
+    "lines": [
+      { "kind": "currency", "amount": 250 },
+      { "kind": "xp", "amount": 150 }
+    ],
+    "top_bonus": [ { "rank": 1, "kind": "currency", "amount": 50 } ]
+  }
+}

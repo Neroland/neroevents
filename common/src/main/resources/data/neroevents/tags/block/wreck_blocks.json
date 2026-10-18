@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "neroevents:hull_plating",
+    "neroevents:scorched_panel",
+    "neroevents:bent_strut"
+  ]
+}

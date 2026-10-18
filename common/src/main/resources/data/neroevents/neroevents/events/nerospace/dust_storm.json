@@ -1,0 +1,23 @@
+{
+  "type": "neroevents:planetary_storm",
+  "category": "hazard",
+  "severity": "HAZARD",
+  "display": {
+    "title": "event.neroevents.dust_storm.title",
+    "what_to_do": "event.neroevents.dust_storm.what_to_do",
+    "announce": "event.neroevents.dust_storm.announce"
+  },
+  "weight": 5,
+  "cooldown_ticks": 144000,
+  "announce_ticks": 6000,
+  "duration_ticks": 9600,
+  "destructive": false,
+  "location_public": false,
+  "conditions": {
+    "dimensions": ["nerospace:greenxertz"],
+    "requires_mods": ["nerospace"]
+  },
+  "bounds": { "kind": "dimension" },
+  "payload": { "variant": "dust" },
+  "rewards": { "budget": 0 }
+}

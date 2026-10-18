@@ -1,0 +1,33 @@
+{
+  "type": "neroevents:supply_drop",
+  "category": "reward",
+  "severity": "REWARD",
+  "display": {
+    "title": "event.neroevents.core.supply_drop_major.title",
+    "what_to_do": "event.neroevents.core.supply_drop_major.what_to_do",
+    "announce": "event.neroevents.core.supply_drop_major.announce"
+  },
+  "weight": 3,
+  "cooldown_ticks": 144000,
+  "announce_ticks": 9000,
+  "duration_ticks": 18000,
+  "location_public": true,
+  "conditions": {
+    "min_online": 3,
+    "bands": ["5-9", "10+"]
+  },
+  "bounds": { "kind": "radius", "radius": 128 },
+  "payload": {
+    "tier": 3,
+    "loot_table": "neroevents:pods/supply_tier3",
+    "loot_rolls": 4,
+    "pod_loot_budget": 700
+  },
+  "rewards": {
+    "budget": 900,
+    "lines": [
+      { "kind": "currency", "amount": 600 },
+      { "kind": "xp", "amount": 300 }
+    ]
+  }
+}

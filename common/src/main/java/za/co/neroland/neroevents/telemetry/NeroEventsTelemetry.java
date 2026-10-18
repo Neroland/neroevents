@@ -321,17 +321,34 @@ public final class NeroEventsTelemetry {
         }
     }
 
-    /** Capture a handled exception with a non-identifying source label for triage. */
+    /**
+     * Capture a handled exception with non-identifying labels for triage. {@code source} and
+     * {@code operation} must be stable labels (a subsystem name plus a translation key or class name),
+     * never player-authored text, a rendered title, a name or a UUID.
+     *
+     * <p>Uses the Sentry 8.x {@code captureException(Throwable, ScopeCallback)} overload: tags set
+     * inside a plain {@code Sentry.withScope(...)} wrapper never reach the event. The event is marked
+     * {@link SentryLevel#WARNING} and fingerprinted by mod, source, operation and exception class, so
+     * unrelated handled failures stay separate issues.
+     */
     public static void captureHandledException(Throwable t, String source, String operation) {
         if (!active || t == null || !touchesNeroEvents(t)) {
             return;
         }
-        Sentry.withScope(scope -> {
-            scope.setTag("handled", "true");
-            scope.setTag("source", source);
-            scope.setExtra("operation", operation);
-            Sentry.captureException(t);
-        });
+        String safeSource = source == null ? "unknown" : scrub(source);
+        String safeOperation = operation == null ? "unknown" : scrub(operation);
+        try {
+            Sentry.captureException(t, scope -> {
+                scope.setLevel(SentryLevel.WARNING);
+                scope.setTag("handled", "true");
+                scope.setTag("source", safeSource);
+                scope.setTag("operation", safeOperation);
+                scope.setFingerprint(List.of(NeroEventsCommon.MOD_ID, safeSource, safeOperation,
+                        t.getClass().getName()));
+            });
+        } catch (RuntimeException | LinkageError e) {
+            NeroEventsCommon.LOGGER.debug("[NeroEvents] telemetry: failed to report a handled exception", e);
+        }
     }
 
     /** Capture a (scrubbed, truncated) FATAL log line that names NeroEvents without a throwable. */
@@ -382,13 +399,22 @@ public final class NeroEventsTelemetry {
                 if (frames != null) {
                     for (SentryStackFrame frame : frames) {
                         frame.setAbsPath(null);
+                        String filename = frame.getFilename();
+                        if (filename != null) {
+                            frame.setFilename(scrub(filename));
+                        }
                     }
                 }
             }
         }
         Message message = event.getMessage();
-        if (message != null && message.getFormatted() != null) {
-            message.setFormatted(scrub(message.getFormatted()));
+        if (message != null) {
+            if (message.getFormatted() != null) {
+                message.setFormatted(scrub(message.getFormatted()));
+            }
+            if (message.getMessage() != null) {
+                message.setMessage(scrub(message.getMessage()));
+            }
         }
         return event;
     }
@@ -446,8 +472,25 @@ public final class NeroEventsTelemetry {
         return sb.toString();
     }
 
-    /** Replaces home-directory paths (which contain the OS account name) with a neutral marker. */
+    /**
+     * Removes the OS account from a string: this JVM's actual home directory (both separator styles)
+     * and account name first, then any remaining {@code /Users/<x>} / {@code /home/<x>} /
+     * {@code C:\Users\<x>} path prefix. Never returns {@code null} for a non-null input.
+     */
     static String scrub(String text) {
-        return USER_PATH.matcher(text).replaceAll("/~");
+        if (text == null) {
+            return null;
+        }
+        String scrubbed = text;
+        String home = System.getProperty("user.home");
+        if (home != null && !home.isBlank()) {
+            scrubbed = scrubbed.replace(home, "~");
+            scrubbed = scrubbed.replace(home.replace('\\', '/'), "~");
+        }
+        String user = System.getProperty("user.name");
+        if (user != null && !user.isBlank()) {
+            scrubbed = scrubbed.replace(user, "[user]");
+        }
+        return USER_PATH.matcher(scrubbed).replaceAll("/~");
     }
 }

@@ -23,13 +23,12 @@ import za.co.neroland.neroevents.NeroEventsCommon;
  * rewards). NeroEvents never imports the quest mod: it only hears Core's progression events.
  *
  * <p>{@code neroevents:hook/supply_beacon} — owes the player a one-use <b>Supply Beacon</b> that calls a
- * small private supply drop at the holder's feet (claim-aware, never in someone else's claim). <b>That
- * item does not exist yet</b>, so this build delivers the smallest honest effect: a chat line telling the
- * player a beacon is reserved for them, and the gate is <i>left open</i> as a pending claim. The future
- * supply-drop feature installs a real {@link Delivery} with {@link #setSupplyBeaconDelivery}; the first
+ * small supply drop at the holder's position under every event rule. Common init installs the real
+ * {@link Delivery} ({@code item/SupplyBeaconDelivery}) with {@link #setSupplyBeaconDelivery}; the first
  * time it hands the item over (on the hook, or on login for a claim that opened while the player was
- * offline) the gate is closed to re-arm it. Until then the notice repeats at most once per login, per
- * server.
+ * offline) the gate is closed to re-arm it. A full inventory leaves the gate open for the next login. The
+ * pending notice below remains the fallback when no delivery is installed (it repeats at most once per
+ * login, per server).
  *
  * <p>Delivery is bounded and idempotent: one beacon per hook opening. Logins are detected loader-free
  * from the server tick ({@link #tick}), the same way the other Neroland mods do it.

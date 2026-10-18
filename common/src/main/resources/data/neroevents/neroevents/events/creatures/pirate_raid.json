@@ -1,0 +1,56 @@
+{
+  "type": "neroevents:pirate_raid",
+  "category": "raid",
+  "severity": "COMBAT",
+  "display": {
+    "title": "event.neroevents.pirate_raid.title",
+    "what_to_do": "event.neroevents.pirate_raid.what_to_do",
+    "announce": "event.neroevents.pirate_raid.announce"
+  },
+  "weight": 6,
+  "cooldown_ticks": 108000,
+  "announce_ticks": 6000,
+  "duration_ticks": 24000,
+  "enabled": true,
+  "destructive": false,
+  "consent_exempt": false,
+  "calm_exempt": false,
+  "location_public": false,
+  "conditions": {
+    "min_online": 2,
+    "requires_mods": ["nerocreatures"]
+  },
+  "bounds": { "kind": "target", "radius": 64, "fallback_to_density": true },
+  "payload": {
+    "waves": [
+      {
+        "mobs": [
+          { "type": "nerocreatures:space_pirate", "count": 4 },
+          { "type": "nerocreatures:rogue_drone", "count": 2 }
+        ]
+      },
+      {
+        "mobs": [
+          { "type": "nerocreatures:space_pirate", "count": 5 },
+          { "type": "nerocreatures:rogue_drone", "count": 3 }
+        ],
+        "delay_ticks": 600
+      },
+      {
+        "mobs": [
+          { "type": "nerocreatures:space_pirate", "count": 4 },
+          { "type": "nerocreatures:rogue_android", "count": 2 },
+          { "type": "nerocreatures:rogue_drone", "count": 2 }
+        ],
+        "delay_ticks": 900
+      }
+    ]
+  },
+  "rewards": {
+    "budget": 600,
+    "lines": [
+      { "kind": "currency", "amount": 350 },
+      { "kind": "xp", "amount": 250 }
+    ]
+  }
+}

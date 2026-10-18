@@ -1,0 +1,139 @@
+{
+  "_about": "Block-by-block layer tables for the four NeroEvents wreck variants. Convert each to data/neroevents/structures/wreck_<name>.nbt (structure block format) or place directly. Layers are listed bottom to top; each layer is a list of rows from north (first row) to south, each row a string of west->east cells. 'y' is the layer height relative to the ground plane: y 0 is the first block above the ground, y -1 replaces exactly one block of the ground surface (only the half-buried crate uses it). Every cell not in the key is structure void: the ground is never replaced below the plane. Facing letters follow the key; every placement goes through the protection query before any block is set.",
+  "key": {
+    ".": "structure_void",
+    "P": "neroevents:hull_plating",
+    "S": "neroevents:scorched_panel",
+    "n": "neroevents:bent_strut[facing=north]",
+    "e": "neroevents:bent_strut[facing=east]",
+    "s": "neroevents:bent_strut[facing=south]",
+    "w": "neroevents:bent_strut[facing=west]",
+    "C": "neroevents:salvage_crate[facing=north,open=false]",
+    "c": "neroevents:salvage_crate[facing=west,open=false]"
+  },
+  "variants": {
+    "wreck_pod_shell": {
+      "size": [5, 3, 5],
+      "description": "A split landing-pod half-shell: a 2-high curved wall of hull plating on the north/east side, scorched panels on the ground side, one salvage crate inside, one bent strut leaning out.",
+      "loot_blocks": 1,
+      "layers": [
+        { "y": 0, "rows": [
+          ".PPP.",
+          "SP.PS",
+          "P.C.P",
+          "S...w",
+          "..S.."
+        ]},
+        { "y": 1, "rows": [
+          ".PPP.",
+          "P...P",
+          "P....",
+          ".....",
+          "....."
+        ]},
+        { "y": 2, "rows": [
+          "..P..",
+          ".....",
+          ".....",
+          ".....",
+          "....."
+        ]}
+      ]
+    },
+    "wreck_strut_field": {
+      "size": [7, 2, 7],
+      "description": "A flat scatter: five bent struts at mixed rotations, three scorched panels, the crate half-buried one block below the ground plane.",
+      "loot_blocks": 1,
+      "layers": [
+        { "y": -1, "rows": [
+          ".......",
+          ".......",
+          ".......",
+          "...C...",
+          ".......",
+          ".......",
+          "......."
+        ]},
+        { "y": 0, "rows": [
+          "n......",
+          "...S...",
+          ".e.....",
+          "......w",
+          "..S.s..",
+          ".......",
+          "....S.n"
+        ]}
+      ]
+    },
+    "wreck_cargo_spill": {
+      "size": [5, 3, 5],
+      "description": "A 3x3 plating floor with two salvage crates and a short 2-high plating wall on the north side; the rich variant, both crates roll loot.",
+      "loot_blocks": 2,
+      "layers": [
+        { "y": 0, "rows": [
+          "PPPPP",
+          ".PPP.",
+          ".PCP.",
+          ".PPc.",
+          "S...S"
+        ]},
+        { "y": 1, "rows": [
+          "PPPPP",
+          ".....",
+          ".....",
+          ".....",
+          "....."
+        ]},
+        { "y": 2, "rows": [
+          ".P.P.",
+          ".....",
+          ".....",
+          ".....",
+          "....."
+        ]}
+      ]
+    },
+    "wreck_hull_rib": {
+      "size": [5, 5, 5],
+      "description": "A five-block arch of bent struts over a single crate, scorched panels at the arch feet; the tallest variant and the most recognisable from a distance.",
+      "loot_blocks": 1,
+      "layers": [
+        { "y": 0, "rows": [
+          ".....",
+          "S...S",
+          "e.C.w",
+          "S...S",
+          "....."
+        ]},
+        { "y": 1, "rows": [
+          ".....",
+          ".....",
+          "e...w",
+          ".....",
+          "....."
+        ]},
+        { "y": 2, "rows": [
+          ".....",
+          ".....",
+          "e...w",
+          ".....",
+          "....."
+        ]},
+        { "y": 3, "rows": [
+          ".....",
+          ".....",
+          ".e.w.",
+          ".....",
+          "....."
+        ]},
+        { "y": 4, "rows": [
+          ".....",
+          ".....",
+          "..n..",
+          ".....",
+          "....."
+        ]}
+      ]
+    }
+  }
+}

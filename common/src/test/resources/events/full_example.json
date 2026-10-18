@@ -1,0 +1,44 @@
+{
+  "type": "neroevents_test:codec",
+  "category": "reward",
+  "severity": "REWARD",
+  "display": {
+    "title": "event.neroevents.supply_drop.title",
+    "what_to_do": "event.neroevents.supply_drop.what_to_do",
+    "announce": "event.neroevents.supply_drop.announce"
+  },
+  "weight": 10,
+  "cooldown_ticks": 72000,
+  "announce_ticks": 6000,
+  "duration_ticks": 12000,
+  "enabled": true,
+  "destructive": false,
+  "consent_exempt": false,
+  "calm_exempt": true,
+  "location_public": true,
+  "conditions": {
+    "dimensions": ["minecraft:overworld", "nerospace:greenxertz"],
+    "min_online": 1,
+    "max_online": -1,
+    "time_of_day": { "from": 0, "to": 24000 },
+    "bands": ["0-1", "2-4", "5-9", "10+"],
+    "requires_gate": "nerospace:hook/reveal_star_guide_page",
+    "required_gate_holders": 1,
+    "requires_mods": [],
+    "allow_empty_dimension": false
+  },
+  "bounds": { "kind": "radius", "radius": 96, "fallback_to_density": true },
+  "payload": {},
+  "rewards": {
+    "budget": 500,
+    "split": "contribution",
+    "min_share_fraction": 0.05,
+    "lines": [
+      { "kind": "currency", "amount": 300 },
+      { "kind": "xp", "amount": 200 },
+      { "kind": "item", "item": "nerolandcore:nero_alloy_ingot", "count": 4 },
+      { "kind": "reputation", "faction": "nerofactions:miners_guild", "delta": 5 }
+    ],
+    "top_bonus": [ { "rank": 1, "kind": "currency", "amount": 100 } ]
+  }
+}

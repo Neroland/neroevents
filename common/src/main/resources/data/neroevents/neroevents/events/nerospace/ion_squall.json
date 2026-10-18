@@ -1,0 +1,23 @@
+{
+  "type": "neroevents:planetary_storm",
+  "category": "hazard",
+  "severity": "HAZARD",
+  "display": {
+    "title": "event.neroevents.ion_squall.title",
+    "what_to_do": "event.neroevents.ion_squall.what_to_do",
+    "announce": "event.neroevents.ion_squall.announce"
+  },
+  "weight": 5,
+  "cooldown_ticks": 144000,
+  "announce_ticks": 6000,
+  "duration_ticks": 7200,
+  "destructive": false,
+  "location_public": false,
+  "conditions": {
+    "dimensions": ["nerospace:cindara"],
+    "requires_mods": ["nerospace"]
+  },
+  "bounds": { "kind": "dimension" },
+  "payload": { "variant": "ion", "intensity": 2 },
+  "rewards": { "budget": 0 }
+}

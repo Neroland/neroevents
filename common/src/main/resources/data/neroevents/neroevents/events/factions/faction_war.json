@@ -1,0 +1,40 @@
+{
+  "type": "neroevents:faction_war",
+  "category": "war",
+  "severity": "WAR",
+  "display": {
+    "title": "event.neroevents.faction_war.title",
+    "what_to_do": "event.neroevents.faction_war.what_to_do",
+    "announce": "event.neroevents.faction_war.announce"
+  },
+  "weight": 4,
+  "cooldown_ticks": 216000,
+  "announce_ticks": 12000,
+  "duration_ticks": 24000,
+  "destructive": false,
+  "consent_exempt": false,
+  "location_public": true,
+  "conditions": {
+    "min_online": 4,
+    "requires_mods": ["nerofactions"]
+  },
+  "bounds": { "kind": "radius", "radius": 96 },
+  "payload": {
+    "objective_count": 3,
+    "objective_spread": 48,
+    "capture_radius": 6,
+    "capture_ticks": 600,
+    "capture_points": 10,
+    "hold_points_per_100_ticks": 1,
+    "win_score": 0,
+    "reputation_win": 10,
+    "reputation_loss": 5
+  },
+  "rewards": {
+    "budget": 800,
+    "lines": [
+      { "kind": "currency", "amount": 500 },
+      { "kind": "xp", "amount": 300 }
+    ]
+  }
+}

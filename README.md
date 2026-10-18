@@ -2,7 +2,7 @@
 
 > Part of the Neroland sci-fi Minecraft mod ecosystem, built on **Neroland Core**.
 
-**Status:** barebones multiloader skeleton — version `0.4.0-alpha.1`. No gameplay content yet; optional NeroEconomy seams and the NeroQuests quest pack are in place.
+**Status:** early alpha — version `0.4.0-alpha.1`. No gameplay content yet; the foundation (Neroland Core wiring, own network channel, erasure hook, menu guard, telemetry, unit tests), the optional NeroEconomy seams and the NeroQuests quest pack are in place. See [USING-CORE.md](USING-CORE.md) for the Core APIs used.
 
 ## Build targets
 
@@ -39,13 +39,13 @@ NeroEvents has no events yet; these are the ready-to-use seams the event system 
 | --- | --- | --- |
 | `MarketShockRequests` | Core only | `apply(scope, multiplier, minutes)` / `end(scope)` ask NeroEconomy for a temporary price multiplier on an item id or `#tag`, through Core `ThresholdEvents` channel `neroevents:market_shock_request` (value = multiplier × 1000, threshold = economy-minutes, rising = apply/end). Validated before sending; NeroEconomy clamps it to its price band and `shockMaxMinutes`, and only hears mods in its `shockSources` config (default `neroevents`). |
 | `EconomySignals` | Core only | Listens for NeroEconomy's world channels (`sector_index`, `market_shock`, `reserve`, `house_stock`) and hands each to hooks registered with `addHook`. No hook is registered yet, so a signal does nothing. |
-| `EventEconomy` | NeroEconomy (optional) | `chargeEntry(player, fee, key)` charges an entry fee (`event_entry`); `payReward(player, amount, key)` pays a budgeted reward (`event_reward`). |
+| `EventsEconomy` | NeroEconomy (optional) | `chargeEntry(player, fee, key)` charges an entry fee (`event_entry`); `payReward(player, amount, key)` pays a budgeted reward (`event_reward`). |
 
 - NeroEconomy is **optional**. It is compiled `compileOnly` (never bundled) and declared optional in
   every loader manifest. One bridge class, `economy/NeroEconomyBridge`, is the only code that imports
-  `za.co.neroland.neroeconomy`, and it is loaded only after `isModLoaded("neroeconomy")` and an API
-  version check (`SiblingEconomy.API_VERSION >= 1`, read reflectively). The handle is claimed once from
-  common init.
+  `za.co.neroland.neroeconomy`, and it is loaded only after `isModLoaded("neroeconomy")`; the manifest
+  floor (0.4.0-beta.1) guarantees the API, and a link failure leaves the seams off instead of crashing.
+  The handle is claimed once from common init.
 - Every call returns an `EconomyOutcome`: `APPLIED` (grant), `REFUSED` (nothing moved; show
   `outcome.message()`), or `ABSENT` (NeroEconomy is not installed; use the fallback).
 - Request keys name the thing being paid for, never a player. A key holding a UUID or 32 hex digits is
@@ -68,15 +68,15 @@ event content lands. The seams it reads live in `common/src/main/java/za/co/nero
 | Class | What it does |
 | --- | --- |
 | `EventMilestones` | One `record...(server, uuid)` per record gate (`first_participation`, `supply_claimed`, `raid_repelled`, `boss_contributor`; offline-capable) and one `fire...()` per world channel (`event_resolved`, `boss_defeated`). Channel scope is an event type id, never a participant, position or region. |
-| `QuestHooks` | Hears the `neroevents:hook/supply_beacon` hook gate that NeroQuests opens when a player completes *Supply Run*. Until the Supply Beacon item exists it sends a pending notice and leaves the gate open; `setSupplyBeaconDelivery` installs the real hand-over. |
+| `QuestHooks` | Hears the `neroevents:hook/supply_beacon` hook gate that NeroQuests opens when a player completes *Supply Run*. The Supply Beacon item (`neroevents:supply_beacon`) is handed over by `item/SupplyBeaconDelivery`, installed with `setSupplyBeaconDelivery` at init; a full inventory leaves the gate open for the next login. |
 
 Record and hook gates have no `requires` and are never checked for access. See
 [wiki/NeroQuests-Integration.md](wiki/NeroQuests-Integration.md).
 
 ## Privacy & telemetry
 
-> **Telemetry notice:** NeroEvents sends anonymous error reports (stack trace + mod/game
-> versions only — never IPs, usernames, UUIDs, or world data) to the developers via Sentry
+> **Telemetry notice:** NeroEvents sends anonymous error reports (stack trace, mod/game
+> versions and the list of loaded mod ids — never IPs, usernames, UUIDs, or world data) to the developers via Sentry
 > (EU servers) so crashes can be fixed. On by default — opt out any time by setting `telemetryEnabled = false`
 > in `config/neroevents.properties`. Full details:
 > [PRIVACY.md](https://github.com/Neroland/neroevents/blob/main/PRIVACY.md).

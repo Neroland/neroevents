@@ -50,7 +50,12 @@ repo/
 PROJECT_PLAN.md
 /tools/__pycache__
 runs/
-# …but DO track the capture-harness gallery screenshots under the NeoForge
+# Dev/test-run output inside the Stonecutter nodes (game logs can carry absolute paths and the OS
+# account name).
+**/versions/*/logs/
+**/versions/*/crash-reports/
+logs/
+crash-reports/
 # python caches (scripts)
 __pycache__/
 *.pyc

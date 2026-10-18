@@ -1,0 +1,66 @@
+{
+  "type": "neroevents:alien_invasion",
+  "category": "invasion",
+  "severity": "COMBAT",
+  "display": {
+    "title": "event.neroevents.alien_invasion.title",
+    "what_to_do": "event.neroevents.alien_invasion.what_to_do",
+    "announce": "event.neroevents.alien_invasion.announce"
+  },
+  "weight": 4,
+  "cooldown_ticks": 144000,
+  "announce_ticks": 9000,
+  "duration_ticks": 30000,
+  "enabled": true,
+  "destructive": false,
+  "consent_exempt": false,
+  "calm_exempt": false,
+  "location_public": false,
+  "conditions": {
+    "min_online": 3,
+    "bands": ["5-9", "10+"],
+    "dimension_tag": "neroland:space/dimensions",
+    "requires_mods": ["nerocreatures"]
+  },
+  "bounds": { "kind": "target", "radius": 64, "fallback_to_density": true },
+  "payload": {
+    "waves": [
+      {
+        "mobs": [
+          { "type": "nerocreatures:void_crawler", "count": 5 },
+          { "type": "nerocreatures:plasma_slime", "count": 3 }
+        ]
+      },
+      {
+        "mobs": [
+          { "type": "nerocreatures:void_crawler", "count": 4 },
+          { "type": "nerocreatures:lunar_stalker", "count": 3 }
+        ],
+        "delay_ticks": 600
+      },
+      {
+        "mobs": [
+          { "type": "nerocreatures:lunar_stalker", "count": 4 },
+          { "type": "nerocreatures:asteroid_worm", "count": 2 }
+        ],
+        "delay_ticks": 900
+      },
+      {
+        "mobs": [
+          { "type": "nerocreatures:void_crawler", "count": 6 },
+          { "type": "nerocreatures:lunar_stalker", "count": 3 },
+          { "type": "nerocreatures:asteroid_worm", "count": 2 },
+          { "type": "nerocreatures:plasma_slime", "count": 3 }
+        ],
+        "delay_ticks": 1200
+      }
+    ]
+  },
+  "rewards": {
+    "budget": 900,
+    "lines": [
+      { "kind": "currency", "amount": 500 },
+      { "kind": "xp", "amount": 400 }
+    ]
+  }
+}

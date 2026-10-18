@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "neroevents:block/meteor_slag"
+      },
+      {
+        "model": "neroevents:block/meteor_slag",
+        "y": 90
+      },
+      {
+        "model": "neroevents:block/meteor_slag",
+        "y": 180
+      },
+      {
+        "model": "neroevents:block/meteor_slag",
+        "y": 270
+      }
+    ]
+  }
+}

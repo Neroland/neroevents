@@ -5,6 +5,11 @@ name: Sync wiki
 # code out, clones the wiki repo, mirrors wiki/*.md into it, and pushes only if something
 # changed. Plain git — no third-party action needed.
 #
+# A guard job runs first, on every push to main and on every pull request: it fails if wiki/ or
+# any tracked text file in the repository references private planning material. The sync job
+# runs only after the guard passes and never for a pull request (the sync is idempotent, so
+# running it on a push that did not touch wiki/ changes nothing).
+#
 # ONE-TIME SETUP (required before the first run):
 #   1. The wiki repo does not exist until the wiki has at least one page. Open the repo's
 #      Wiki tab in the GitHub UI and create any page once (e.g. save an empty Home) so
@@ -14,21 +19,61 @@ name: Sync wiki
 on:
   push:
     branches: [main]
-    paths:
-      - wiki/**
-      - .github/workflows/wiki.yml
+  pull_request:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+# The wiki is player-facing and the repository is public: nothing in either may reference private
+# planning material. Each name in PATTERN is written with a one-character class so this file never
+# spells it out while the regex still matches the real strings. Matching is case-insensitive.
+# Document-style names are matched only as names (a file name, a numbered plan, a folder path or a
+# record number), so ordinary words in prose are never blocked.
+env:
+  PATTERN: 'neroland-mc-ecosyste[m]|nerolink-ap[p]|BUILD-PROMP[T]|REWORK-PROMP[T]|PLA[N]-[0-9]+\.[0-9]+|SMOKE-TES[T]|\bAUDI[T](-|\.md)|decision[s]/|\bAD[R]\b|PROGRES[S]\.md|RESUME-STAG[E]'
 
 jobs:
-  sync:
-    name: Push wiki/ to the GitHub wiki
+  guard:
+    name: Guard against private references
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          fetch-depth: 1
+
+      - name: Guard against private references in wiki/
+        run: |
+          set -euo pipefail
+          if grep -rniE "$PATTERN" wiki/; then
+            echo "::error::wiki/ references private planning material. Remove the reference before publishing."
+            exit 1
+          fi
+          echo "wiki/ contains no private references."
+
+      # Every tracked text file (binary files skipped with -I). Build output, Gradle caches and run
+      # logs are never tracked, so they are not scanned. git grep exits 0 on any match and 1 on
+      # none (no xargs batching, whose mixed exit codes could hide a match).
+      - name: Guard against private references anywhere in the repository
+        run: |
+          set -euo pipefail
+          if git grep -nIiE "$PATTERN" -- .; then
+            echo "::error::The repository references private planning material. Remove the reference."
+            exit 1
+          fi
+          echo "No tracked file contains a private reference."
+
+  sync:
+    name: Push wiki/ to the GitHub wiki
+    needs: guard
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           fetch-depth: 1
 

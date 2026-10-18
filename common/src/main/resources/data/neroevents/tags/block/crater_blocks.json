@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "neroevents:meteor_slag",
+    "neroevents:cooled_crust",
+    "neroevents:embedded_meteor_ore",
+    "neroevents:crater_pocket"
+  ]
+}

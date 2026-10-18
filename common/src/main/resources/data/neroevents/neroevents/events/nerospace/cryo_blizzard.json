@@ -1,0 +1,23 @@
+{
+  "type": "neroevents:planetary_storm",
+  "category": "hazard",
+  "severity": "HAZARD",
+  "display": {
+    "title": "event.neroevents.cryo_blizzard.title",
+    "what_to_do": "event.neroevents.cryo_blizzard.what_to_do",
+    "announce": "event.neroevents.cryo_blizzard.announce"
+  },
+  "weight": 5,
+  "cooldown_ticks": 144000,
+  "announce_ticks": 6000,
+  "duration_ticks": 9600,
+  "destructive": false,
+  "location_public": false,
+  "conditions": {
+    "dimensions": ["nerospace:glacira"],
+    "requires_mods": ["nerospace"]
+  },
+  "bounds": { "kind": "dimension" },
+  "payload": { "variant": "cryo" },
+  "rewards": { "budget": 0 }
+}

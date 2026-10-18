@@ -1,0 +1,5 @@
+{
+  "command.neroevents.status.integrations": "Integrations: %s",
+  "command.neroevents.status.shocks_paused": "Market shocks: paused for this session (two unconfirmed requests in a row)",
+  "command.neroevents.status.storm": "Storm in %1$s: %2$s, intensity %3$s"
+}

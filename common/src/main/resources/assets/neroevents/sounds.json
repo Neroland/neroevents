@@ -1,0 +1,314 @@
+{
+  "event.announce.info": {
+    "subtitle": "subtitles.neroevents.announce.info",
+    "sounds": [
+      {
+        "name": "block.note_block.chime",
+        "type": "event",
+        "pitch": 1.0
+      }
+    ]
+  },
+  "event.announce.info_tail": {
+    "subtitle": "subtitles.neroevents.announce.info",
+    "sounds": [
+      {
+        "name": "block.note_block.chime",
+        "type": "event",
+        "pitch": 1.25
+      }
+    ]
+  },
+  "event.announce.reward": {
+    "subtitle": "subtitles.neroevents.announce.reward",
+    "sounds": [
+      {
+        "name": "entity.player.levelup",
+        "type": "event",
+        "pitch": 1.3
+      }
+    ]
+  },
+  "event.announce.hazard": {
+    "subtitle": "subtitles.neroevents.announce.hazard",
+    "sounds": [
+      {
+        "name": "block.beacon.deactivate",
+        "type": "event",
+        "pitch": 0.8
+      }
+    ]
+  },
+  "event.announce.hazard_tail": {
+    "subtitle": "subtitles.neroevents.announce.hazard",
+    "sounds": [
+      {
+        "name": "block.note_block.bass",
+        "type": "event",
+        "pitch": 0.8
+      }
+    ]
+  },
+  "event.announce.combat": {
+    "subtitle": "subtitles.neroevents.announce.combat",
+    "sounds": [
+      {
+        "name": "event.raid.horn",
+        "type": "event",
+        "pitch": 0.9
+      }
+    ]
+  },
+  "event.announce.war": {
+    "subtitle": "subtitles.neroevents.announce.war",
+    "sounds": [
+      {
+        "name": "event.raid.horn",
+        "type": "event",
+        "pitch": 0.7
+      }
+    ]
+  },
+  "event.announce.war_layer": {
+    "subtitle": "subtitles.neroevents.announce.war",
+    "sounds": [
+      {
+        "name": "block.bell.resonate",
+        "type": "event",
+        "pitch": 0.7
+      }
+    ]
+  },
+  "event.vote.open": {
+    "subtitle": "subtitles.neroevents.vote.open",
+    "sounds": [
+      {
+        "name": "ui.button.click",
+        "type": "event",
+        "pitch": 1.0
+      }
+    ]
+  },
+  "event.vote.cast": {
+    "subtitle": "subtitles.neroevents.vote.cast",
+    "sounds": [
+      {
+        "name": "block.note_block.pling",
+        "type": "event",
+        "pitch": 1.4
+      }
+    ]
+  },
+  "event.deny": {
+    "subtitle": "subtitles.neroevents.deny",
+    "sounds": [
+      {
+        "name": "block.note_block.didgeridoo",
+        "type": "event",
+        "pitch": 0.6
+      }
+    ]
+  },
+  "entity.supply_pod.descend": {
+    "subtitle": "subtitles.neroevents.supply_pod.descend",
+    "sounds": [
+      {
+        "name": "item.elytra.flying",
+        "type": "event",
+        "pitch": 0.6
+      }
+    ]
+  },
+  "entity.supply_pod.land": {
+    "subtitle": "subtitles.neroevents.supply_pod.land",
+    "sounds": [
+      {
+        "name": "block.anvil.land",
+        "type": "event",
+        "pitch": 0.8
+      }
+    ]
+  },
+  "entity.supply_pod.land_layer": {
+    "subtitle": "subtitles.neroevents.supply_pod.land",
+    "sounds": [
+      {
+        "name": "block.gravel.break",
+        "type": "event",
+        "pitch": 0.8
+      }
+    ]
+  },
+  "entity.supply_pod.open": {
+    "subtitle": "subtitles.neroevents.supply_pod.open",
+    "sounds": [
+      {
+        "name": "block.iron_door.open",
+        "type": "event",
+        "pitch": 1.0
+      }
+    ]
+  },
+  "entity.supply_pod.open_layer": {
+    "subtitle": "subtitles.neroevents.supply_pod.open",
+    "sounds": [
+      {
+        "name": "block.chest.open",
+        "type": "event",
+        "pitch": 1.0
+      }
+    ]
+  },
+  "entity.meteor.whoosh": {
+    "subtitle": "subtitles.neroevents.meteor.whoosh",
+    "sounds": [
+      {
+        "name": "entity.firework_rocket.launch",
+        "type": "event",
+        "pitch": 0.5
+      }
+    ]
+  },
+  "entity.meteor.impact": {
+    "subtitle": "subtitles.neroevents.meteor.impact",
+    "sounds": [
+      {
+        "name": "entity.generic.explode",
+        "type": "event",
+        "pitch": 0.7
+      }
+    ]
+  },
+  "entity.meteor.impact_layer": {
+    "subtitle": "subtitles.neroevents.meteor.impact",
+    "sounds": [
+      {
+        "name": "block.lava.extinguish",
+        "type": "event",
+        "pitch": 0.7
+      }
+    ]
+  },
+  "entity.debris.impact": {
+    "subtitle": "subtitles.neroevents.debris.impact",
+    "sounds": [
+      {
+        "name": "entity.generic.explode",
+        "type": "event",
+        "pitch": 0.6
+      }
+    ]
+  },
+  "entity.debris.impact_layer": {
+    "subtitle": "subtitles.neroevents.debris.impact",
+    "sounds": [
+      {
+        "name": "block.anvil.destroy",
+        "type": "event",
+        "pitch": 0.6
+      }
+    ]
+  },
+  "block.war_beacon.capture_tick": {
+    "subtitle": "subtitles.neroevents.war_beacon.capture_tick",
+    "sounds": [
+      {
+        "name": "block.beacon.ambient",
+        "type": "event",
+        "pitch": 1.0
+      }
+    ]
+  },
+  "block.war_beacon.captured": {
+    "subtitle": "subtitles.neroevents.war_beacon.captured",
+    "sounds": [
+      {
+        "name": "block.beacon.power_select",
+        "type": "event",
+        "pitch": 1.2
+      }
+    ]
+  },
+  "block.event_console.tab": {
+    "subtitle": "subtitles.neroevents.event_console.tab",
+    "sounds": [
+      {
+        "name": "ui.button.click",
+        "type": "event",
+        "pitch": 1.1
+      }
+    ]
+  },
+  "storm.solar.loop": {
+    "subtitle": "subtitles.neroevents.storm.solar",
+    "sounds": [
+      {
+        "name": "block.beacon.ambient",
+        "type": "event",
+        "pitch": 0.7
+      }
+    ]
+  },
+  "storm.solar.rumble": {
+    "subtitle": "subtitles.neroevents.storm.solar",
+    "sounds": [
+      {
+        "name": "entity.lightning_bolt.thunder",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 0.6
+      }
+    ]
+  },
+  "storm.dust.loop": {
+    "subtitle": "subtitles.neroevents.storm.dust",
+    "sounds": [
+      {
+        "name": "item.elytra.flying",
+        "type": "event",
+        "pitch": 0.5
+      }
+    ]
+  },
+  "storm.ion.loop": {
+    "subtitle": "subtitles.neroevents.storm.ion",
+    "sounds": [
+      {
+        "name": "block.conduit.ambient",
+        "type": "event",
+        "pitch": 1.3
+      }
+    ]
+  },
+  "storm.ion.crack": {
+    "subtitle": "subtitles.neroevents.storm.ion",
+    "sounds": [
+      {
+        "name": "entity.lightning_bolt.impact",
+        "type": "event",
+        "pitch": 1.3,
+        "volume": 0.5
+      }
+    ]
+  },
+  "storm.cryo.loop": {
+    "subtitle": "subtitles.neroevents.storm.cryo",
+    "sounds": [
+      {
+        "name": "item.elytra.flying",
+        "type": "event",
+        "pitch": 0.4
+      }
+    ]
+  },
+  "storm.cryo.loop_layer": {
+    "subtitle": "subtitles.neroevents.storm.cryo",
+    "sounds": [
+      {
+        "name": "block.powder_snow.step",
+        "type": "event",
+        "pitch": 0.4
+      }
+    ]
+  }
+}

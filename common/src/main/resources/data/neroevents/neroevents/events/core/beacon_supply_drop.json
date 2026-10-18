@@ -1,0 +1,30 @@
+{
+  "type": "neroevents:supply_drop",
+  "category": "reward",
+  "severity": "REWARD",
+  "display": {
+    "title": "event.neroevents.core.beacon_supply_drop.title",
+    "what_to_do": "event.neroevents.core.beacon_supply_drop.what_to_do",
+    "announce": "event.neroevents.core.beacon_supply_drop.announce"
+  },
+  "weight": 0,
+  "cooldown_ticks": 0,
+  "announce_ticks": 200,
+  "duration_ticks": 6000,
+  "consent_exempt": true,
+  "calm_exempt": true,
+  "location_public": true,
+  "bounds": { "kind": "radius", "radius": 32 },
+  "payload": {
+    "tier": 1,
+    "pod_drop_height": 48,
+    "pod_loot_budget": 120,
+    "loot_rolls": 2
+  },
+  "rewards": {
+    "budget": 100,
+    "lines": [
+      { "kind": "xp", "amount": 60 }
+    ]
+  }
+}

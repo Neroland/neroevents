@@ -9,6 +9,9 @@ plugins {
 
 // MC version comes from the Stonecutter node (e.g. :fabric:26.1.2), not a global property.
 def mc = stonecutter.current.version
+// Upper bound of this cell's Minecraft range: the next minor line (26.1.2 -> 26.2, 26.2 -> 26.3), same
+// expression as Neroland Core, so each cell's jar declares only its own MC line.
+def mcCeiling = mc.tokenize('.').with { "${it[0]}.${it[1].toInteger() + 1}" }
 def fabricApi = project.findProperty("fabric_api_version_${mc}")
 def jeiVersion = project.findProperty("jei_version_${mc}")
 def emiFile = project.findProperty("emi_file_fabric_${mc}")
@@ -17,6 +20,31 @@ def nerolandcoreVersion = project.findProperty('nerolandcore_version')
 // This node's projectDir is <loader>/versions/<v>; the authoritative loader source +
 // resources live in the BRANCH root (fabric/). Resolve branch-root paths via the parent.
 def branchDir = project.parent.projectDir
+
+// --- Optional siblings (compat facades) ---------------------------------------------------------------------
+// Nerospace, NeroCreatures, NeroColonies, NeroAgriculture, NeroFactions and Open Parties and Claims are compileOnly
+// behind compat/<x>/<X>Compat: one bridge class per sibling imports it, found through a META-INF/services seam after
+// isModLoaded. A `<x>_compat=false` property (gradle.properties or -P) drops the dependency, excludes that bridge
+// class and its services line from the build, and leaves the optional manifest entry out, so the mod builds with no
+// sibling artifact at all. Manifest floors are the compiled versions (ecosystem floor rule).
+def compatOn = { String flag -> (rootProject.findProperty(flag) ?: 'true').toString().trim() == 'true' }
+def siblingIds = ['nerospace', 'nerocreatures', 'nerocolonies', 'neroagriculture', 'nerofactions']
+def siblingPkg = [nerospace: 'nerospace', nerocreatures: 'creatures', nerocolonies: 'colonies', neroagriculture: 'agriculture', nerofactions: 'factions']
+def siblingCls = [nerospace: 'Nerospace', nerocreatures: 'Creatures', nerocolonies: 'Colonies', neroagriculture: 'Agriculture', nerofactions: 'Factions']
+def siblingRun = [nerospace: 'withNerospace', nerocreatures: 'withNeroCreatures', nerocolonies: 'withNeroColonies', neroagriculture: 'withNeroAgriculture', nerofactions: 'withNeroFactions']
+def siblingOn = siblingIds.collectEntries { id -> [(id): compatOn("${id}_compat")] }
+def opacVersion = rootProject.findProperty("opac_version_${mc}")
+def opacOn = compatOn('opac_compat') && opacVersion != null
+siblingIds.each { id ->
+    if (!siblingOn[id]) {
+        sourceSets.main.java.exclude "za/co/neroland/neroevents/compat/${siblingPkg[id]}/Nero${siblingCls[id]}Bridge.java"
+        sourceSets.main.resources.exclude "META-INF/services/za.co.neroland.neroevents.compat.${siblingPkg[id]}.${siblingCls[id]}Bridge"
+    }
+}
+if (!opacOn) {
+    sourceSets.main.java.exclude 'za/co/neroland/neroevents/compat/opac/XaeroOpacBridge.java'
+    sourceSets.main.resources.exclude 'META-INF/services/za.co.neroland.neroevents.compat.opac.OpacBridge'
+}
 
 // Distinct, descriptive jar name per cell (the node project is named after the MC version, so the
 // default jar would be "<mc>-<version>.jar" and COLLIDE with the neoforge cell of the same version).
@@ -78,6 +106,23 @@ dependencies {
         runtimeOnly "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${rootProject.neroeconomy_version}"
     }
 
+    // Optional siblings — compileOnly, never bundled, never required (see the compat block above).
+    siblingIds.each { id ->
+        if (siblingOn[id]) {
+            def coord = "za.co.neroland.${id}:${id}-fabric-${mc}:${rootProject.property("${id}_version")}"
+            compileOnly coord
+            // Dev clients load a sibling only with -PwithNerospace / -PwithNeroCreatures / -PwithNeroColonies /
+            // -PwithNeroAgriculture / -PwithNeroFactions.
+            if (project.hasProperty(siblingRun[id])) {
+                runtimeOnly coord
+            }
+        }
+    }
+    // Open Parties and Claims — compileOnly against the loader-neutral API jar (claims only ever deny).
+    if (opacOn) {
+        compileOnly("xaero.pac:open-parties-and-claims-common-${mc}:${opacVersion}") { transitive = false }
+    }
+
     // Sentry SDK (telemetry/NeroEventsTelemetry): compile against it + embed it as a jar-in-jar so the
     // shipped Fabric jar carries it. Counterpart to the NeoForge JarJar bundling.
     implementation 'io.sentry:sentry:8.60.0'
@@ -118,7 +163,15 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
         mod_license          : rootProject.mod_license,
         fabric_loader_version: rootProject.fabric_loader_version,
         minecraft_version    : mc,
+        minecraft_version_ceiling: mcCeiling,
         nerolandcore_version : nerolandcoreVersion,
+        // fabric.mod.json "suggests" entries for the optional siblings: `, "<modid>": ">=<floor>"` or "".
+        nerospace_suggest       : siblingOn.nerospace ? ", \"nerospace\": \">=${rootProject.nerospace_version}\"" : '',
+        nerocreatures_suggest   : siblingOn.nerocreatures ? ", \"nerocreatures\": \">=${rootProject.nerocreatures_version}\"" : '',
+        nerocolonies_suggest    : siblingOn.nerocolonies ? ", \"nerocolonies\": \">=${rootProject.nerocolonies_version}\"" : '',
+        neroagriculture_suggest : siblingOn.neroagriculture ? ", \"neroagriculture\": \">=${rootProject.neroagriculture_version}\"" : '',
+        nerofactions_suggest    : siblingOn.nerofactions ? ", \"nerofactions\": \">=${rootProject.nerofactions_version}\"" : '',
+        opac_suggest            : opacOn ? ", \"openpartiesandclaims\": \">=${opacVersion}\"" : '',
     ]
     inputs.properties(props)
     expand(props)
@@ -181,7 +234,12 @@ tasks.register('ecjCheck', JavaExec) {
         def analysisCp = (sourceSets.main.compileClasspath.files + sourceSets.main.output.files)
                 .findAll { it.exists() }
                 .join(File.pathSeparator)
-        def srcDirs = sourceSets.main.java.srcDirs.findAll { it.exists() }.collect { it.absolutePath }
+        // The source FILES, not the source dirs, so the `<x>_compat=false` excludes apply here exactly as in
+        // compileJava. Passed through an @argfile (forward slashes) to keep the Windows command line short.
+        def ecjSources = project.layout.buildDirectory.file('tmp/ecjCheck/sources.txt').get().asFile
+        ecjSources.parentFile.mkdirs()
+        ecjSources.text = sourceSets.main.java.files.collect { it.absolutePath.replace('\\', '/') }.join('\n') + '\n'
+        def srcDirs = ['@' + ecjSources.absolutePath.replace('\\', '/')]
         args = [
                 '--release', '25',
                 '-proc:none',

@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "neroevents:block/cooled_crust"
+      },
+      {
+        "model": "neroevents:block/cooled_crust",
+        "y": 90
+      },
+      {
+        "model": "neroevents:block/cooled_crust",
+        "y": 180
+      },
+      {
+        "model": "neroevents:block/cooled_crust",
+        "y": 270
+      }
+    ]
+  }
+}
