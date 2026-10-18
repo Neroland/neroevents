@@ -58,6 +58,7 @@ which entry was wrong).
 | `destructiveEventsEnabled` | `true` | Allow events that can change blocks. `false` removes them from the schedule and refuses `/neroevents start` for them. |
 | `combatEventsEnabled` | `true` | Allow combat, raid, invasion, boss and war events. |
 | `economyEventsEnabled` | `true` | Allow economy events. |
+| `pushNotificationsEnabled` | `true` | Allow companion-app notifications and stored alerts about events. `false` sends none to anyone (live event rows in the app still update). Has no effect until a NeroLink module is present. |
 | `eventsDisabled` | *(empty)* | Comma-separated event ids that never fire automatically. |
 
 ## Protection
@@ -86,7 +87,7 @@ which entry was wrong).
 | `meteorBlockDamage` | `true` | Meteors dig small craters. `false` makes every impact a soft landing (one loot pocket, no crater). |
 | `craterAvoidsBlockEntities` | `true` | A meteor that would land near a chest, machine or any other block entity lands softly instead. |
 | `craterBlockEntityMarginBlocks` | `4` | How far around an impact those blocks are looked for (0 to 16). |
-| `raidBlockDamage` | `false` | Reserved. Raid creatures never break blocks in this version; keep it `false`. |
+| `raidBlockDamage` | `false` | Reserved. NeroEvents never breaks blocks for a raid in this version (the creatures follow the server's normal mob rules); keep it `false`. |
 | `wreckLingerDays` | `3` | Real days before a crashed wreck starts to rust away (twice that and it is rubble). `0` keeps wrecks forever. A crate that still holds loot is never removed. |
 | `wreckRecordsMax` | `200` | Most wrecks remembered for decay; the oldest are forgotten first (their blocks then stay). |
 | `stormEffectsEnabled` | `true` | Server-wide switch for what storms do to players out in the open (each storm event can also turn this off). |

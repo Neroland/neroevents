@@ -36,7 +36,7 @@ public class CraterPocketBlockEntity extends BlockEntity {
     }
 
     /** Set once by {@link CraterBuilder} right after the pocket is placed. */
-    public void configure(@Nullable UUID instance, Identifier table, long budget, long lootSeed) {
+    public void configure(@Nullable UUID instance, @Nullable Identifier table, long budget, long lootSeed) {
         this.instanceId = instance;
         this.lootTable = table;
         this.lootBudget = budget;

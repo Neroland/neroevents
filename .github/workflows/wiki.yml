@@ -31,7 +31,7 @@ permissions:
 # Document-style names are matched only as names (a file name, a numbered plan, a folder path or a
 # record number), so ordinary words in prose are never blocked.
 env:
-  PATTERN: 'neroland-mc-ecosyste[m]|nerolink-ap[p]|BUILD-PROMP[T]|REWORK-PROMP[T]|PLA[N]-[0-9]+\.[0-9]+|SMOKE-TES[T]|\bAUDI[T](-|\.md)|decision[s]/|\bAD[R]\b|PROGRES[S]\.md|RESUME-STAG[E]'
+  PATTERN: 'neroland-mc-ecosyste[m]|nerolink-ap[p]|BUILD-PROMP[T]|REWORK-PROMP[T]|PLA[N]-[0-9]+\.[0-9]+|SMOKE-TES[T]|\bAUDI[T](-|\.md)|decision[s]/|\bAD[R]\b|PROGRES[S]\.md|RESUME-STAG[E]|RELEASE[_-]CHECKLIS[T]'
 
 jobs:
   guard:

@@ -42,9 +42,9 @@ The server chooses one of three modes with `consentMode`:
 
 - **off** (default) — events just happen.
 - **vote** — when an automatic event is announced, online players vote with `/neroevents vote yes` or
-  `/neroevents vote no` before the countdown ends. It goes ahead only with enough votes (the quorum)
-  and more yes than the configured majority; a tie fails. You can change your vote until the
-  countdown ends.
+  `/neroevents vote no` (or the YES / NO buttons on an Event Console) before the countdown ends. It
+  goes ahead only with enough votes (the quorum) and more yes than the configured majority; a tie
+  fails. You can change your vote until the countdown ends.
 - **admin** — nothing fires automatically; only operators start events.
 
 A single-player world is always **off**: there is nobody to ask. A world opened to LAN with two or
@@ -57,96 +57,35 @@ way is not shown to anyone, and a restart during a vote either skips the event o
 
 ## Protection and fair play
 
-Before an event touches the world, it asks every protection rule in turn, and any single "no" wins.
-The rules in this version:
-
-- **Exclusion zones** — areas the server marks off (`eventExclusionZones`, or
-  `/neroevents zones add`).
-- **World spawn** — events keep `protectSpawnRadiusBlocks` (64 by default) away from spawn.
-- **Space stations** — nothing destructive ever happens in the Nerospace station dimension.
-- **Neroland security and colony blocks** — destructive effects keep clear of blocks from the mods in
-  `protectedBlockNamespaces`, plus a margin. Only loaded areas can be checked; if part of the area is
-  not loaded, the effect does not happen there.
-- **NeroColonies colonies** — with NeroColonies installed, nothing destructive happens inside a
-  colony's claimed area.
-- **Open Parties and Claims** — with Open Parties and Claims installed, nothing destructive happens in
-  a claimed chunk.
-
-Destructive events keep clear of Neroland security and colony blocks, of NeroColonies colonies and of
-chunks claimed with Open Parties and Claims. They cannot recognise an unclaimed build made of ordinary
-blocks, and other claim mods (FTB Chunks, Flan) are not supported yet — use `eventExclusionZones` or
-leave block damage off.
-
-If a protection rule ever fails with an error, it counts as a "no" (destructive effects it covers are
-refused) and `/neroevents status` shows it as failing.
-
-Events are placed **near where players are** by counting how many players are in each area of the
-dimension — never by following any one player — and [rewards](Rewards.md) go to the players who
-actually took part, never to whoever happens to be standing nearby.
+Before an event touches the world, it asks every protection rule in turn, and any single "no" wins:
+exclusion zones, world spawn, the Nerospace station dimension, Neroland security and colony blocks,
+NeroColonies colonies and Open Parties and Claims claims. Events are placed **near where players are**
+by counting how many players are in each area — never by following any one player — and
+[rewards](Rewards.md) go to the players who actually took part. The full rules and every switch are on
+[Protection and fair play](Protection-and-Fair-Play.md).
 
 ## The events
 
-Each event below says what it can change in the world and which mod it needs, if any. An event whose mod
-is not installed simply never comes up. In this beta build the Nerospace, NeroCreatures and
-NeroAgriculture integrations are not switched on yet, so storms, raids, invasions and the world boss do
-not appear; they will in a later build.
+Each event has its own page: how serious it is, what to do, what it can change in the world and which
+mod it needs. An event whose mod is not installed simply never comes up.
 
-### Supply drop (no extra mod)
+| Event | Severity | Needs | Can change blocks | In this build |
+| --- | --- | --- | --- | --- |
+| [Supply drop](Event-Supply-Drop.md) | REWARD | Neroland Core | No | Yes |
+| [Meteor shower](Event-Meteor-Shower.md) | HAZARD | Neroland Core | Yes (craters) | Yes |
+| [Debris crash](Event-Debris-Crash.md) | HAZARD | Neroland Core | Yes (a wreck) | Yes |
+| [Solar storm](Event-Solar-Storm.md) | HAZARD | Nerospace | No | Not yet |
+| [Planetary storms](Event-Planetary-Storms.md) | HAZARD | Nerospace | No | Not yet |
+| [Pirate raid](Event-Pirate-Raid.md) | COMBAT | NeroCreatures | No | Not yet |
+| [Alien invasion](Event-Alien-Invasion.md) | COMBAT | NeroCreatures | No | Not yet |
+| [World boss](Event-World-Boss.md) | COMBAT | NeroCreatures | No | Not yet |
+| [Market shock](Event-Market-Shock.md) | INFO | NeroEconomy | No | Yes |
+| [Faction war](Event-Faction-War.md) | WAR | NeroFactions | No (temporary beacons) | Not yet |
 
-A supply pod falls from the sky. The first player to open it claims the drop; others who open it later
-still get a share. The pod lands only where it can see the sky and breaks no blocks. A **Supply Beacon**
-calls one to you; a called drop never needs a vote.
-
-### Meteor shower (no extra mod)
-
-Meteors fall over an area for a few minutes. Each one digs a small crater of meteor rock with a hot
-**crater pocket** in the middle: break it for loot. It can change blocks: craters replace the ground
-where they land, but never in a protected area, never next to chests or machines, and never at all when
-`meteorBlockDamage` is off (then every meteor lands softly and leaves only the pocket).
-
-### Debris crash (no extra mod)
-
-A piece of wreckage crashes and leaves a small wreck with salvage crates. Open the crates before
-someone else does. It places blocks (hull plating, struts and crates) where it lands, outside protected
-areas. A crate cannot be broken while it still holds loot; if one is blown up, its loot drops where it
-stood. After a few real days the wreck rusts away (`wreckLingerDays`). Rusting only ever replaces the
-wreck's own blocks with rubble or air — even if someone claims the area later — and never touches
-anything else. Hull plating, panels and struts you mine and place elsewhere are yours.
-
-### Solar storm and planetary storms (need Nerospace)
-
-Weather for space. A **solar storm** reaches any space dimension; a **planetary storm** is the world's
-own kind (dust storm, ion squall or cryo blizzard). Only players out in the open are affected: get under
-a solid roof or into a pressurised room (glass roofs do not count). A weak blizzard only chills; at full
-strength, players in the open take frost damage unless they wear leather. Solar storms and ion squalls
-slowly drain energy from batteries left under open sky near players, never below a fifth of their
-charge. Storms change no blocks and pay no rewards. With NeroAgriculture installed, crops grow more
-slowly while a storm rages.
-
-### Pirate raid and alien invasion (need NeroCreatures)
-
-Waves of hostile creatures attack an area where players are. Fight them off: damage dealt and waves
-survived count toward the reward. Raid creatures never break blocks. In this version raids target
-populated areas only, not colonies or stations.
-
-### World boss: the Cinder Tyrant (needs NeroCreatures)
-
-A world boss lands. Everyone who deals damage shares the reward. It changes no blocks itself. If nobody
-fights it, it gets away. Only one boss runs at a time.
-
-### Market shock (needs NeroEconomy)
-
-Traders report a shortage, glut or rush on one good, and its price moves for a while. Buy low, sell high.
-It changes nothing in the world. If the market does not respond, the event ends as a failure (its
-cooldown is not shortened), and after two in a row market shocks pause until the server restarts.
-
-### Faction war (needs NeroFactions)
-
-The two factions with the most members online fight over a ring of war beacons. Stand at a beacon with
-your faction, and no enemy, to capture it; holding beacons scores points. The winning side's fighters
-gain reputation with their own faction and the losing side's lose a little; players in both or neither
-faction stay neutral. The beacons are placed outside protected areas, cannot be broken, and are removed
-when the war ends.
+In this beta build the Nerospace, NeroCreatures and NeroAgriculture integrations are not switched on
+yet, and faction wars wait for NeroFactions to be published, so storms, raids, invasions, the world boss
+and faction wars do not appear; they will in a later build. Server owners can add their own events:
+see [Writing your own events](Writing-Your-Own-Events.md).
 
 ## Restarts
 

@@ -5,21 +5,19 @@
 ## The mod
 
 - **NeroEvents** — server events for the Neroland sci-fi Minecraft mod ecosystem, built on **Neroland
-  Core**. Current state: the **foundation for 0.5.0 is in progress**. Core is wired (config,
-  progression gates, threshold channels, erasure hook), the platform seams, own network channel,
-  menu guard, telemetry and unit tests are in place, and the optional NeroEconomy seams and the
-  NeroQuests quest pack ship. The **event engine** (Stage 1) is in: datapack definitions, payload
-  registry, scheduler, lifecycle, resumable records, anchor picker, protection contract and the
-  `/neroevents` commands, with one operator test payload (`neroevents:debug_marker`). **Stage 2** is
-  in: participation tracking, the budgeted reward split, the reward crate, reward history and aggregate
-  event history, the consent vote policy, the privacy commands (opt-out, export, retention, erasure) and
-  the Supply Beacon item. **Stages 3 + 4** are in: the Core-only payloads (supply drop, meteor shower
-  with craters, debris crash with wreck decay) and the sibling payloads behind `compat/` façades — storms
-  (Nerospace, + NeroAgriculture growth modifier), pirate raid / alien invasion / boss (NeroCreatures),
-  market shock (NeroEconomy), faction war with the `war_beacon` block (NeroFactions) — plus the
-  NeroColonies and Open Parties and Claims protection sources. Each sibling integration is a build
-  flag (`<x>_compat` in `gradle.properties`); Nerospace, NeroCreatures and NeroAgriculture default to
-  off until their artifacts resolve on the build machine.
+  Core**. Current state: **0.5.0-beta.1 feature-complete except the NeroLink module, pending runtime
+  verification** (`mod_version` is still `0.4.0-alpha.1` until release). In: the event engine
+  (datapack definitions documented in `EVENT-DEFINITIONS.md`, payload registry, scheduler, lifecycle,
+  resumable records, anchor picker, protection contract, `/neroevents` commands); participation, the
+  budgeted reward split, reward crate, reward history and aggregate history, consent voting, the privacy
+  commands and the Supply Beacon; the Core-only payloads (supply drop, meteor shower, debris crash) and
+  the sibling payloads behind `compat/` façades — storms (Nerospace, + NeroAgriculture growth modifier),
+  pirate raid / alien invasion / boss (NeroCreatures), market shock (NeroEconomy), faction war with the
+  `war_beacon` block (NeroFactions) — plus NeroColonies and Open Parties and Claims protection; the Event
+  Console, the HUD and its settings screen, effects and sounds; the full wiki. Each sibling integration
+  is a build flag (`<x>_compat` in `gradle.properties`); Nerospace, NeroCreatures, NeroAgriculture and
+  NeroFactions default to off in this build. **Not built:** the NeroLink link module and push
+  (`USING-NEROLINK.md` describes the planned contract).
 - Mod id: **`neroevents`** (matches the registry namespace + every loader manifest). Package root:
   `za.co.neroland.neroevents`. Author: **Neroland**.
 - Version: **0.4.0-alpha.1** (`mod_version` in `gradle.properties`; only bump it as part of a release).

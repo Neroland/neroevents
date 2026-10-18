@@ -101,6 +101,19 @@ class PrivacyExportTest {
     }
 
     @Test
+    void theExportNeverOutlivesALowerHardCap(@TempDir Path world) throws Exception {
+        Path dir = PrivacyExport.directory(world);
+        PrivacyExport.write(dir, subject, document());
+        long threeDaysLater = Files.getLastModifiedTime(PrivacyExport.file(dir, subject)).toMillis()
+                + 3L * 86_400_000L;
+        assertEquals(0, PrivacyExport.purgeExpired(dir, threeDaysLater, 90), "7 days under a 90-day cap");
+        assertEquals(0, PrivacyExport.purgeExpired(dir, threeDaysLater), "7 days by default");
+        assertTrue(PrivacyExport.exists(dir, subject));
+        assertEquals(1, PrivacyExport.purgeExpired(dir, threeDaysLater, 2), "a 2-day hard cap wins");
+        assertFalse(PrivacyExport.exists(dir, subject));
+    }
+
+    @Test
     void theCooldownIsEnforcedAndRefundedOnFailure() {
         ExportCooldown cooldown = new ExportCooldown();
         assertEquals(0L, cooldown.tryAcquire(subject, 1_000L, 60_000L));

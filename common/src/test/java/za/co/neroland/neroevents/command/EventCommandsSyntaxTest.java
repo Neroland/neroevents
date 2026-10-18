@@ -59,9 +59,18 @@ class EventCommandsSyntaxTest {
                 "/neroevents skip", "/neroevents reweight <definition> reset", "/neroevents zones exclusions",
                 "/neroevents zones add <name> <from> <to> <dimension>", "/neroevents zones remove <name>",
                 "/neroevents claim", "/neroevents rewards", "/neroevents privacy optout", "/neroevents privacy optin",
-                "/neroevents privacy status", "/neroevents privacy export", "/neroevents budget")) {
+                "/neroevents privacy status", "/neroevents privacy export", "/neroevents budget",
+                "/neroevents gallery", "/neroevents gallery exhibits", "/neroevents gallery events",
+                "/neroevents gallery stress", "/neroevents gallery storm <storm>", "/neroevents gallery cue <station>",
+                "/neroevents gallery clear")) {
             assertTrue(EventCommands.SYNTAX.contains(form), form);
         }
+        assertEquals(Set.of("instance", "definition", "dimension", "anchor", "weight", "name", "from", "to", "storm",
+                "station"), EventCommands.ARGUMENTS);
+        assertFalse(EventCommands.PLAYER_LITERALS.contains("gallery"), "the gallery is for operators");
+        List<String> gallery = EventCommands.SYNTAX.stream().filter(r -> r.startsWith("/neroevents gallery")).toList();
+        assertEquals(7, gallery.size());
+        assertEquals("/neroevents gallery clear", EventCommands.SYNTAX.get(EventCommands.SYNTAX.size() - 1));
     }
 
     @Test

@@ -100,7 +100,7 @@ public final class EventsPrivacy {
             long nowEpochMillis, RewardConfig cfg) {
         int rows = ledger == null ? 0 : ledger.purgeExpired(nowEpochMillis, cfg.ledgerDays());
         int entries = crates == null ? 0 : crates.purgeExpired(nowEpochMillis, cfg.crateDays());
-        int files = PrivacyExport.purgeExpired(exports, nowEpochMillis);
+        int files = PrivacyExport.purgeExpired(exports, nowEpochMillis, cfg.retentionHardCapDays());
         return new Purged(rows, entries, files);
     }
 

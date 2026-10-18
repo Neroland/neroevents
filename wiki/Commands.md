@@ -36,8 +36,13 @@ works. It is a random id and says nothing about any player.
 | `/neroevents zones remove <name>` | Operators | Removes a zone added by command (zones from the config file are edited there). |
 | `/neroevents zones exclusions` | Operators | Lists every exclusion zone; zones from the config file are marked *(config)*. |
 | `/neroevents budget` | Operators | Today's (UTC) event reward budget: the daily allowance, what has been spent, what is left and how many events have paid out today. |
-| `/neroevents gallery` | Operators | Creative mode only, **in a test world**: lays out every NeroEvents block, both Event Console states, empty supply pods (three tiers landed, one descending), a war beacon and hanging meteors and debris on a lit floor north of you, for screenshots. It replaces the blocks in its footprint and removes loose dropped items within 64 blocks. |
-| `/neroevents gallery clear` | Operators | Creative mode only: stand where you ran `gallery` and it takes the gallery down again (blocks to air, and only the gallery's own pods, meteors, debris and labels). |
+| `/neroevents gallery` | Operators | Creative mode only, **in a test world**: builds the whole showcase north of you — every block and entity exhibit plus one station per event type showing it in action (a pod landing, a meteor striking a crater, debris crashing onto a wreck, a war beacon being captured, display-only raiders and a boss arena, four storm posts with a storm preview, a market board) and a demo HUD/console that cycles through every severity, for you only. Replaces the blocks in its footprint; removes loose dropped items within 64 blocks. Nothing it shows is a real event: nothing is paid, recorded or sent to another mod. The whole footprint is checked against the protection rules first; inside the spawn-protection radius or a claim it is refused and says which rule refused it, which is intended. See [the gallery](Gallery.md). |
+| `/neroevents gallery exhibits` | Operators | Only the static exhibit rows (blocks, pods, war beacon, hanging meteors and debris). |
+| `/neroevents gallery events` | Operators | Only the event stations, the wreck yard and the demo HUD/console. |
+| `/neroevents gallery stress` | Operators | The showcase plus 40 meteors, 10 pods and an ion storm preview in view: the renderer-budget scene. Read the numbers with `/nsevrender` after ten seconds. |
+| `/neroevents gallery storm <storm>` | Operators | Pins the storm preview (`solar`, `dust`, `ion`, `cryo`) or turns it `off`. A preview is sky, fog, particles and sound on your own screen only: no drain, no effects, no other player sees it. |
+| `/neroevents gallery cue <station>` | Operators | Replays one station at its photo moment (`supply_drop`, `meteor_shower`, `debris_crash`, `faction_war`), pins a demo HUD scene (`hud_info`, `hud_reward`, `hud_hazard`, `hud_combat`, `hud_war`) or opens the demo console (`console`). |
+| `/neroevents gallery clear` | Operators | Stand where you ran `gallery`: takes everything down (blocks to air, only the gallery's own entities) and ends the demo. |
 
 `neroevents:debug_marker` is a built-in test event for operators: it places nothing, changes
 nothing and simply runs through countdown, start and finish. `/neroevents start neroevents:debug_marker`
@@ -52,9 +57,20 @@ permission and creative mode; `/nsevrender` needs neither.
 - `/nsevgallery capture [time]` — re-shoots the gallery: pins the time (`day`, `noon`, `night`, `midnight`
   or a tick count; default `night`) and stops the weather and the day cycle (`advance_time` and
   `advance_weather` off), rebuilds `/neroevents gallery` where you stand, removes the labels and loose
-  items, then takes a fixed list of screenshots into `screenshots/neroevents/` with the HUD hidden.
-  Because it changes game rules and replaces blocks, **use a test world**.
+  items, then takes a fixed list of screenshots into `screenshots/neroevents/`: every exhibit, every
+  station at its photo moment (it sends the `gallery cue` and `gallery storm` commands itself), the four
+  storm previews, every demo HUD scene and every console tab. The HUD is hidden except in the HUD and
+  storm shots. Because it changes game rules and replaces blocks, **use a test world**.
+- `/nsevgallery capture stress [time]` — the same over `/neroevents gallery stress`: a hero shot and the
+  renderer-budget frame, after which the `/nsevrender` numbers go to chat and to
+  `screenshots/neroevents/stress_budget.txt`.
 - `/nsevgallery capture shot <name>` — one screenshot of the current view, HUD hidden.
+
+  The screenshots stay on your computer. Other players are **not** hidden: if anyone else is in the
+  world, their name tag and skin can appear in a frame, and the capture says so in chat. A player's
+  name is personal data, and a published image cannot be taken back, so **look at every capture for
+  other players' names before you add it to the repository's gallery** (the gallery workflow publishes
+  every tracked screenshot to Modrinth). Best of all, capture in a world where nobody else is online.
 - `/nsevrender` — how many meteors, pods, debris and war beacons were drawn per frame, how long their
   renderers took, the frame time and the effect particles spawned (averaged over the last 200 frames).
   `/nsevrender reset` starts the count again.

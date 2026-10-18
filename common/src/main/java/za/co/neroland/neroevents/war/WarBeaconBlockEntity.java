@@ -64,8 +64,8 @@ public class WarBeaconBlockEntity extends BlockEntity {
 
     // --- server: binding and sync ---------------------------------------------------------------
 
-    /** Binds this beacon to an instance (server, at placement). */
-    public void bind(UUID instance, int objectiveIndex, int colourOfA, int colourOfB, int ticksToCapture,
+    /** Binds this beacon to an instance (server, at placement); {@code null} binds it to none (a display). */
+    public void bind(@Nullable UUID instance, int objectiveIndex, int colourOfA, int colourOfB, int ticksToCapture,
             int radius) {
         this.instanceId = instance;
         this.index = objectiveIndex;

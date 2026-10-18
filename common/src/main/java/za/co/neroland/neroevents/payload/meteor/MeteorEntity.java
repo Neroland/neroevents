@@ -76,6 +76,22 @@ public class MeteorEntity extends Entity {
         return meteor;
     }
 
+    /**
+     * A meteor that falls straight down at {@code vy} blocks per tick, belonging to no event (the creative
+     * gallery's strike loop). It whooshes in flight and is discarded on its first collision without reaching any
+     * impact hook; one that touches nothing is discarded after 400 ticks.
+     */
+    public static MeteorEntity displayFalling(ServerLevel level, double x, double y, double z, double vy) {
+        MeteorEntity meteor = new MeteorEntity(CorePayloadEntities.METEOR.get(), level);
+        meteor.setPos(x, y, z);
+        meteor.vx = 0.0D;
+        meteor.vy = vy;
+        meteor.vz = 0.0D;
+        meteor.maxAge = 400;
+        meteor.setDeltaMovement(0.0D, vy, 0.0D);
+        return meteor;
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         // No synced data: the client renders from the tracked position, velocity and age.

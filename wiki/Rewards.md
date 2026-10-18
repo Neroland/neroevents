@@ -75,3 +75,6 @@ Setting `rewardBudgetPerDay` to 0 switches event rewards off entirely: 0 pays no
 Completing the *Supply Run* quest gives you a **Supply Beacon**. Use it to ask for a small supply drop
 where you stand. It obeys every event rule — protected areas, the calm period and the event limits —
 and is used up only when the drop is on its way; otherwise you keep it and are told why.
+
+Everyone online is told the direction and rough distance of the pod — do not call one at a place you
+want to keep private.

@@ -1,8 +1,8 @@
 name: Sync Modrinth gallery
 
 # Mirrors the tracked gallery screenshots to the Modrinth project gallery whenever they change.
-# Modrinth has a gallery API (unlike CurseForge — the CF gallery stays a manual web upload, see
-# RELEASE_CHECKLIST.md §9.1a). To keep the gallery an exact mirror of the repo folder, this wipes
+# Modrinth has a gallery API (unlike CurseForge — the CF gallery stays a manual web upload at
+# release time). To keep the gallery an exact mirror of the repo folder, this wipes
 # the existing gallery and re-uploads every PNG in a fixed order, featuring the first as the card.
 #
 # Source of truth: neoforge/versions/26.2/runs/client/screenshots/neroevents/*.png (written by the

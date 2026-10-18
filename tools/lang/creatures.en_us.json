@@ -12,7 +12,7 @@
   "event.neroevents.cinder_tyrant.what_to_do": "A world boss has landed. Team up and bring it down; everyone who deals damage shares the reward.",
   "event.neroevents.pirate_raid.announce": "Pirate ships are inbound to %1$s, landing in about %2$s min. %3$s",
   "event.neroevents.pirate_raid.title": "Pirate Raid",
-  "event.neroevents.pirate_raid.todo": "Fight off the raiders — they never break blocks, %s",
-  "event.neroevents.pirate_raid.what_to_do": "Space pirates and rogue machines attack in waves. Fight them off; they never break blocks.",
+  "event.neroevents.pirate_raid.todo": "Fight off the raiders — %s",
+  "event.neroevents.pirate_raid.what_to_do": "Space pirates and rogue machines attack in waves. Fight them off; the event itself breaks no blocks.",
   "event.neroevents.wave.started": "Wave %s of %s"
 }

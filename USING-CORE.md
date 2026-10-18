@@ -26,20 +26,28 @@ Core fails with a clear loader message instead of a `NoSuchMethodError` in game:
 
 Bump `nerolandcore_version` and the floor follows automatically.
 
-## Core APIs NeroEvents uses today
+## Core APIs NeroEvents uses
+
+Every `za.co.neroland.nerolandcore` import in the main source (`common/`, plus `RegistrationProvider` in the
+NeoForge and Forge entry points, which attach Core's deferred registers to the mod bus):
 
 | Core API | Used by | For |
 | --- | --- | --- |
 | `config.ConfigSchema`, `ConfigManager`, `ConfigValue` | `config/NeroEventsConfig` | `config/neroevents.properties` (key prefixes, server-authoritative flags, hot reload) |
 | `event.CoreEvents.onProgression`, `progression.GateScope` | `progression/QuestHooks` | hearing the `neroevents:hook/supply_beacon` hook gate |
 | `progression.ProgressionGates` (`open` / `close` / `isOpen`, offline-capable) | `progression/EventMilestones`, `progression/QuestHooks`, `event/world/ServerWorldView` | personal record gates, the hook re-arm, and counting online gate holders for `conditions.requires_gate` |
-| `event.ThresholdEvents` (`fire` with a source, `onCrossing`) | `progression/EventMilestones`, `economy/MarketShockRequests`, `economy/EconomySignals` | world channels, market-shock requests, NeroEconomy's world signals |
+| `event.ThresholdEvents.fire` (with `neroevents` as the source) | `progression/EventMilestones`, `economy/MarketShockRequests`, `storm/StormChannel`, `war/WarChannel` | the world channels `neroevents:event_resolved`, `boss_defeated`, `storm` and `war_resolved`, and market-shock requests on `neroevents:market_shock_request`; scopes are event types, places and factions, never players |
+| `event.ThresholdEvents.onCrossing` | `economy/EconomySignals`, `compat/creatures/CreaturesCompat` | NeroEconomy's world signals, and NeroCreatures' falling `boss_pressure` crossing (a boss fell in a dimension) |
 | `data.PlayerDataErasure`, `data.PlayerDataEraser` | `data/NeroEventsData` | the shared per-player erasure hook (registered early in common init) |
-| `data.SavedDataRecovery` | `event/persist/EventEngineState`, `payload/debris/WreckState` and every other NeroEvents `SavedData` | crash-safe loading plus a last-known-good backup; call `backupNow` after erasing a player |
-| `registry.RegistrationProvider`, `registry.CoreCreativeTab` | `item/EventItems`, `payload/registry/*`, `storm/StormParticles`, `war/WarBlocks` | blocks, block entities, entities, items and particle types on every loader; the creative-tab entries |
-| `platform.EnergyLookup`, `energy.NeroEnergyStorage` | `storm/StormEnergyDrain` | finding and draining energy storages during solar storms and ion squalls (Nero storages on Fabric; standard energy too on NeoForge and Forge) |
-| `reputation.ReputationApi` (`hasRealProvider`, `adjust`) | `war/FactionWarPayload` | faction-war reputation, only when a real provider (NeroFactions) is present |
-| `event.ThresholdEvents.fire` (channels `neroevents:storm`, `neroevents:war_resolved`) | `storm/StormChannel`, `war/WarChannel` | storm start/end per dimension and war resolution per faction; scopes are places and factions, never players |
+| `data.SavedDataRecovery` (`get`, `backupNow`) | `event/persist/EventEngineState`, `history/EventHistoryState`, `reward/RewardLedgerState`, `reward/RewardCrateState`, `privacy/PrivacyOptOuts`, `payload/debris/WreckState` | crash-safe loading plus a last-known-good backup for every NeroEvents `SavedData`; `backupNow` after erasing a player |
+| `registry.RegistrationProvider` (+ `RegistryEntry`) | `item/EventItems`, `console/ConsoleBlocks`, `payload/registry/CorePayloadBlocks`, `CorePayloadBlockEntities`, `CorePayloadEntities`, `CorePayloadItems`, `fx/EventParticles`, `storm/StormParticles`, `war/WarBlocks` | blocks, block entities, entities, items and particle types on every loader |
+| `registry.CoreCreativeTab` | `console/ConsoleBlocks`, `payload/registry/CorePayloadItems`, `war/WarBlocks` | the Event Console, the event blocks and items and the war beacon in Neroland Core's creative tab |
+| `registry.BlockCodecs.simple` | `console/EventConsoleBlock`, `payload/meteor/CraterPocketBlock`, `payload/debris/SalvageCrateBlock`, `payload/debris/WreckPaletteBlocks`, `war/WarBeaconBlock` | the block `MapCodec`s |
+| `platform.EnergyLookup`, `energy.NeroEnergyStorage` | `storm/StormEnergyDrain` | finding and draining energy storages during solar storms and ion squalls (Neroland storages on Fabric; standard energy too on NeoForge and Forge) |
+| `reputation.ReputationApi` (`hasRealProvider`, `adjust`) | `war/FactionWarPayload`, `reward/ServerRewardSinks` | faction-war reputation and `reputation` reward lines, only when a real provider (NeroFactions) is present |
+
+The tests also use Core's `data.ErasureConformance` harness (`ErasureConformanceTest`) to prove that
+every player-keyed store is erased.
 
 NeroEvents does **not** use Core's network registry: it has its own `neroevents:main` channel behind
 `platform/NetworkPlatform`, because Core seals its own payload lists during Core's bootstrap.

@@ -227,20 +227,28 @@ public final class MeteorShowerPayload implements PayloadType<MeteorShowerPayloa
     private final Supplier<EngineSettings> settings;
     private final ProtectionQuery protection;
     private final Predicate<Identifier> blockKnown;
+    private final Predicate<Identifier> blockPlainSolid;
 
     /** Production. */
     public MeteorShowerPayload() {
         this(MeteorShowerPayload::serverWorld, MeteorShowerPayload::liveSettings, ProtectionQuery.live(),
-                id -> BuiltInRegistries.BLOCK.containsKey(id));
+                id -> BuiltInRegistries.BLOCK.containsKey(id), CraterBuilder::plainSolidBlock);
     }
 
     /** Tests: fake world, fixed settings, scripted protection, a block-registry predicate. */
     public MeteorShowerPayload(Worlds worlds, Supplier<EngineSettings> settings, ProtectionQuery protection,
             Predicate<Identifier> blockKnown) {
+        this(worlds, settings, protection, blockKnown, id -> true);
+    }
+
+    /** Tests: as above, plus which ore blocks count as plain solid blocks. */
+    public MeteorShowerPayload(Worlds worlds, Supplier<EngineSettings> settings, ProtectionQuery protection,
+            Predicate<Identifier> blockKnown, Predicate<Identifier> blockPlainSolid) {
         this.worlds = worlds;
         this.settings = settings;
         this.protection = protection;
         this.blockKnown = blockKnown;
+        this.blockPlainSolid = blockPlainSolid;
     }
 
     static EngineSettings liveSettings() {
@@ -267,6 +275,8 @@ public final class MeteorShowerPayload implements PayloadType<MeteorShowerPayloa
         for (Identifier ore : config.oreBlocks()) {
             if (!safeKnown(ore)) {
                 out.add("ore_blocks entry " + ore + " is not a registered block; ignored");
+            } else if (!safePlainSolid(ore)) {
+                out.add("ore_blocks entry " + ore + " is not a plain solid block; ignored");
             }
         }
         if (config.pocketLootBudget() < 0L || config.pocketLootBudget() > 100_000L) {
@@ -281,6 +291,19 @@ public final class MeteorShowerPayload implements PayloadType<MeteorShowerPayloa
         } catch (RuntimeException | LinkageError e) {
             return true; // no registry here (plain JVM): checked again at start
         }
+    }
+
+    /** A solid, full block with no block entity and no fluid: the only kind a crater may lay as ore. */
+    private boolean safePlainSolid(Identifier id) {
+        try {
+            return blockPlainSolid.test(id);
+        } catch (RuntimeException | LinkageError e) {
+            return true; // no registry here (plain JVM); the crater falls back to meteor ore anyway
+        }
+    }
+
+    private boolean usableOre(Identifier id) {
+        return safeKnown(id) && safePlainSolid(id);
     }
 
     @Override
@@ -314,7 +337,7 @@ public final class MeteorShowerPayload implements PayloadType<MeteorShowerPayloa
         state.instanceId = instance;
         state.dimension = ctx.dimension();
         state.seed = ctx.instance().seed();
-        state.ores = config.oreBlocks().stream().filter(this::safeKnown).toList();
+        state.ores = config.oreBlocks().stream().filter(this::usableOre).toList();
         state.spawnAt = schedule(ctx.now(), ctx.instance().definition().durationTicks(), config, ctx.random());
         state.bearing = ctx.random().nextDouble() * Math.PI * 2.0D;
         LIVE.put(instance, new Live(this, config, state));
@@ -428,7 +451,7 @@ public final class MeteorShowerPayload implements PayloadType<MeteorShowerPayloa
         int max = config.radiusMax();
         int r = min + random.nextInt(max - min + 1);
         Footprint craterBox = new Footprint(dim, pos.getX() - r - 1, pos.getY() - r, pos.getZ() - r - 1,
-                pos.getX() + r + 1, pos.getY() + 1, pos.getZ() + r + 1);
+                pos.getX() + r + 1, pos.getY() + 2, pos.getZ() + r + 1);
         ProtectionEvaluation evaluation = protection.evaluation(world.view());
         boolean soft = config.softLandingOnly() || !s.meteorBlockDamage || !s.destructiveEventsEnabled
                 || state.craters >= config.maxCratersPerEvent()
@@ -530,7 +553,7 @@ public final class MeteorShowerPayload implements PayloadType<MeteorShowerPayloa
             }
         }
         state.bearing = tag.getDoubleOr("bearing", 0.0D);
-        state.ores = config.oreBlocks().stream().filter(this::safeKnown).toList();
+        state.ores = config.oreBlocks().stream().filter(this::usableOre).toList();
         return state;
     }
 

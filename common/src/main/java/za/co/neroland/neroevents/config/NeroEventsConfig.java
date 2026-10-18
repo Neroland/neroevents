@@ -121,6 +121,11 @@ public final class NeroEventsConfig {
     public static final ConfigValue<Boolean> ECONOMY_EVENTS_ENABLED = SCHEMA.bool(
             "economyEventsEnabled", true, true,
             "allow economy events");
+    public static final ConfigValue<Boolean> PUSH_NOTIFICATIONS_ENABLED = SCHEMA.bool(
+            "pushNotificationsEnabled", true, true,
+            "allow companion-app notifications and stored alerts about events; false sends none to anyone (live event "
+                    + "rows in the app still update). Has no effect until a NeroLink module is present");
+    public static boolean isPushNotificationsEnabled() { return PUSH_NOTIFICATIONS_ENABLED.get(); }
     public static final ConfigValue<String> EVENTS_DISABLED = SCHEMA.string(
             "eventsDisabled", "", true,
             "comma-separated event definition ids that never fire automatically");
@@ -277,7 +282,7 @@ public final class NeroEventsConfig {
 
     public static final ConfigValue<Boolean> RAID_BLOCK_DAMAGE = SCHEMA.bool(
             "raidBlockDamage", false, true,
-            "reserved: 0.5.0 raid creatures never break blocks; keep false until a siege mechanic exists");
+            "reserved: 0.5.0 NeroEvents never breaks blocks for a raid; keep false until a siege mechanic exists");
     public static final ConfigValue<Integer> WAR_MIN_MEMBERS_ONLINE = SCHEMA.intRange(
             "warMinMembersOnline", 2, 1, 50, true,
             "members each faction needs online before a faction war can start (needs NeroFactions)");

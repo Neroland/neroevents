@@ -23,6 +23,13 @@ class TelemetryScrubTest {
     }
 
     @Test
+    void masksUuids() {
+        String id = java.util.UUID.randomUUID().toString();
+        String scrubbed = NeroEventsTelemetry.scrub("no account " + id + " (" + id.toUpperCase() + ")");
+        assertEquals("no account <uuid> (<uuid>)", scrubbed);
+    }
+
+    @Test
     void nullStaysNull() {
         assertNull(NeroEventsTelemetry.scrub(null));
     }

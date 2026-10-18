@@ -1,0 +1,15 @@
+{
+  "command.neroevents.gallery.built_events": "Gallery built north of you: %s exhibits and %s event stations (%s need a sibling mod: %s). The demo HUD and console are on for you — nothing shown is real. Run /neroevents gallery clear here to take it down.",
+  "command.neroevents.gallery.stress_built": "Stress scene: %s meteors, %s pods and an ion storm preview. Look north from here, wait ten seconds, then run /nsevrender.",
+  "command.neroevents.gallery.protected": "The gallery footprint is protected here (%s). Move elsewhere or use a test world; nothing was built.",
+  "command.neroevents.gallery.storm_live": "A real storm is running in this dimension, so the storm preview stays off.",
+  "command.neroevents.gallery.storm_set": "Storm preview: %s (your screen only).",
+  "command.neroevents.gallery.storm_off": "Storm preview off.",
+  "command.neroevents.gallery.cue_done": "Cue: %s.",
+  "command.neroevents.gallery.cue_unknown": "Unknown cue %s. Try supply_drop, meteor_shower, debris_crash, faction_war, hud_info, hud_reward, hud_hazard, hud_combat, hud_war or console.",
+  "command.neroevents.gallery.cue_no_console": "Stand within 6 blocks of one of the gallery's Event Consoles first.",
+  "command.neroevents.gallery.no_session": "No live gallery session of yours here. Run /neroevents gallery first.",
+  "command.neroevents.gallery.demo_yields": "A real event is live, so the gallery demo HUD and console step aside until it ends.",
+  "console.neroevents.gallery.demo": "Gallery demo — nothing on this screen is real.",
+  "console.neroevents.gallery.demo_locked": "Gallery demo: these buttons do nothing. Clear the gallery to use the console."
+}

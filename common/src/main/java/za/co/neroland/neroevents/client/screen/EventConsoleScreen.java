@@ -59,6 +59,8 @@ public class EventConsoleScreen extends EventScreen<EventConsoleMenu> {
     private static final int ROW_SLOTS = 5;
 
     private static int lastTab = LIVE;
+    /** The console screen built last (the capture harness switches its tab). */
+    private static @Nullable EventConsoleScreen latest;
 
     private int tab = lastTab;
     private final int[] scroll = new int[TAB_NAMES.length];
@@ -88,8 +90,30 @@ public class EventConsoleScreen extends EventScreen<EventConsoleMenu> {
 
     // --- widgets -------------------------------------------------------------------------------------------
 
+    /**
+     * Creative gallery capture: shows tab {@code index} ({@link #LIVE} .. {@link #PRIVACY}) on the open console, or
+     * on the next one opened.
+     */
+    public static void selectTabForCapture(int index) {
+        int which = Math.max(LIVE, Math.min(PRIVACY, index));
+        lastTab = which;
+        EventConsoleScreen screen = latest;
+        if (screen != null) {
+            screen.showTab(which);
+        }
+    }
+
+    @Override
+    public void removed() {
+        if (latest == this) {
+            latest = null;
+        }
+        super.removed();
+    }
+
     @Override
     protected void initWidgets() {
+        latest = this;
         int left = left();
         int top = top();
         List<Component> labels = new ArrayList<>();

@@ -7,7 +7,8 @@ modId = "${mod_id}"
 version = "${mod_version}"
 displayName = "${mod_name}"
 authors = "${mod_authors}"
-logoFile = "neroevents_logo.png"
+# NeoForge 26.x: logoFile is deprecated; the square logo is the mod-list icon.
+iconFile = "neroevents_logo.png"
 description = '''
 NeroEvents - multiloader build (NeoForge).
 '''

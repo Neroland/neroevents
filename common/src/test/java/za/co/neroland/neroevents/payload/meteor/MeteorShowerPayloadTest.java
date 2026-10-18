@@ -364,4 +364,19 @@ class MeteorShowerPayloadTest {
         assertEquals(2, bad.radiusMin());
         assertEquals(4, bad.radiusMax());
     }
+
+    @Test
+    void oreBlocksThatAreNotPlainSolidAreWarnedAndIgnored() {
+        Identifier stone = Identifier.parse("minecraft:stone");
+        Identifier lava = Identifier.parse("minecraft:lava");
+        MeteorShowerPayload.Config d = MeteorShowerPayload.Config.DEFAULT;
+        MeteorShowerPayload.Config config = new MeteorShowerPayload.Config(d.meteorCount(), d.cadenceJitter(),
+                d.spawnHeight(), d.fallBlocksPerTick(), d.craterRadiusMin(), d.craterRadiusMax(), 2, 16, 2,
+                List.of(stone, lava), d.pocketLootTable(), d.pocketLootBudget(), false);
+        MeteorShowerPayload type = new MeteorShowerPayload((server, dim) -> world, () -> settings,
+                new ProtectionQuery(List.of()), id -> true, id -> !id.equals(lava));
+        List<String> warnings = type.validate(config);
+        assertEquals(1, warnings.size());
+        assertTrue(warnings.get(0).contains("minecraft:lava") && warnings.get(0).contains("plain solid"));
+    }
 }

@@ -31,13 +31,24 @@ Every event row has a coloured band, a symbol and a word that tell you how serio
 ## 3. Watch the messages on your screen
 
 You do not have to stand at a console. When an event is announced, a small countdown appears at the
-top of your screen ("Meteor Shower in 4:32"). When it starts, a banner tells you what to do. During
+top of your screen ("Meteor Shower on Cindara in 4:32"). When it starts, a banner tells you what to do. During
 raids and wars, short lines under the countdown show the waves or the beacon score.
 
 Press **H** to hide these messages until the next change. You can move them, shrink them or switch
 parts off — see [HUD settings](HUD-Settings.md).
 
-## 4. Collect your rewards
+## 4. Your first supply drop
+
+The first event most servers see is a **supply drop** (it is one of the few events allowed during a new
+server's calm window): a chat line says a pod is coming down, with a rough direction, and the console
+shows it as INFO until it lands and REWARD after. The console's Live row points the way ("· 320 m
+north-east"), and once you are inside the drop area a marker on your screen does too. Get there and open the pod — the first
+player to open it claims the drop, and everyone who opens it shares the rewards. See
+[Supply drop](Event-Supply-Drop.md).
+
+Server operators can call one straight away to try it out: `/neroevents start neroevents:core/supply_drop`.
+
+## 5. Collect your rewards
 
 Taking part earns you a share of the event's rewards. Items and experience wait in your **reward
 crate**: open a console, go to **Mine** and press **CLAIM** (or type `/neroevents claim`). Credits go
@@ -46,6 +57,7 @@ straight to your account when NeroEconomy is installed.
 ## More
 
 - [How events work](Events.md) — every event and what it can change
+- [Protection and fair play](Protection-and-Fair-Play.md) — what events never touch
 - [Rewards](Rewards.md) — how your share is worked out
 - [Consent and voting](Consent-and-Voting.md) — how votes are counted
 - [Privacy](Privacy.md) — what is kept about you and for how long

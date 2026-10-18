@@ -18,6 +18,11 @@ settings say. A server can also switch the reward history off completely (`rewar
 
 While an event runs, the server also keeps in memory what you did for that event and, when votes are
 used, how you voted. That is never saved and disappears when the event ends or the server stops.
+During a faction war it also remembers which side you were on when you first came near it, and during a
+storm whether it last told you that you were out in the open; both go when the event ends, and an erasure
+request removes them at once. In a faction war NeroEvents reads which faction you belong to and asks
+NeroFactions to change your reputation at the end; it stores neither. A market shock sends NeroEconomy a
+price request that names nobody.
 
 The event history everyone can see holds counts and totals only: which event happened, how it ended, how
 many took part and how much it paid in total — never who, and never where.
@@ -33,6 +38,12 @@ many took part and how much it paid in total — never who, and never where.
 | `/neroland data eraseme` | Erases everything NeroEvents (and every other Neroland mod) holds about you. |
 
 **Erasure forfeits unclaimed reward crate items; claim them first with /neroevents claim.**
+
+## The companion app
+
+This build of NeroEvents sends nothing to the NeroLink companion app and sends no notifications. When
+that arrives, this page and PRIVACY.md will say exactly what it sends; see
+[NeroLink app and notifications](NeroLink-Companion.md) for what is planned.
 
 ## Nothing leaves the server
 

@@ -14,7 +14,8 @@ import za.co.neroland.neroevents.client.HistorySentences.Title;
  * The console's and the HUD's copy rules in code: the title line ({@code <Event noun> on <Dimension>}, at most
  * 32 characters, the noun cut before the place), the what-to-do line (the definition's own {@code .todo} key,
  * else the type's, with the time left), {@code mm:ss} countdowns and dimension names (a Nerospace lang key when
- * one exists, else the vanilla-style name). Turns {@link HistorySentences} trees into components. CLIENT-ONLY (reads the client language).
+ * one exists, else the vanilla-style name). Turns {@link HistorySentences} trees into components. CLIENT-ONLY
+ * (reads the client language).
  */
 public final class ConsoleText {
 

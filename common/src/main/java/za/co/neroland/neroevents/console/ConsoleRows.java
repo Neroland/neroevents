@@ -86,6 +86,15 @@ public final class ConsoleRows {
         return type == null ? "" : "event." + type.getNamespace() + "." + type.getPath() + ".todo";
     }
 
+    /**
+     * The definition's own what-to-do line ({@code event.<ns>.<definition path, '/' as '.'>.todo}); the client
+     * uses it when a language file has it, so a definition can say something more specific than its type.
+     */
+    public static String definitionTodoKey(Identifier definition) {
+        return definition == null ? ""
+                : "event." + definition.getNamespace() + "." + definition.getPath().replace('/', '.') + ".todo";
+    }
+
     /** Votes needed for quorum: the larger of the floor and the online fraction. */
     public static int quorum(int quorumPlayers, double quorumFraction, int online) {
         return Math.max(quorumPlayers, (int) Math.ceil(quorumFraction * Math.max(0, online)));
@@ -117,7 +126,7 @@ public final class ConsoleRows {
         BlockPos anchor = view.publicAnchor();
         Severity severity = severityFor(view.severity(), view.phase());
         return new EventRow(keyOf(view.instanceId()), (byte) severity.ordinal(), safe(view.titleKey()),
-                todoKey(view.type()), safe(view.whatToDoKey()), view.dimension(), (byte) view.phase().ordinal(),
+                safe(definitionTodoKey(view.definitionId())), safe(todoKey(view.type())), safe(view.whatToDoKey()), view.dimension(), (byte) view.phase().ordinal(),
                 clampInt(ticksLeft(view)), view.participantCount(), located,
                 located && anchor != null ? anchor.immutable() : BlockPos.ZERO, view.votingOpen(), view.yes(),
                 view.no(), needed, myVote, voteBlock.map(ConsoleIntents.Deny::wire).orElse((byte) 0));
@@ -131,7 +140,7 @@ public final class ConsoleRows {
      * @param objective    a ready objective line, "" for none
      * @param boundsRadius the definition's bounds radius (the marker shows only inside it)
      */
-    public static HudEntry hud(EventView view, long phaseAge, int needed, int remaining, String objective,
+    public static HudEntry hud(EventView view, long phaseAge, int remaining, String objective,
             @Nullable BlockPos playerPos, @Nullable Identifier playerDimension, int boundsRadius) {
         BlockPos anchor = view.publicAnchor();
         boolean marker = view.phase() == EventPhase.ACTIVE && locationAllowed(view) && anchor != null
@@ -139,8 +148,9 @@ public final class ConsoleRows {
         Severity severity = severityFor(view.severity(), view.phase());
         BlockPos markerPos = marker && anchor != null ? anchor.immutable() : BlockPos.ZERO;
         return new HudEntry(keyOf(view.instanceId()), (byte) severity.ordinal(), safe(view.titleKey()),
-                todoKey(view.type()), view.dimension(), (byte) view.phase().ordinal(), clampInt(ticksLeft(view)),
-                clampInt(phaseAge), view.votingOpen(), view.yes(), view.no(), needed,
+                safe(definitionTodoKey(view.definitionId())), safe(todoKey(view.type())), view.dimension(),
+                (byte) view.phase().ordinal(), clampInt(ticksLeft(view)), clampInt(phaseAge), view.votingOpen(),
+                view.yes(), view.no(),
                 Math.max(0, view.progressDone()), Math.max(0, view.progressTotal()), remaining,
                 objective == null ? "" : truncate(objective), marker, markerPos);
     }

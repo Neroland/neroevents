@@ -4,6 +4,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -12,6 +13,7 @@ import za.co.neroland.nerolandcore.registry.RegistrationProvider;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
 import za.co.neroland.neroevents.command.EventCommands;
+import za.co.neroland.neroevents.command.GalleryShowcase;
 import za.co.neroland.neroevents.console.ConsoleServer;
 import za.co.neroland.neroevents.creatures.EventDamageHooks;
 import za.co.neroland.neroevents.event.EventEngine;
@@ -41,6 +43,9 @@ public final class NeroEventsForge {
         TickEvent.ServerTickEvent.Post.BUS.addListener(event -> EventEngine.tick(event.server()));
         // The HUD push and the open consoles' refresh, once a second.
         TickEvent.ServerTickEvent.Post.BUS.addListener(event -> ConsoleServer.tick(event.server()));
+        // The creative gallery's station loops and demo (no-op without a gallery session); dropped on stop.
+        TickEvent.ServerTickEvent.Post.BUS.addListener(event -> GalleryShowcase.tick(event.server()));
+        ServerStoppingEvent.BUS.addListener(event -> GalleryShowcase.onServerStopping(event.getServer()));
         RegisterCommandsEvent.BUS.addListener(event -> EventCommands.register(event.getDispatcher()));
         // Event-entity damage (raid waves, the boss). A statement-bodied lambda keeps the Consumer/Predicate
         // overloads of the cancellable bus unambiguous.

@@ -34,12 +34,15 @@ import za.co.neroland.neroevents.reward.RewardCrates;
 import za.co.neroland.neroevents.reward.RewardLedgerEntry;
 import za.co.neroland.neroevents.reward.RewardLedgerState;
 import za.co.neroland.neroevents.reward.RewardSummary;
+import za.co.neroland.neroevents.storm.StormErasureProbe;
 import za.co.neroland.neroevents.testing.RecordingPayloadType;
+import za.co.neroland.neroevents.war.WarErasureProbe;
 
 /**
  * POPIA/GDPR erasure conformance through Core's {@link ErasureConformance} harness: every NeroEvents store
  * that names a player — the reward ledger, the reward crates, the opt-out set, export files and the
- * engine's in-memory state (contributions, votes, session crate, session paid markers) — loses the
+ * engine's in-memory state (contributions, votes, session crate, session paid markers, a war's frozen sides,
+ * a storm's exposure flags) — loses the
  * subject through the composite eraser while a bystander keeps theirs; and every persisted store refreshes
  * its backup exactly once per erasure.
  */
@@ -72,6 +75,10 @@ class ErasureConformanceTest {
         UUID subject = UUID.randomUUID();
         UUID bystander = UUID.randomUUID();
         UUID instanceId = UUID.randomUUID();
+        UUID warId = UUID.randomUUID();
+        UUID stormId = UUID.randomUUID();
+        WarErasureProbe.seed(warId, subject, bystander);
+        StormErasureProbe.seed(stormId, subject, bystander);
 
         RewardLedgerState ledger = new RewardLedgerState();
         RewardCrateState crateState = new RewardCrateState();
@@ -120,6 +127,8 @@ class ErasureConformanceTest {
                     .probe("neroevents:session_crate", t.engine::holdsSessionCrate)
                     .probe("neroevents:session_paid", t.engine::holdsSessionPaid)
                     .probe("neroevents:export_cooldown", EventsPrivacyActions.cooldown()::holds)
+                    .probe("neroevents:war_sides", WarErasureProbe::holds)
+                    .probe("neroevents:storm_exposure", StormErasureProbe::holds)
                     .run(null, subject);
             assertTrue(report.passed(), report.describe());
             assertFalse(report.describe().contains(subject.toString()), "the report never carries the UUID");
@@ -133,7 +142,11 @@ class ErasureConformanceTest {
             assertTrue(t.engine.holdsSessionCrate(bystander));
             assertTrue(t.engine.holdsSessionPaid(bystander));
             assertTrue(EventsPrivacyActions.cooldown().holds(bystander));
+            assertTrue(WarErasureProbe.holds(bystander));
+            assertTrue(StormErasureProbe.holds(bystander));
         } finally {
+            WarErasureProbe.remove(warId);
+            StormErasureProbe.remove(stormId);
             EventsPrivacyActions.cooldown().forget(subject);
             EventsPrivacyActions.cooldown().forget(bystander);
         }

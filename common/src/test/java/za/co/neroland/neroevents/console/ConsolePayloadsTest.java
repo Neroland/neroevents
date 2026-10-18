@@ -32,6 +32,7 @@ import za.co.neroland.neroevents.event.EventOrigin;
 import za.co.neroland.neroevents.event.EventPhase;
 import za.co.neroland.neroevents.event.EventView;
 import za.co.neroland.neroevents.event.Severity;
+import za.co.neroland.neroevents.war.FactionWarPayload;
 
 /**
  * Data minimisation of the console and HUD packets: no player name or UUID ever crosses the wire, the instance
@@ -94,7 +95,7 @@ class ConsolePayloadsTest {
             EventRow row = ConsoleRows.row(raid, 3, ConsolePayloads.NO_VOTE, Optional.empty());
             assertFalse(row.located(), category + " row must not be located");
             assertEquals(BlockPos.ZERO, row.location());
-            HudEntry hud = ConsoleRows.hud(raid, 10L, 3, 4, "", ANCHOR, OVERWORLD, 64);
+            HudEntry hud = ConsoleRows.hud(raid, 10L, 4, "", ANCHOR, OVERWORLD, 64);
             assertFalse(hud.marker(), category + " must never get a marker");
             byte[] bytes = encode(ConsolePayloads.HudState.STREAM_CODEC, new HudState(List.of(hud)));
             FriendlyByteBuf posOnly = new FriendlyByteBuf(Unpooled.buffer());
@@ -109,20 +110,20 @@ class ConsolePayloadsTest {
     void privateLocationsAreNeverSent() {
         EventView hidden = view(UUID.randomUUID(), EventCategory.HAZARD, EventPhase.ACTIVE, false, "meteor_shower");
         assertFalse(ConsoleRows.row(hidden, 1, ConsolePayloads.NO_VOTE, Optional.empty()).located());
-        assertFalse(ConsoleRows.hud(hidden, 0L, 1, -1, "", ANCHOR, OVERWORLD, 64).marker());
+        assertFalse(ConsoleRows.hud(hidden, 0L, -1, "", ANCHOR, OVERWORLD, 64).marker());
     }
 
     @Test
     void markerOnlyInsideBoundsAndInTheSameDimension() {
         EventView drop = view(UUID.randomUUID(), EventCategory.REWARD, EventPhase.ACTIVE, true, "supply_drop");
-        assertTrue(ConsoleRows.hud(drop, 0L, 1, -1, "", ANCHOR.offset(30, 0, 30), OVERWORLD, 64).marker());
-        assertFalse(ConsoleRows.hud(drop, 0L, 1, -1, "", ANCHOR.offset(200, 0, 0), OVERWORLD, 64).marker(),
+        assertTrue(ConsoleRows.hud(drop, 0L, -1, "", ANCHOR.offset(30, 0, 30), OVERWORLD, 64).marker());
+        assertFalse(ConsoleRows.hud(drop, 0L, -1, "", ANCHOR.offset(200, 0, 0), OVERWORLD, 64).marker(),
                 "outside the bounds radius");
-        assertFalse(ConsoleRows.hud(drop, 0L, 1, -1, "", ANCHOR, Identifier.withDefaultNamespace("the_nether"), 64)
+        assertFalse(ConsoleRows.hud(drop, 0L, -1, "", ANCHOR, Identifier.withDefaultNamespace("the_nether"), 64)
                 .marker(), "another dimension");
-        assertFalse(ConsoleRows.hud(drop, 0L, 1, -1, "", ANCHOR, OVERWORLD, 0).marker(), "dimension-wide bounds");
+        assertFalse(ConsoleRows.hud(drop, 0L, -1, "", ANCHOR, OVERWORLD, 0).marker(), "dimension-wide bounds");
         EventView announced = view(UUID.randomUUID(), EventCategory.REWARD, EventPhase.ANNOUNCED, true, "supply_drop");
-        assertFalse(ConsoleRows.hud(announced, 0L, 1, -1, "", ANCHOR, OVERWORLD, 64).marker(), "not active yet");
+        assertFalse(ConsoleRows.hud(announced, 0L, -1, "", ANCHOR, OVERWORLD, 64).marker(), "not active yet");
         // The console may still show where a public event is (anywhere), as a row location.
         assertTrue(ConsoleRows.row(drop, 1, ConsolePayloads.NO_VOTE, Optional.empty()).located());
     }
@@ -156,6 +157,28 @@ class ConsolePayloadsTest {
     }
 
     @Test
+    void theWarObjectiveLineNeverCarriesANamespacedId() {
+        Identifier red = Identifier.fromNamespaceAndPath("nerofactions", "red");
+        Identifier blue = Identifier.fromNamespaceAndPath("nerofactions", "blue_team");
+        String line = FactionWarPayload.objectiveLine(FactionWarPayload.sideName(Optional.empty(), red), 34,
+                FactionWarPayload.sideName(Optional.empty(), blue), 21);
+        assertEquals("Red 34 · Blue Team 21", line);
+        assertFalse(line.contains(":"), line);
+        assertEquals("The Reds", FactionWarPayload.sideName(Optional.of("The Reds"), red));
+        assertFalse(FactionWarPayload.sideName(Optional.of(" "), red).contains(":"));
+    }
+
+    @Test
+    void definitionTodoKeyFollowsTheDefinitionId() {
+        assertEquals("event.neroevents.core.meteor_shower.todo",
+                ConsoleRows.definitionTodoKey(Identifier.fromNamespaceAndPath("neroevents", "core/meteor_shower")));
+        EventView v = view(UUID.randomUUID(), EventCategory.HAZARD, EventPhase.ACTIVE, false, "meteor_shower");
+        EventRow row = ConsoleRows.row(v, 1, ConsolePayloads.NO_VOTE, Optional.empty());
+        assertEquals("event.neroevents.meteor_shower.todo", row.definitionTodoKey());
+        assertEquals("event.neroevents.meteor_shower.todo", row.todoKey());
+    }
+
+    @Test
     void phaseSwitchShowsSupplyDropsAsInfoUntilActive() {
         assertEquals(Severity.INFO, ConsoleRows.severityFor(Severity.REWARD, EventPhase.ANNOUNCED));
         assertEquals(Severity.INFO, ConsoleRows.severityFor(Severity.REWARD, EventPhase.VOTING));
@@ -171,7 +194,7 @@ class ConsolePayloadsTest {
         ConsoleSnapshot snap = snapshot(List.of(row), List.of());
         assertEquals(snap, roundTrip(ConsoleSnapshot.STREAM_CODEC, snap));
         HudState hud = new HudState(List.of(ConsoleRows.hud(view(UUID.randomUUID(), EventCategory.WAR,
-                EventPhase.ACTIVE, true, "faction_war"), 5L, 2, -1, "Red 34 · Blue 21", ANCHOR, OVERWORLD, 96)));
+                EventPhase.ACTIVE, true, "faction_war"), 5L, -1, "Red 34 · Blue 21", ANCHOR, OVERWORLD, 96)));
         assertEquals(hud, roundTrip(HudState.STREAM_CODEC, hud));
         assertEquals(ConsoleIntents.Deny.VOTING_OFF, ConsoleIntents.Deny.fromWire(row.voteBlock()));
     }

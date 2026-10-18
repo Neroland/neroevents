@@ -14,6 +14,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+import za.co.neroland.neroevents.command.GalleryDemo;
+
 /**
  * The console's screen state: the severity of the most urgent announced or running event ({@link #NONE}
  * when nothing is), so the block's tint source and renderer can colour the screen. World data only — it
@@ -49,6 +51,10 @@ public class EventConsoleBlockEntity extends BlockEntity {
             return;
         }
         byte wanted = ConsoleServer.screenSeverity(server);
+        if (wanted == NONE) {
+            // Only the creative gallery's own consoles, while its demo runs; every other console stays idle.
+            wanted = GalleryDemo.severityAt(level, pos);
+        }
         boolean active = wanted != NONE;
         BlockState current = state;
         if (state.hasProperty(EventConsoleBlock.ACTIVE) && state.getValue(EventConsoleBlock.ACTIVE) != active) {

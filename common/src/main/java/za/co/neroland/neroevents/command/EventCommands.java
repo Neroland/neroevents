@@ -19,6 +19,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
@@ -109,6 +110,11 @@ public final class EventCommands {
             "/neroevents zones exclusions",
             "/neroevents budget",
             "/neroevents gallery",
+            "/neroevents gallery exhibits",
+            "/neroevents gallery events",
+            "/neroevents gallery stress",
+            "/neroevents gallery storm <storm>",
+            "/neroevents gallery cue <station>",
             "/neroevents gallery clear");
 
     /** First-level literals anyone may use; every other branch is operator-only. */
@@ -116,7 +122,7 @@ public final class EventCommands {
 
     /** Every {@code <argument>} a row may use. */
     public static final Set<String> ARGUMENTS = Set.of("instance", "definition", "dimension", "anchor", "weight",
-            "name", "from", "to");
+            "name", "from", "to", "storm", "station");
 
     private EventCommands() {
     }
@@ -156,6 +162,10 @@ public final class EventCommands {
             case "weight" -> Commands.argument(name, IntegerArgumentType.integer(0, 1000));
             case "name" -> Commands.argument(name, StringArgumentType.word());
             case "from", "to" -> Commands.argument(name, ColumnPosArgument.columnPos());
+            case "storm" -> Commands.argument(name, StringArgumentType.word())
+                    .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(GalleryStations.STORM_IDS, builder));
+            case "station" -> Commands.argument(name, StringArgumentType.word())
+                    .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(GalleryStations.CUE_IDS, builder));
             default -> throw new IllegalStateException("Unknown command argument " + token);
         };
     }
@@ -189,7 +199,12 @@ public final class EventCommands {
             case "zones add <name> <from> <to> <dimension>" -> zoneAdd(ctx, true);
             case "zones remove <name>" -> zoneRemove(ctx);
             case "zones exclusions" -> zoneList(ctx);
-            case "gallery" -> GalleryCommands.build(ctx.getSource());
+            case "gallery" -> GalleryCommands.build(ctx.getSource(), GalleryCommands.Mode.ALL);
+            case "gallery exhibits" -> GalleryCommands.build(ctx.getSource(), GalleryCommands.Mode.EXHIBITS);
+            case "gallery events" -> GalleryCommands.build(ctx.getSource(), GalleryCommands.Mode.EVENTS);
+            case "gallery stress" -> GalleryCommands.build(ctx.getSource(), GalleryCommands.Mode.STRESS);
+            case "gallery storm <storm>" -> GalleryCommands.storm(ctx);
+            case "gallery cue <station>" -> GalleryCommands.cue(ctx);
             case "gallery clear" -> GalleryCommands.clear(ctx.getSource());
             default -> throw new IllegalStateException("No executor for " + row);
         });

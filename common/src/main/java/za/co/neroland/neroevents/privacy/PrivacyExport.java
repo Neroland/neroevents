@@ -228,10 +228,19 @@ public final class PrivacyExport {
 
     /** Retention: deletes export files older than {@link #RETENTION_DAYS}. Returns how many. Never throws. */
     public static int purgeExpired(@Nullable Path directory, long now) {
+        return purgeExpired(directory, now, RETENTION_DAYS);
+    }
+
+    /**
+     * Retention under the server's hard cap: deletes export files older than {@link #RETENTION_DAYS} or
+     * {@code hardCapDays}, whichever is shorter. Returns how many. Never throws.
+     */
+    public static int purgeExpired(@Nullable Path directory, long now, int hardCapDays) {
         if (directory == null || !Files.isDirectory(directory)) {
             return 0;
         }
-        long cutoff = now - RETENTION_DAYS * DAY_MS;
+        long days = Math.min(RETENTION_DAYS, Math.max(1, hardCapDays));
+        long cutoff = now - days * DAY_MS;
         int removed = 0;
         try (Stream<Path> listing = Files.list(directory)) {
             for (Path file : listing.toList()) {

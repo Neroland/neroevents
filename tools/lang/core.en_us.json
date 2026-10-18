@@ -19,7 +19,7 @@
   "entity.neroevents.debris": "Falling Debris",
   "entity.neroevents.meteor": "Meteor",
   "entity.neroevents.supply_pod": "Supply Pod",
-  "event.neroevents.core.beacon_supply_drop.announce": "A supply pod you called is coming down in %1$s in about %2$s min. %3$s",
+  "event.neroevents.core.beacon_supply_drop.announce": "A called supply pod is coming down in %1$s in about %2$s min. %3$s",
   "event.neroevents.core.beacon_supply_drop.title": "Called Supply Drop",
   "event.neroevents.core.beacon_supply_drop.what_to_do": "Find the pod and open it first to claim the drop.",
   "event.neroevents.core.debris_crash.announce": "Wreckage is falling in %1$s in about %2$s min. %3$s",

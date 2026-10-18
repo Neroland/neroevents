@@ -1,8 +1,8 @@
 name: Sync Modrinth project page
 
 # Pushes the full Modrinth project page from the repo whenever the sources change —
-# Modrinth's API supports writing all of this, unlike CurseForge's (see
-# RELEASE_CHECKLIST.md §12: the CurseForge page stays a manual paste/upload):
+# Modrinth's API supports writing all of this, unlike CurseForge's
+# (the CurseForge page stays a manual paste/upload at release time):
 #   - description body            <- art/modrinth_description.md
 #   - title, summary, categories,
 #     client/server environments,

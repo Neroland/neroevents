@@ -8,6 +8,7 @@
     "neroevents:hull_plating",
     "neroevents:scorched_panel",
     "neroevents:bent_strut",
-    "neroevents:salvage_crate"
+    "neroevents:salvage_crate",
+    "neroevents:event_console"
   ]
 }

@@ -84,6 +84,11 @@ public final class RewardConfig {
         return privacyRewardLedgerRetentionDays > hardCap() || privacyRewardCrateRetentionDays > hardCap();
     }
 
+    /** The retention hard cap in days (1..90), which no retention, the export file's included, outlives. */
+    public int retentionHardCapDays() {
+        return hardCap();
+    }
+
     private int hardCap() {
         return Math.max(1, Math.min(90, privacyRetentionHardCapDays));
     }

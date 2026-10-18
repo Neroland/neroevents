@@ -64,6 +64,21 @@ public class DebrisEntity extends Entity {
         return debris;
     }
 
+    /**
+     * Debris that falls straight down at {@code vy} blocks per tick, belonging to no event (the creative gallery's
+     * crash loop): discarded on its first collision without reaching any landing hook, or after 400 ticks.
+     */
+    public static DebrisEntity displayFalling(ServerLevel level, double x, double y, double z, double vy) {
+        DebrisEntity debris = new DebrisEntity(CorePayloadEntities.DEBRIS.get(), level);
+        debris.setPos(x, y, z);
+        debris.vx = 0.0D;
+        debris.vy = vy;
+        debris.vz = 0.0D;
+        debris.maxAge = 400;
+        debris.setDeltaMovement(0.0D, vy, 0.0D);
+        return debris;
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         // No synced data: the client tumbles it on age.

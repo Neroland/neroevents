@@ -68,7 +68,7 @@ public abstract class StormPayloadBase implements PayloadType<StormPayloadBase.C
     public static final int PROGRESS_TICKS = 200;
 
     /** Live storm states by instance id, for {@link #forget}. */
-    private static final Map<UUID, State> LIVE = new ConcurrentHashMap<>();
+    static final Map<UUID, State> LIVE = new ConcurrentHashMap<>();
     private static final Set<Identifier> WARNED_NO_VARIANT = ConcurrentHashMap.newKeySet();
 
     /** The {@code payload} object of a storm definition; every key optional. */
@@ -128,6 +128,11 @@ public abstract class StormPayloadBase implements PayloadType<StormPayloadBase.C
 
         public int windYaw() {
             return windYaw;
+        }
+
+        /** Whether the in-memory exposure map still names the player (erasure probe). */
+        boolean holdsExposure(UUID player) {
+            return player != null && exposure.containsKey(player);
         }
 
         /** How many players the in-memory exposure map holds (tests). */

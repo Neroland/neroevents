@@ -99,10 +99,14 @@ class EventColoursTest {
 
     @Test
     void hudTextStaysLegibleOverABrightSky() {
+        // Every HUD text (pill, vote line, banner lines, objectives, shelter line, marker) is drawn in TITLE.
         int worst = EventColours.over(EventColours.INK, EventColours.HUD_ALPHA, 0xFFFFFF);
         assertTrue(EventColours.contrast(EventColours.TITLE, worst) >= 4.5, "TITLE on the HUD body over white");
-        assertTrue(EventColours.contrast(EventColours.SUBTLE, EventColours.over(EventColours.INK,
-                EventColours.HUD_ALPHA, 0x000000)) >= 4.5, "SUBTLE on the HUD body over black");
+        for (int sky : new int[] {0xFFFFFF, 0xBFE9FF, 0x87CEEB, 0x000000}) {
+            int body = EventColours.over(EventColours.INK, EventColours.HUD_ALPHA, sky);
+            assertTrue(EventColours.contrast(EventColours.TITLE, body) >= 4.5,
+                    String.format("TITLE on the HUD body over %06X", sky));
+        }
     }
 
     @Test

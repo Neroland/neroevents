@@ -1,6 +1,9 @@
 package za.co.neroland.neroevents.client;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -21,13 +24,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 
+import za.co.neroland.neroevents.client.fx.RenderBudget;
+import za.co.neroland.neroevents.client.screen.EventConsoleScreen;
 import za.co.neroland.neroevents.command.GalleryLayout;
 
 /**
  * CLIENT, creative-debug: a reproducible screenshot pass over the {@code /neroevents gallery} scene. The server
- * command builds the exhibit; this harness pins time and weather, drives the camera through a hand-framed shot
- * list with every overlay hidden, and writes one PNG per shot to {@code screenshots/neroevents/<shot>.png}, so
- * the gallery can be re-shot identically after any texture or model change instead of being framed by hand.
+ * command builds the exhibits and the event stations; this harness pins time and weather, drives the camera
+ * through the {@link GalleryShots} list with every overlay hidden (the HUD shown only for the HUD and storm
+ * shots), cues each station at its photo moment, and writes one PNG per shot to
+ * {@code screenshots/neroevents/<shot>.png}, so the gallery can be re-shot identically after any texture or
+ * model change instead of being framed by hand.
  *
  * <p><b>Commands</b> (client side; they never reach the server dispatcher). The root is {@code /nsevgallery},
  * NOT {@code /neroevents}: a client-dispatcher root that shares its name with a server command shadows the server
@@ -36,17 +43,23 @@ import za.co.neroland.neroevents.command.GalleryLayout;
  *   <li>{@code /nsevgallery capture [time]}: freezes time and weather ({@code advance_time} and
  *       {@code advance_weather} off), rebuilds the gallery at the spot you stand on ({@code gallery clear} then
  *       {@code gallery}, so a rerun never stacks), strips the floating labels and loose items within 64 blocks,
- *       then shoots the list. {@code time} is {@code day}/{@code noon}/{@code night}/{@code midnight} or a tick
- *       count; the default is {@code night}, which shows the glows, beacons and trails best.</li>
+ *       then shoots the list: every exhibit, every station, the storm previews, every demo HUD scene and every
+ *       console tab. {@code time} is {@code day}/{@code noon}/{@code night}/{@code midnight} or a tick count;
+ *       the default is {@code night}, which shows the glows, beacons and trails best.</li>
+ *   <li>{@code /nsevgallery capture stress [time]}: the same with {@code gallery stress} (40 more meteors,
+ *       10 pods, an ion storm preview); after the budget frame it writes the {@code /nsevrender} numbers to chat
+ *       and to {@code screenshots/neroevents/stress_budget.txt}.</li>
  *   <li>{@code /nsevgallery capture shot <name>}: captures the current view once, overlays hidden, to
  *       {@code neroevents/<name>.png}.</li>
  * </ul>
  *
  * <p>Every pose is relative to the origin the run started at (the player's block position), so the shots match
- * the {@link GalleryLayout} plan wherever the gallery is built. The HUD, clouds and view-bob are suppressed for
- * the run and restored afterwards. It changes game rules and replaces blocks: use a test world. Each loader wires
+ * the gallery plan wherever it is built. The HUD, clouds and view-bob are suppressed for the run and restored
+ * afterwards. It changes game rules and replaces blocks: use a test world. Each loader wires
  * {@link #registerClientCommands(CommandDispatcher)} from its client-command hook and {@link #tick()} from its
- * client tick. Nothing here records a player, a name or a position.
+ * client tick. Nothing here records a player, a name or a position; the screenshots and the budget file stay in
+ * this client's own {@code screenshots/} folder and nothing is sent to the server except the ordinary commands
+ * above. Other players in view are not hidden, so the run warns when anyone else is in the world.
  */
 public final class GalleryCaptureHarness {
 
@@ -56,14 +69,17 @@ public final class GalleryCaptureHarness {
     private static final int BUILD_WARMUP_TICKS = 60;
     /** Ticks after the build for the pods to light, trails to form and the label kill to settle. */
     private static final int SCENE_TICKS = 70;
+    /** Ticks a posed shot waits for the server to see the new position before its setup commands go out. */
+    private static final int POSE_TICKS = 3;
 
     private static final String SUBFOLDER = "neroevents";
+    private static final String BUDGET_SHOT = "stress_budget";
 
     private record Shot(String name, List<String> setup, List<String> build, List<String> cleanup, int warmup,
-            Vec3 camera, Vec3 target) {
+            boolean hud, int tab, Vec3 camera, Vec3 target) {
     }
 
-    private enum Phase { MOVE, WARMUP, SCENE, SETTLE, SHOOT }
+    private enum Phase { MOVE, POSE, WARMUP, SCENE, SETTLE, SHOOT }
 
     private static final Deque<Shot> QUEUE = new ArrayDeque<>();
     private static boolean running;
@@ -75,6 +91,8 @@ public final class GalleryCaptureHarness {
     private static int warmup;
     private static int sceneWait;
     private static int settle;
+    private static int poseWait;
+    private static String lastConsoleShot = "";
     private static Shot current;
 
     private GalleryCaptureHarness() {
@@ -88,15 +106,21 @@ public final class GalleryCaptureHarness {
         dispatcher.register(
                 LiteralArgumentBuilder.<S>literal("nsevgallery")
                         .then(LiteralArgumentBuilder.<S>literal("capture")
-                                .executes(ctx -> startCapture("night"))
+                                .executes(ctx -> startCapture("night", false))
                                 .then(LiteralArgumentBuilder.<S>literal("shot")
                                         .then(RequiredArgumentBuilder.<S, String>argument("name", StringArgumentType.word())
                                                 .executes(ctx -> shotHere(StringArgumentType.getString(ctx, "name")))))
+                                .then(LiteralArgumentBuilder.<S>literal("stress")
+                                        .executes(ctx -> startCapture("night", true))
+                                        .then(RequiredArgumentBuilder.<S, String>argument("time", StringArgumentType.word())
+                                                .executes(ctx -> startCapture(StringArgumentType.getString(ctx, "time"),
+                                                        true))))
                                 .then(RequiredArgumentBuilder.<S, String>argument("time", StringArgumentType.word())
-                                        .executes(ctx -> startCapture(StringArgumentType.getString(ctx, "time"))))));
+                                        .executes(ctx -> startCapture(StringArgumentType.getString(ctx, "time"),
+                                                false)))));
     }
 
-    private static int startCapture(String time) {
+    private static int startCapture(String time, boolean stress) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) {
             return 0;
@@ -107,10 +131,13 @@ public final class GalleryCaptureHarness {
         }
         BlockPos origin = mc.player.blockPosition();
         QUEUE.clear();
-        QUEUE.addAll(galleryQueue(origin, time));
+        QUEUE.addAll(galleryQueue(origin, time, stress));
+        lastConsoleShot = GalleryShots.lastConsoleShot(stress ? GalleryShots.STRESS : GalleryShots.SHOWCASE);
         begin(mc);
-        mc.player.sendSystemMessage(Component.literal("NeroEvents gallery capture: rebuilding the gallery here, time="
-                + time + ", " + QUEUE.size() + " shots -> screenshots/" + SUBFOLDER + "/ (overlays hidden)."));
+        warnIfOthersNearby(mc);
+        mc.player.sendSystemMessage(Component.literal("NeroEvents gallery capture: rebuilding the gallery"
+                + (stress ? " (stress scene)" : "") + " here, time=" + time + ", " + QUEUE.size()
+                + " shots -> screenshots/" + SUBFOLDER + "/ (overlays hidden)."));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -120,14 +147,32 @@ public final class GalleryCaptureHarness {
             return 0;
         }
         QUEUE.clear();
-        QUEUE.add(new Shot(name, List.of(), List.of(), List.of(), 0, null, null));
+        QUEUE.add(new Shot(name, List.of(), List.of(), List.of(), 0, false, -1, null, null));
+        lastConsoleShot = "";
         begin(mc);
+        warnIfOthersNearby(mc);
         return Command.SINGLE_SUCCESS;
     }
 
+    /**
+     * Screenshots are local files, but they may end up in a public gallery: when anyone else is in this world,
+     * say so, because their name tag and skin can appear in a frame. Counts players only; names nobody.
+     */
+    private static void warnIfOthersNearby(Minecraft mc) {
+        if (mc.player == null || mc.level == null || mc.level.players().size() <= 1) {
+            return;
+        }
+        mc.player.sendSystemMessage(Component.literal("Other players are in this world: their names and skins may "
+                + "appear in these screenshots. Check every capture before you publish it."));
+    }
+
     /** The shot list, with the one-time rebuild and environment pins attached to the first shot. */
-    private static List<Shot> galleryQueue(BlockPos origin, String time) {
-        List<Shot> shots = new ArrayList<>(buildShots(origin));
+    private static List<Shot> galleryQueue(BlockPos origin, String time, boolean stress) {
+        List<Shot> shots = new ArrayList<>();
+        for (GalleryShots.Shot s : stress ? GalleryShots.STRESS : GalleryShots.SHOWCASE) {
+            shots.add(new Shot(s.name(), s.setup(), List.of(), List.of(), s.warmup(), s.hud(), s.tab(),
+                    at(origin, s.camera()), at(origin, s.target())));
+        }
         List<String> setup = List.of(
                 "tp @s " + (origin.getX() + 0.5) + " " + origin.getY() + " " + (origin.getZ() + 0.5),
                 "gamerule advance_time false",    // 26.1 renamed doDaylightCycle -> advance_time
@@ -138,15 +183,20 @@ public final class GalleryCaptureHarness {
         // origin itself; the explicit clear first keeps a rerun honest if a previous run was interrupted.
         List<String> build = List.of(
                 "neroevents gallery clear",
-                "neroevents gallery");
+                stress ? "neroevents gallery stress" : "neroevents gallery");
         // After the scene settles: strip the floating labels (gallery-tagged stands only) and sweep any litter.
         List<String> cleanup = List.of(
-                "kill @e[type=armor_stand,tag=" + GalleryLayout.ENTITY_TAG + ",distance=..64]",
+                "kill @e[type=armor_stand,tag=" + GalleryLayout.ENTITY_TAG + ",distance=..96]",
                 "kill @e[type=item,distance=..64]",
                 "kill @e[type=experience_orb,distance=..64]");
         Shot first = shots.get(0);
-        shots.set(0, new Shot(first.name(), setup, build, cleanup, BUILD_WARMUP_TICKS, first.camera(), first.target()));
+        shots.set(0, new Shot(first.name(), setup, build, cleanup, BUILD_WARMUP_TICKS, first.hud(), first.tab(),
+                first.camera(), first.target()));
         return shots;
+    }
+
+    private static Vec3 at(BlockPos o, GalleryShots.Pose p) {
+        return new Vec3(o.getX() + 0.5 + p.x(), o.getY() + p.y(), o.getZ() + 0.5 + p.z());
     }
 
     private static void begin(Minecraft mc) {
@@ -191,11 +241,29 @@ public final class GalleryCaptureHarness {
                     finish(mc);
                     return;
                 }
-                for (String cmd : shot.setup()) {
-                    player.connection.sendCommand(cmd);
+                if (BUDGET_SHOT.equals(shot.name())) {
+                    RenderBudget.reset(); // the budget window is the frames of this shot's warmup
                 }
-                warmup = shot.warmup();
-                phase = Phase.WARMUP;
+                if (shot.build().isEmpty() && shot.camera() != null) {
+                    // Cues act around the camera (the console cue opens the console nearest it): pose first, and
+                    // let the position reach the server before the setup commands do.
+                    applyPose(player, shot);
+                    poseWait = POSE_TICKS;
+                    phase = Phase.POSE;
+                    return;
+                }
+                sendSetup(player, shot);
+            }
+            case POSE -> {
+                Shot shot = current;
+                if (shot == null) {
+                    phase = Phase.MOVE;
+                    return;
+                }
+                applyPose(player, shot);
+                if (--poseWait <= 0) {
+                    sendSetup(player, shot);
+                }
             }
             case WARMUP -> {
                 Shot shot = current;
@@ -203,7 +271,11 @@ public final class GalleryCaptureHarness {
                     phase = Phase.MOVE;
                     return;
                 }
-                holdStill(mc, player);
+                if (shot.build().isEmpty()) {
+                    applyPose(player, shot);
+                } else {
+                    holdStill(mc, player);
+                }
                 if (--warmup <= 0) {
                     for (String cmd : shot.build()) {
                         player.connection.sendCommand(cmd);
@@ -235,6 +307,12 @@ public final class GalleryCaptureHarness {
                     return;
                 }
                 applyPose(player, shot); // re-pinned every tick so nothing drifts the camera
+                if (shot.hud()) {
+                    setHudHidden(mc, false);
+                }
+                if (shot.tab() >= 0) {
+                    EventConsoleScreen.selectTabForCapture(shot.tab());
+                }
                 if (--settle <= 0) {
                     phase = Phase.SHOOT;
                 }
@@ -246,7 +324,43 @@ public final class GalleryCaptureHarness {
                     return;
                 }
                 grab(mc, shot.name());
+                if (shot.hud()) {
+                    setHudHidden(mc, true);
+                }
+                if (shot.name().equals(lastConsoleShot)) {
+                    player.closeContainer();
+                }
+                if (BUDGET_SHOT.equals(shot.name())) {
+                    writeBudget(mc);
+                }
                 phase = Phase.MOVE;
+            }
+        }
+    }
+
+    private static void sendSetup(LocalPlayer player, Shot shot) {
+        for (String cmd : shot.setup()) {
+            player.connection.sendCommand(cmd);
+        }
+        warmup = shot.warmup();
+        phase = Phase.WARMUP;
+    }
+
+    /** The renderer numbers for the stress frame: to chat and to a text file beside the screenshots. */
+    private static void writeBudget(Minecraft mc) {
+        String record = RenderBudget.record();
+        if (mc.player != null) {
+            for (String line : record.split("\\R")) {
+                mc.player.sendSystemMessage(Component.literal(line));
+            }
+        }
+        File out = new File(mc.gameDirectory, "screenshots/" + SUBFOLDER + "/" + BUDGET_SHOT + ".txt");
+        try {
+            Files.writeString(out.toPath(), record + System.lineSeparator(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            if (mc.player != null) {
+                mc.player.sendSystemMessage(Component.literal("Could not write screenshots/" + SUBFOLDER + "/"
+                        + BUDGET_SHOT + ".txt (" + e.getClass().getSimpleName() + ")."));
             }
         }
     }
@@ -325,29 +439,5 @@ public final class GalleryCaptureHarness {
         *///?} else {
         return mc.gameRenderer.mainRenderTarget();
         //?}
-    }
-
-    // --- the shot list (poses relative to the origin; mirrors GalleryLayout, tune the two together) ------------
-
-    private static List<Shot> buildShots(BlockPos o) {
-        List<Shot> shots = new ArrayList<>();
-        // The descending pod falls slowly from 14 up, so the shots that show it come first.
-        shots.add(shot(o, "hero", 0, 9, 4, 0, 1.5, -13));                    // the whole gallery from the south
-        shots.add(shot(o, "pod_descending", 4, 6, -7, 4, 10, -14));           // canopy, gores and the falling pod
-        shots.add(shot(o, "pods", -5, 4, -7.5, -5, 1.5, -14));                // tiers 1-3 landed, beacons lit
-        shots.add(shot(o, "war_beacon", 9, 3.5, -9.5, 9, 1.5, -14));          // pylon, emitter ring, ground ring
-        shots.add(shot(o, "meteors", -3, 5, -13.5, -3, 4.5, -20));            // two meteors, heat shell and trails
-        shots.add(shot(o, "debris", 6, 5, -15.5, 6, 4.5, -20));               // the tumbling hull fragment
-        shots.add(shot(o, "crater_blocks", -9, 3.2, -1.5, -9, 1.2, -6));      // slag, crust, ore, pocket
-        shots.add(shot(o, "consoles", -1, 2.4, -3, -1, 1.5, -6));             // idle and active Event Console
-        shots.add(shot(o, "wreck_blocks", 8, 3.2, -1.5, 8, 1.2, -6));         // plating, scorched, strut, crates
-        return shots;
-    }
-
-    /** A camera-only shot whose pose is an offset from the origin. */
-    private static Shot shot(BlockPos o, String name, double cx, double cy, double cz, double tx, double ty, double tz) {
-        return new Shot(name, List.of(), List.of(), List.of(), 0,
-                new Vec3(o.getX() + 0.5 + cx, o.getY() + cy, o.getZ() + 0.5 + cz),
-                new Vec3(o.getX() + 0.5 + tx, o.getY() + ty, o.getZ() + 0.5 + tz));
     }
 }

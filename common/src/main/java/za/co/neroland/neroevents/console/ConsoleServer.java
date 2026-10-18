@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import za.co.neroland.neroevents.NeroEventsCommon;
 import za.co.neroland.neroevents.client.ClientConsoleState;
 import za.co.neroland.neroevents.client.ClientHudState;
+import za.co.neroland.neroevents.command.GalleryDemo;
 import za.co.neroland.neroevents.console.ConsolePayloads.ConsoleCancel;
 import za.co.neroland.neroevents.console.ConsolePayloads.ConsoleClaim;
 import za.co.neroland.neroevents.console.ConsolePayloads.ConsolePrivacy;
@@ -110,8 +111,17 @@ public final class ConsoleServer {
             List<EventInstance> shown = shownInstances(engine);
             boolean idle = shown.isEmpty();
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                if (!idle || tick % IDLE_PUSH_TICKS == 0) {
+                // The creative gallery's demo HUD, for its owner only, and only while nothing real is shown.
+                Optional<HudState> demo = idle ? GalleryDemo.hudFor(player) : Optional.empty();
+                if (demo.isPresent()) {
+                    Services.NETWORK.sendToPlayer(player, demo.get());
+                } else if (!idle || tick % IDLE_PUSH_TICKS == 0) {
                     Services.NETWORK.sendToPlayer(player, hudFor(engine, shown, player, server));
+                }
+                if (idle) {
+                    GalleryDemo.noteIdle(player);
+                } else {
+                    GalleryDemo.noteBusy(player);
                 }
                 if (player.containerMenu instanceof EventConsoleMenu menu && menu.stillValid(player)) {
                     sendSnapshot(player, menu, true, "", "");
@@ -164,7 +174,6 @@ public final class ConsoleServer {
             return HudState.EMPTY;
         }
         long now = engine.now();
-        int needed = needed(engine, server);
         BlockPos pos = player.blockPosition();
         Identifier dimension = player.level().dimension().identifier();
         List<EventInstance> sorted = new ArrayList<>(shown);
@@ -177,7 +186,7 @@ public final class ConsoleServer {
             EventView view = instance.view(now);
             EventBounds bounds = instance.definition().bounds();
             int radius = bounds.kind() == EventBounds.Kind.DIMENSION ? 0 : bounds.radius();
-            entries.add(ConsoleRows.hud(view, Math.max(0L, now - instance.phaseSince()), needed, remaining(instance),
+            entries.add(ConsoleRows.hud(view, Math.max(0L, now - instance.phaseSince()), remaining(instance),
                     FactionWarPayload.objectiveText(instance.id()).orElse(""), pos, dimension, radius));
         }
         return new HudState(entries);
@@ -200,6 +209,13 @@ public final class ConsoleServer {
         MinecraftServer server = player.level().getServer();
         if (server == null) {
             return;
+        }
+        if (demoShowing(player)) {
+            Optional<ConsoleSnapshot> demo = GalleryDemo.snapshotFor(player, ok, key, arg);
+            if (demo.isPresent()) {
+                Services.NETWORK.sendToPlayer(player, demo.get());
+                return;
+            }
         }
         Services.NETWORK.sendToPlayer(player, snapshot(server, player, menu, ok, key, arg));
     }
@@ -290,15 +306,25 @@ public final class ConsoleServer {
 
     /**
      * Every request: the sender must have the console menu open and still be at the console; one answer per
-     * {@link ConsoleIntents#MIN_INTERVAL_TICKS}. A failure answers "try again" and never reaches the player as a
-     * stack trace.
+     * {@link ConsoleIntents#MIN_INTERVAL_TICKS}. A request refused as too fast is answered at most once per
+     * interval too, and otherwise dropped silently, so the limiter never amplifies a flood into snapshots. A
+     * failure answers "try again" and never reaches the player as a stack trace.
      */
     private static void guarded(ServerPlayer player, String operation, MenuAction action) {
         if (!(player.containerMenu instanceof EventConsoleMenu menu) || !menu.stillValid(player)) {
             return; // not at a console: nothing to answer on
         }
-        if (!menu.tryRequest(player.level().getGameTime())) {
-            sendSnapshot(player, menu, false, ConsoleIntents.Deny.TOO_FAST.key(), "");
+        long now = player.level().getGameTime();
+        if (!menu.tryRequest(now)) {
+            if (menu.tryDeny(now)) {
+                sendSnapshot(player, menu, false, ConsoleIntents.Deny.TOO_FAST.key(), "");
+            }
+            return;
+        }
+        if (!"refresh".equals(operation) && demoShowing(player)) {
+            // The gallery demo is on this player's screen: no vote, claim, privacy or cancel request reaches the
+            // engine (a real event makes the demo step aside, and the console works normally again).
+            sendSnapshot(player, menu, false, "console.neroevents.gallery.demo_locked", "");
             return;
         }
         try {
@@ -309,6 +335,12 @@ public final class ConsoleServer {
                     e.getClass().getName());
             sendSnapshot(player, menu, false, MESSAGE_FAILED, "");
         }
+    }
+
+    /** Whether {@code player}'s console shows the gallery demo (it is theirs, and nothing real is shown). */
+    private static boolean demoShowing(ServerPlayer player) {
+        MinecraftServer server = player.level().getServer();
+        return server != null && GalleryDemo.active(player) && shownInstances(EventEngine.get(server)).isEmpty();
     }
 
     private static @Nullable EventInstance find(List<EventInstance> instances, int key) {

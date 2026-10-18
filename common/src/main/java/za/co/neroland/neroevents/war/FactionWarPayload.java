@@ -380,8 +380,8 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
         }
         state.sideA = a;
         state.sideB = b;
-        state.nameA = world.displayName(a).orElse(a.toString());
-        state.nameB = world.displayName(b).orElse(b.toString());
+        state.nameA = sideName(world.displayName(a), a);
+        state.nameB = sideName(world.displayName(b), b);
         state.scoring = new WarScoring(config.rules(), placed);
         state.sides = new WarSides(a, b);
         state.objectiveText = text(state);
@@ -448,7 +448,38 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
         WarScoring scoring = state.scoring;
         int a = scoring == null ? 0 : scoring.score(Side.A);
         int b = scoring == null ? 0 : scoring.score(Side.B);
-        return state.nameA + " " + a + " · " + state.nameB + " " + b;
+        return objectiveLine(state.nameA, a, state.nameB, b);
+    }
+
+    /** "Red 34 · Blue 21": the HUD / console objective line. */
+    public static String objectiveLine(String nameA, int scoreA, String nameB, int scoreB) {
+        return nameA + " " + scoreA + " · " + nameB + " " + scoreB;
+    }
+
+    /**
+     * A faction's name for the objective line: its display name, else the last part of its id's path in title
+     * case ("red", "blue_team" → "Red", "Blue Team") — never the namespaced id.
+     */
+    public static String sideName(Optional<String> displayName, Identifier faction) {
+        if (displayName != null && displayName.isPresent() && !displayName.get().isBlank()) {
+            return displayName.get();
+        }
+        if (faction == null) {
+            return "?";
+        }
+        String path = faction.getPath();
+        String last = path.substring(path.lastIndexOf('/') + 1).replace('_', ' ').replace('-', ' ');
+        StringBuilder out = new StringBuilder();
+        for (String word : last.split(" ")) {
+            if (word.isEmpty()) {
+                continue;
+            }
+            if (!out.isEmpty()) {
+                out.append(' ');
+            }
+            out.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
+        }
+        return out.isEmpty() ? "?" : out.toString();
     }
 
     @Override
@@ -613,8 +644,8 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
         state.scoring = scoring;
         state.restored.clear();
         state.sides = new WarSides(a, b);
-        state.nameA = world.displayName(a).orElse(a.toString());
-        state.nameB = world.displayName(b).orElse(b.toString());
+        state.nameA = sideName(world.displayName(a), a);
+        state.nameB = sideName(world.displayName(b), b);
         state.objectiveText = text(state);
         LIVE.put(ctx.instance().id(), state);
         return ResumeResult.ok();

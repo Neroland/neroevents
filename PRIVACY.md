@@ -77,8 +77,8 @@ never sent anywhere, never logged with a player id, and removed by an erasure re
 | `neroevents/exports/<uuid>.json` — your export | A copy of the above for one player, written only when that player asks for it. | **7 days** |
 
 No retention setting can exceed `privacyRetentionHardCapDays` (90 days at most; it can only be
-lowered). Expired rows, crate entries and export files are removed when the world loads and then
-every `privacyPurgeIntervalMinutes` (hourly by default). With `rewardLedgerEnabled=false` the reward
+lowered). Expired rows, crate entries and export files are removed shortly after the world loads (at
+the first scheduler pass) and then every `privacyPurgeIntervalMinutes` (hourly by default). With `rewardLedgerEnabled=false` the reward
 history is not kept at all.
 
 NeroEvents also saves two world-data stores that name no player:
@@ -107,6 +107,13 @@ NeroEvents also keeps in memory which players are online (to hand over a pending
 login), a per-player limit on how often an export can be requested, and — for players who opted out —
 a temporary reward crate and a "paid this session" marker. All of it is dropped when the server stops.
 
+Some events keep a little more in memory while they run, all of it by player UUID, never saved, never
+logged and removed at once by an erasure request: during a **faction war**, which side each player was
+on when they first came near it (frozen, so changing faction mid-war changes nothing; dropped when the
+war is cleaned up); during a **storm**, whether the storm last told each player they were out in the
+open (used only to tell them when that changes; cleared when the storm ends); and which players were
+already told this login that a Supply Beacon reward is waiting.
+
 Events are placed by counting how many players are in each area of a dimension; the counts are used
 and discarded, never a position.
 
@@ -116,9 +123,11 @@ The console and the on-screen event messages show world information to everyone 
 announced or running, where public ones are, vote counts as numbers) and your own reward crate, reward
 history and privacy settings only to you. Nothing they send names or identifies another player: an
 event is addressed by an opaque key, tallies are numbers, and the location of a raid or invasion
-target is never sent. The console's buttons run the same actions as the commands below. Where you put
-the event messages on your screen is saved only on your own computer
-(`config/neroevents-hud.properties`) and never sent to a server.
+target is never sent. One exception you choose yourself: a Supply Beacon calls its drop to where you
+stand, and that drop is announced to everyone online with its direction and rough distance like any
+public event, so using one tells others roughly where you are. The console's buttons run the same
+actions as the commands below. Where you put the event messages on your screen is saved only on your
+own computer (`config/neroevents-hud.properties`) and never sent to a server.
 
 ### Your choices
 
@@ -140,8 +149,17 @@ opens the chat with the `/neroland data eraseme` command typed in for you to sen
   held in memory about you, and refreshes the stores' backups so nothing comes back from them.
   **Erasure forfeits unclaimed reward crate items; claim them first with /neroevents claim.**
 
+This version of NeroEvents registers no NeroLink companion-app module: it sends no event data to the
+app and no notification to anyone. A server operator can already switch off every future event
+notification and stored alert with `pushNotificationsEnabled=false`. When the module ships, this
+document will describe exactly what it sends before it is enabled.
+
 Credits are paid through NeroEconomy when it is installed; NeroEconomy keeps its own ledger and
-documents it in its own PRIVACY.md. Reputation changes go through NeroFactions when it is installed.
+documents it in its own PRIVACY.md. Reputation changes go through NeroFactions when it is installed:
+during a faction war NeroEvents reads which faction players near an objective belong to, and at the end
+it asks NeroFactions to adjust the reputation of the players who took part (capped by
+`rewardReputationMaxDeltaPerEvent`). NeroEvents stores neither; NeroFactions' PRIVACY.md covers what it
+keeps. A market shock sends NeroEconomy a price request that names no player.
 
 ## Legal basis and your rights (GDPR / POPIA)
 

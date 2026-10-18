@@ -126,4 +126,34 @@ public final class ConsoleIntents {
     public static boolean allowed(long last, long now) {
         return last == Long.MIN_VALUE || now < last || now - last >= MIN_INTERVAL_TICKS;
     }
+
+    /**
+     * One open console's rate limit. A request is answered at most once per {@link #MIN_INTERVAL_TICKS}; a
+     * request refused as too fast is itself answered ("too fast") at most once per interval, so a client that
+     * floods requests gets silence instead of one full snapshot per packet.
+     */
+    public static final class RateLimit {
+        /** Game time of the last answered request ({@code Long.MIN_VALUE} = never). */
+        private long lastRequestAt = Long.MIN_VALUE;
+        /** Game time of the last "too fast" answer ({@code Long.MIN_VALUE} = never). */
+        private long lastDeniedAt = Long.MIN_VALUE;
+
+        /** Records and allows a request at {@code gameTime} when the limit permits it. */
+        public boolean tryRequest(long gameTime) {
+            if (!allowed(lastRequestAt, gameTime)) {
+                return false;
+            }
+            lastRequestAt = gameTime;
+            return true;
+        }
+
+        /** Records and allows a "too fast" answer at {@code gameTime}; false means drop the request silently. */
+        public boolean tryDeny(long gameTime) {
+            if (!allowed(lastDeniedAt, gameTime)) {
+                return false;
+            }
+            lastDeniedAt = gameTime;
+            return true;
+        }
+    }
 }

@@ -15,8 +15,8 @@ import net.minecraft.world.item.ItemStack;
 public class EventConsoleMenu extends AbstractContainerMenu {
 
     private final ContainerLevelAccess access;
-    /** Server: game time of the last answered request ({@code Long.MIN_VALUE} = never). */
-    private long lastRequestAt = Long.MIN_VALUE;
+    /** Server: this sitting's request and "too fast" answer limits. */
+    private final ConsoleIntents.RateLimit rateLimit = new ConsoleIntents.RateLimit();
     /** Server: the viewer emptied their crate from this sitting. */
     private boolean claimedHere;
 
@@ -32,11 +32,16 @@ public class EventConsoleMenu extends AbstractContainerMenu {
 
     /** Records and allows a request at {@code gameTime} when the rate limit permits it. */
     public boolean tryRequest(long gameTime) {
-        if (!ConsoleIntents.allowed(lastRequestAt, gameTime)) {
-            return false;
-        }
-        lastRequestAt = gameTime;
-        return true;
+        return rateLimit.tryRequest(gameTime);
+    }
+
+    /**
+     * Records and allows a "too fast" answer at {@code gameTime}; at most one per
+     * {@link ConsoleIntents#MIN_INTERVAL_TICKS}, so a flood of refused requests is never answered packet for
+     * packet.
+     */
+    public boolean tryDeny(long gameTime) {
+        return rateLimit.tryDeny(gameTime);
     }
 
     public boolean claimedHere() {

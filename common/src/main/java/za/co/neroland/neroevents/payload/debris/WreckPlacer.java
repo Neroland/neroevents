@@ -94,12 +94,13 @@ public final class WreckPlacer {
     public static final class ServerWreckWorld implements WreckWorld {
         private final ServerLevel level;
         private final @Nullable UUID instanceId;
-        private final Identifier lootTable;
+        private final @Nullable Identifier lootTable;
         private final long lootBudget;
         private final long seed;
 
-        public ServerWreckWorld(ServerLevel level, @Nullable UUID instanceId, Identifier lootTable, long lootBudget,
-                long seed) {
+        /** {@code lootTable} null places empty, already-rolled crates (no loot, no credit). */
+        public ServerWreckWorld(ServerLevel level, @Nullable UUID instanceId, @Nullable Identifier lootTable,
+                long lootBudget, long seed) {
             this.level = level;
             this.instanceId = instanceId;
             this.lootTable = lootTable;

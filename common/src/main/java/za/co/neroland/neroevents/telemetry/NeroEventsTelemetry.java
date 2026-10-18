@@ -48,30 +48,8 @@ import za.co.neroland.neroevents.platform.Services;
  */
 public final class NeroEventsTelemetry {
 
-    /**
-     * ============================ THE UNCONFIGURED-BUILD GUARD ============================
-     * While {@link #DSN} equals this literal, every entry point below is a hard no-op:
-     * {@link #init()} returns before touching the Sentry SDK, so <b>nothing is ever sent
-     * anywhere</b> and no network connection is opened, regardless of the {@code telemetryEnabled}
-     * config value.
-     *
-     * <p>No NeroEvents Sentry project exists yet, so {@link #DSN} is still this placeholder and
-     * telemetry is wired but inert. To go live, create the project and paste its public DSN into
-     * {@link #DSN}. Even then, <b>do not remove the guard</b>: it is what keeps a fork, a stripped
-     * build or a half-configured branch silent instead of crashing on SDK init or reporting into
-     * somebody else's project.
-     * ===================================================================================
-     */
-    private static final String PLACEHOLDER_DSN = "https://REPLACE-ME@sentry.invalid/0";
-
-    /**
-     * Sentry DSN — the placeholder until a real project key is pasted in (no secret is involved:
-     * a DSN is a public client key, write-only ingest, safe to ship in the jar). It grants
-     * permission to SEND events and nothing else: it cannot read issues, and it identifies the
-     * NeroEvents project, never a player. Opt-out via {@code telemetryEnabled=false} in
-     * {@code config/neroevents.properties}; see PRIVACY.md for the full disclosure.
-     */
-    private static final String DSN = PLACEHOLDER_DSN;
+    /** Sentry DSN — a public client key (write-only ingest), safe to ship in the jar. */
+   private static final String DSN = "https://529fa2f26311e4272792f89427cb21b6@o4511183823241216.ingest.de.sentry.io/4512279060349008";
 
     /** Stack traces must contain this package for an event to be sent. */
     private static final String PACKAGE_MARKER = "za.co.neroland.neroevents";
@@ -86,20 +64,16 @@ public final class NeroEventsTelemetry {
     private static final Pattern USER_PATH =
             Pattern.compile("(?i)(?:[A-Z]:)?[/\\\\](?:Users|home)[/\\\\][^/\\\\\\s:;,'\"]+");
 
+    /** Masks anything shaped like a UUID (player, account or entity ids) in messages and values. */
+    private static final Pattern UUID_RE =
+            Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+
     private static volatile boolean active;
     private static final AtomicInteger eventsSent = new AtomicInteger();
     private static final Set<String> seenFingerprints = ConcurrentHashMap.newKeySet();
     private static SentryLogAppender appender;
 
     private NeroEventsTelemetry() {
-    }
-
-    /**
-     * True while the shipped DSN is the placeholder (the case until a Sentry project exists), in which
-     * case telemetry stays wired but inert.
-     */
-    private static boolean dsnIsPlaceholder() {
-        return PLACEHOLDER_DSN.equals(DSN);
     }
 
     /**
@@ -110,13 +84,6 @@ public final class NeroEventsTelemetry {
      * out of production metrics.
      */
     public static void init() {
-        if (dsnIsPlaceholder()) {
-            // No Sentry project configured: stay completely inert. Logged once at DEBUG so a
-            // developer can see why no events arrive, without nagging players.
-            NeroEventsCommon.LOGGER.debug(
-                    "[NeroEvents] Telemetry inert - no Sentry DSN configured in this build.");
-            return;
-        }
         if (!NeroEventsConfig.isTelemetryEnabled()) {
             return;
         }
@@ -475,7 +442,8 @@ public final class NeroEventsTelemetry {
     /**
      * Removes the OS account from a string: this JVM's actual home directory (both separator styles)
      * and account name first, then any remaining {@code /Users/<x>} / {@code /home/<x>} /
-     * {@code C:\Users\<x>} path prefix. Never returns {@code null} for a non-null input.
+     * {@code C:\Users\<x>} path prefix; then anything shaped like a UUID becomes {@code <uuid>}. Never returns
+     * {@code null} for a non-null input.
      */
     static String scrub(String text) {
         if (text == null) {
@@ -491,6 +459,7 @@ public final class NeroEventsTelemetry {
         if (user != null && !user.isBlank()) {
             scrubbed = scrubbed.replace(user, "[user]");
         }
-        return USER_PATH.matcher(scrubbed).replaceAll("/~");
+        scrubbed = USER_PATH.matcher(scrubbed).replaceAll("/~");
+        return UUID_RE.matcher(scrubbed).replaceAll("<uuid>");
     }
 }

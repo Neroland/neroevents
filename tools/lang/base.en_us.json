@@ -130,7 +130,7 @@
   "item.neroevents.supply_beacon.refused.other": "The supply drop could not be called right now. Keep the beacon and try again later.",
   "item.neroevents.supply_beacon.refused.protected": "You can't call a drop here — this area is protected.",
   "item.neroevents.supply_beacon.refused.unknown_definition": "Supply drops aren't available on this server yet; keep the beacon.",
-  "item.neroevents.supply_beacon.tooltip": "Calls a supply drop to this dimension. One use.",
+  "item.neroevents.supply_beacon.tooltip": "Calls a supply drop to where you stand. One use. Everyone online is told roughly where it lands.",
   "item.neroevents.supply_beacon.unavailable": "Supply drops aren't available on this server yet; keep the beacon.",
   "message.neroevents.supply_beacon_no_room": "A Supply Beacon is waiting for you — free an inventory slot; it is handed over on your next login.",
   "message.neroevents.supply_beacon_pending": "A Supply Beacon is reserved for you. NeroEvents will hand it over once supply drops arrive.",

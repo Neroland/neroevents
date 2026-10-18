@@ -81,6 +81,24 @@ class ConsoleIntentsTest {
     }
 
     @Test
+    void aFloodOfRefusedRequestsEarnsOneTooFastAnswer() {
+        ConsoleIntents.RateLimit limit = new ConsoleIntents.RateLimit();
+        assertTrue(limit.tryRequest(100L), "the first request is answered");
+        int denies = 0;
+        for (int i = 0; i < 10; i++) {
+            assertFalse(limit.tryRequest(101L));
+            if (limit.tryDeny(101L)) {
+                denies++;
+            }
+        }
+        assertEquals(1, denies, "ten refused requests in one tick produce one deny");
+        assertFalse(limit.tryRequest(105L));
+        assertFalse(limit.tryDeny(105L), "still inside the deny interval: silent");
+        assertTrue(limit.tryDeny(101L + ConsoleIntents.MIN_INTERVAL_TICKS), "a later flood is told once again");
+        assertTrue(limit.tryRequest(100L + ConsoleIntents.MIN_INTERVAL_TICKS));
+    }
+
+    @Test
     void denyWireValuesRoundTripAndZeroMeansAllowed() {
         assertNull(Deny.fromWire((byte) 0));
         assertNull(Deny.fromWire((byte) 99));

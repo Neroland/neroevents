@@ -28,6 +28,23 @@ public final class CraterBuilder {
     private CraterBuilder() {
     }
 
+    /**
+     * Whether {@code state} may be laid as crater ore: a solid, full block with no block entity and no fluid
+     * (no fluids, no containers or other block entities, no see-through blocks). Anything else falls back to
+     * meteor ore.
+     */
+    public static boolean plainSolid(BlockState state) {
+        return !state.isAir() && state.isSolidRender() && !state.hasBlockEntity() && state.getFluidState().isEmpty();
+    }
+
+    /** {@link #plainSolid(BlockState)} for a registered block's default state; false for an unknown id. */
+    public static boolean plainSolidBlock(Identifier id) {
+        if (!BuiltInRegistries.BLOCK.containsKey(id)) {
+            return false;
+        }
+        return plainSolid(BuiltInRegistries.BLOCK.getValue(id).defaultBlockState());
+    }
+
     /** What applying a plan did. {@code craterBlocks} counts every non-pocket cell set. */
     public record Result(int craterBlocks, boolean pocketPlaced) {
 
@@ -138,7 +155,10 @@ public final class CraterBuilder {
             if (index >= 0 && index < oreBlocks.size()) {
                 Block block = BuiltInRegistries.BLOCK.getValue(oreBlocks.get(index));
                 if (block != Blocks.AIR) {
-                    return block.defaultBlockState();
+                    BlockState state = block.defaultBlockState();
+                    if (plainSolid(state)) {
+                        return state;
+                    }
                 }
             }
             return CorePayloadBlocks.EMBEDDED_METEOR_ORE.get().defaultBlockState();
