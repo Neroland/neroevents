@@ -97,8 +97,8 @@ class BossPayloadTest {
     }
 
     private static SchedulerSnapshot snapshot(Set<String> mods, int online, PopulationBand band, long remaining) {
-        return new SchedulerSnapshot(0L, online, band, false, ConsentMode.OFF, true, Map.of(), List.of(), Map.of(),
-                Map.of(), Map.of(), mods, Map.of(), Map.of(), 0, 0L, Map.of(), Map.of(), remaining);
+        return new SchedulerSnapshot(0L, online, band, false, ConsentMode.OFF, true, false, false, Map.of(),
+                List.of(), Map.of(), Map.of(), Map.of(), mods, Map.of(), Map.of(), 0, 0L, Map.of(), Map.of(), remaining);
     }
 
     @Test

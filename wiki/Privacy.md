@@ -27,6 +27,9 @@ price request that names nobody.
 The event history everyone can see holds counts and totals only: which event happened, how it ended, how
 many took part and how much it paid in total — never who, and never where.
 
+In a single-player world the "server operator" is you; the export file is written into your world's
+folder.
+
 ## Your choices
 
 | Command | What it does |

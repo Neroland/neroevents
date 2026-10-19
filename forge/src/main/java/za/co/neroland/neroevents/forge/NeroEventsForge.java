@@ -46,6 +46,8 @@ public final class NeroEventsForge {
         // The creative gallery's station loops and demo (no-op without a gallery session); dropped on stop.
         TickEvent.ServerTickEvent.Post.BUS.addListener(event -> GalleryShowcase.tick(event.server()));
         ServerStoppingEvent.BUS.addListener(event -> GalleryShowcase.onServerStopping(event.getServer()));
+        // Running events save their resumable state when the server (or a single-player world) closes.
+        ServerStoppingEvent.BUS.addListener(event -> EventEngine.onServerStopping(event.getServer()));
         RegisterCommandsEvent.BUS.addListener(event -> EventCommands.register(event.getDispatcher()));
         // Event-entity damage (raid waves, the boss). A statement-bodied lambda keeps the Consumer/Predicate
         // overloads of the cancellable bus unambiguous.

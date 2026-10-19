@@ -48,6 +48,10 @@ announced; if no safe spot is found, the event is skipped. Announcements give a 
 distance for public events only, never coordinates, and never name a player. Raid and invasion targets
 are never shown to anyone.
 
+Events never anchor within `anchorMinPlayerDistanceBlocks` (24) of any player: a pod or a wreck never
+comes down on someone watching the sky. Only a count of players inside that distance is used, never a
+position. (An operator's `/neroevents start` with an explicit position is not held to it.)
+
 ## How rewards stay fair
 
 - Only what you **do** counts: damage to an event's creatures, opening its containers, capturing

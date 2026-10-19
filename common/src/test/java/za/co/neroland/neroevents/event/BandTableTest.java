@@ -52,7 +52,7 @@ class BandTableTest {
     }
 
     private static SchedulerSnapshot snapshot(PopulationBand band, int online) {
-        return new SchedulerSnapshot(0L, online, band, false, ConsentMode.OFF, true, Map.of(), List.of(), Map.of(),
-                Map.of(), Map.of(), Set.of(), Map.of(), Map.of(), 0, 0L, Map.of(), Map.of(), Long.MAX_VALUE);
+        return new SchedulerSnapshot(0L, online, band, false, ConsentMode.OFF, true, false, false, Map.of(),
+                List.of(), Map.of(), Map.of(), Map.of(), Set.of(), Map.of(), Map.of(), 0, 0L, Map.of(), Map.of(), Long.MAX_VALUE);
     }
 }

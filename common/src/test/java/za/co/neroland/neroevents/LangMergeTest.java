@@ -73,6 +73,42 @@ class LangMergeTest {
     }
 
     @Test
+    void everySoloVariantHasItsBaseKeyAndTheSinglePlayerKeysExist() throws IOException {
+        Map<String, String> merged = merge(repoRoot().resolve("tools").resolve("lang"));
+        List<String> orphans = new ArrayList<>();
+        for (String key : merged.keySet()) {
+            if (key.endsWith(".solo") && !merged.containsKey(key.substring(0, key.length() - ".solo".length()))) {
+                orphans.add(key);
+            }
+        }
+        assertTrue(orphans.isEmpty(), ".solo keys without a base key: " + orphans);
+        List<String> solo = List.of("console.neroevents.title", "console.neroevents.subtitle.soon",
+                "console.neroevents.tab.soon.help", "console.neroevents.subtitle.privacy",
+                "console.neroevents.tab.privacy.help", "console.neroevents.privacy.explain.export",
+                "console.neroevents.privacy.explain.optout", "console.neroevents.privacy.export_done",
+                "console.neroevents.mine.ledger_off", "console.neroevents.privacy.ledger_off",
+                "console.neroevents.privacy.row.ledger_off", "console.neroevents.soon.empty",
+                "privacy.neroevents.export.done", "privacy.neroevents.optout.done", "privacy.neroevents.status.disabled",
+                "reward.neroevents.crate_session_only", "command.neroevents.rewards.disabled");
+        for (String key : solo) {
+            assertTrue(merged.containsKey(key), key);
+            assertTrue(merged.containsKey(key + ".solo"), key + ".solo");
+        }
+        for (String key : List.of("command.neroevents.status.single_player",
+                "command.neroevents.status.single_player.off", "command.neroevents.preview.first_event")) {
+            assertTrue(merged.containsKey(key), key);
+        }
+        assertEquals("console.neroevents.title.solo",
+                za.co.neroland.neroevents.client.ConsoleText.solo("console.neroevents.title", true, merged::containsKey));
+        assertEquals("console.neroevents.title",
+                za.co.neroland.neroevents.client.ConsoleText.solo("console.neroevents.title", false, merged::containsKey));
+        // No variant: the base key, alone or not.
+        assertEquals("console.neroevents.live.empty",
+                za.co.neroland.neroevents.client.ConsoleText.solo("console.neroevents.live.empty", true,
+                        merged::containsKey));
+    }
+
+    @Test
     void sameTextRepeatedMergesAndDifferentTextFails() throws IOException {
         assertEquals(Map.of("a", "x", "b", "y"),
                 merge(List.of(fragment("{\"b\": \"y\", \"a\": \"x\"}"), fragment("{\"a\": \"x\"}"))));

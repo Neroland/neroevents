@@ -364,6 +364,7 @@ normal mob rules (`mobGriefing`, claim mob protection).
 | --- | --- | --- | --- |
 | `waves` | **required**, 1..8 waves | — | Each wave: `mobs` (1..16 entries of `{ "type": <entity id>, "count": 1..32 }`), optional `delay_ticks` 0..6000 (default 0) before it starts, optional `timeout_ticks` 600..12000 (default 4800). Unregistered mob types are ignored (warned). |
 | `scale_per_online` | 0.0..1.0 | `0.25` | Extra mobs per online player, as a share of the wave. |
+| `solo_scale` | 0.25..1.0 | `0.6` | With one player (or none) in the event's dimension, every count is multiplied by this instead (rounded, at least 1 per entry), so a lone player meets a smaller wave. |
 | `max_per_wave` | 1..64 | `24` | Cap on one wave after scaling. |
 | `spawn_radius_min` | 8..64 | `16` | Closest spawn distance from the anchor. |
 | `spawn_radius_max` | 8..64 | `28` | Furthest spawn distance (swapped with the minimum if lower, warned). |
@@ -392,7 +393,7 @@ normal mob rules (`mobGriefing`, claim mob protection).
   "calm_exempt": false,
   "location_public": false,
   "conditions": {
-    "min_online": 2,
+    "min_online": 1,
     "requires_mods": ["nerocreatures"]
   },
   "bounds": { "kind": "target", "radius": 64, "fallback_to_density": true },

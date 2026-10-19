@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import za.co.neroland.neroevents.event.EventConditions.ConditionResult;
 import za.co.neroland.neroevents.event.persist.EventEngineState;
+import za.co.neroland.neroevents.event.world.SinglePlayer;
 import za.co.neroland.neroevents.event.world.WorldView;
 
 /**
@@ -30,7 +31,7 @@ public final class EventScheduler {
 
     /** Every rule, in the order it is checked; the first failing code is what preview and list show. */
     public static final List<String> RULES = List.of("disabled", "request_only", "payload_missing", "kill_switch",
-            "calm_window", "consent_admin", "cooldown", "band_cap", "type_cap", "conditions", "boss_dimension_cap",
+            "calm_window", "first_event", "consent_admin", "cooldown", "band_cap", "type_cap", "conditions", "boss_dimension_cap",
             "preflight");
 
     private EventScheduler() {
@@ -109,6 +110,7 @@ public final class EventScheduler {
             case "payload_missing" -> def.payloadType() == null || PayloadTypes.get(def.type()).isEmpty();
             case "kill_switch" -> killSwitch(def, s).isPresent();
             case "calm_window" -> snap.calmWindow() && !def.calmExempt();
+            case "first_event" -> snap.firstEventHold();
             case "consent_admin" -> snap.effectiveConsent() == ConsentMode.ADMIN;
             case "cooldown" -> snap.cooldownUntil().getOrDefault(def.id(), Long.MIN_VALUE) > snap.now();
             case "band_cap" -> bandCapReached(snap, s);
@@ -201,10 +203,20 @@ public final class EventScheduler {
         return pick(weights, rng).orElse(candidates.get(0));
     }
 
-    /** {@code now + max(globalCooldown, round(base × multiplier × (1 + jitter)))}. */
+    /** {@code now + max(globalCooldown, round(base × multiplier × (1 + jitter)))}, with the band's multiplier. */
     public static long nextRollAt(long now, EngineSettings s, PopulationBand band, RandomGenerator rng) {
+        return nextRollAt(now, s, band, false, rng);
+    }
+
+    /**
+     * As above; while alone in a single-player world (and single-player pacing is on) the multiplier is
+     * {@code singlePlayerIntervalMultiplier} instead of the band's.
+     */
+    public static long nextRollAt(long now, EngineSettings s, PopulationBand band, boolean singlePlayer,
+            RandomGenerator rng) {
+        double multiplier = s.soloPacing(singlePlayer) ? s.singlePlayerIntervalMultiplier : band.intervalMultiplier();
         double jitter = rng.nextDouble() * 2.0D * s.schedulerJitterFraction - s.schedulerJitterFraction;
-        long interval = Math.round(s.schedulerBaseIntervalTicks * band.intervalMultiplier() * (1.0D + jitter));
+        long interval = Math.round(s.schedulerBaseIntervalTicks * multiplier * (1.0D + jitter));
         return now + Math.max(s.schedulerGlobalCooldownTicks, interval);
     }
 
@@ -224,6 +236,8 @@ public final class EventScheduler {
         int online = world.onlinePlayers();
         PopulationBand band = bands.bandFor(online);
         boolean dedicated = world.isDedicatedServer();
+        boolean singlePlayer = SinglePlayer.is(world);
+        boolean firstEventHold = s.soloPacing(singlePlayer) && now < s.singlePlayerFirstEventTicks();
         ConsentMode consent = ConsentMode.effective(s.consentMode, s.consentVotingEnabled, dedicated, online);
         List<Identifier> dimensions = List.copyOf(world.loadedDimensions());
         Map<Identifier, Long> dayTimes = new HashMap<>();
@@ -271,7 +285,8 @@ public final class EventScheduler {
                 bossPerDimension.merge(instance.dimension(), 1, Integer::sum);
             }
         }
-        return new SchedulerSnapshot(now, online, band, now < s.calmWindowTicks(), consent, dedicated,
+        return new SchedulerSnapshot(now, online, band, now < s.calmWindowTicks(singlePlayer), consent, dedicated,
+                singlePlayer, firstEventHold,
                 Map.copyOf(world.onlinePlayersPerDimension()), dimensions, Map.copyOf(dayTimes), Map.copyOf(holders),
                 Map.copyOf(tagMembers), Set.copyOf(loadedMods), Map.copyOf(byCategory), Map.copyOf(bossPerDimension),
                 active, state.lastFiredAt(), state.cooldowns(), state.reweights(), remainingDailyBudget);

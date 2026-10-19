@@ -31,7 +31,7 @@ class AnchorPickerTest {
 
     private static AnchorPicker.Result pick(FakeWorldView world, ProtectionQuery protection, long seed) {
         return AnchorPicker.pick(world, protection, FakeWorldView.OVERWORLD,
-                a -> Footprint.point(FakeWorldView.OVERWORLD, a), seed, CELL, 16, 4);
+                a -> Footprint.point(FakeWorldView.OVERWORLD, a), seed, CELL, 16, 4, 0);
     }
 
     /** Two dense cells far apart (no shared neighbours), all chunks loaded. */
@@ -49,7 +49,7 @@ class AnchorPickerTest {
         for (long seed = 0; seed < 20; seed++) {
             // Enough cell rolls to visit every candidate cell, so the denied cluster cannot exhaust them.
             AnchorPicker.Result result = AnchorPicker.pick(world, query, FakeWorldView.OVERWORLD,
-                    a -> Footprint.point(FakeWorldView.OVERWORLD, a), seed, CELL, 16, 18);
+                    a -> Footprint.point(FakeWorldView.OVERWORLD, a), seed, CELL, 16, 18, 0);
             AnchorPicker.Found found = assertInstanceOf(AnchorPicker.Found.class, result, "seed " + seed);
             assertTrue(found.anchor().getX() >= 9 * CELL && found.anchor().getZ() >= 9 * CELL, "seed " + seed);
         }
@@ -99,7 +99,7 @@ class AnchorPickerTest {
         int founds = 0;
         for (long seed = 0; seed < 64; seed++) {
             AnchorPicker.Result result = AnchorPicker.pick(world, new ProtectionQuery(List.of()),
-                    FakeWorldView.OVERWORLD, a -> Footprint.point(FakeWorldView.OVERWORLD, a), seed, CELL, 64, 16);
+                    FakeWorldView.OVERWORLD, a -> Footprint.point(FakeWorldView.OVERWORLD, a), seed, CELL, 64, 16, 0);
             if (result instanceof AnchorPicker.Found found) {
                 founds++;
                 assertEquals(0, found.anchor().getX() >> 4, "seed " + seed);
@@ -127,6 +127,34 @@ class AnchorPickerTest {
         FakeWorldView world = twoCells();
         pick(world, new ProtectionQuery(List.of()), 1L);
         assertEquals(1, world.densityCalls);
+    }
+
+    @Test
+    void anchorsKeepTheStandOffFromPlayers() {
+        // Small cells so the stand-off circle covers a good share of the candidate area.
+        int cell = 32;
+        FakeWorldView world = new FakeWorldView().allChunksLoaded(FakeWorldView.OVERWORLD)
+                .playerAt(FakeWorldView.OVERWORLD, 100, 100);
+        ProtectionQuery open = new ProtectionQuery(List.of());
+        boolean insideWithoutStandOff = false;
+        for (long n = 0; n < 50; n++) {
+            // Spread seeds: consecutive small seeds give java.util.Random near-identical first draws.
+            long seed = n * 0x9E3779B97F4A7C15L;
+            AnchorPicker.Result result = AnchorPicker.pick(world, open, FakeWorldView.OVERWORLD,
+                    a -> Footprint.point(FakeWorldView.OVERWORLD, a), seed, cell, 16, 4, 24);
+            AnchorPicker.Found found = assertInstanceOf(AnchorPicker.Found.class, result, "seed " + seed);
+            int distance = Math.max(Math.abs(found.anchor().getX() - 100), Math.abs(found.anchor().getZ() - 100));
+            assertTrue(distance > 24, "seed " + seed + " landed " + distance + " blocks from the player");
+
+            AnchorPicker.Found off = (AnchorPicker.Found) AnchorPicker.pick(world, open, FakeWorldView.OVERWORLD,
+                    a -> Footprint.point(FakeWorldView.OVERWORLD, a), seed, cell, 16, 4, 0);
+            if (Math.max(Math.abs(off.anchor().getX() - 100), Math.abs(off.anchor().getZ() - 100)) <= 24) {
+                insideWithoutStandOff = true;
+            }
+        }
+        assertTrue(insideWithoutStandOff, "with the stand-off off, some seed lands inside the circle");
+        assertEquals(1, world.playersWithinBlocks(FakeWorldView.OVERWORLD, 110, 90, 24));
+        assertEquals(0, world.playersWithinBlocks(FakeWorldView.OVERWORLD, 125, 100, 24));
     }
 
     @Test

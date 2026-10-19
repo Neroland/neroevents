@@ -172,7 +172,8 @@ The player data described under [Player data](#player-data) is kept by the serve
 sent to the NeroEvents developers. It is processed so the server can run its events fairly (pay each
 participant once, let them see and claim what they earned), on the same legitimate-interest basis,
 with the shortest retention that does the job. The server operator is responsible for it; the
-commands above let you see it, export it, limit it and erase it yourself.
+commands above let you see it, export it, limit it and erase it yourself. In a single-player world the
+"server operator" is you; the export file is written into your world's folder.
 
 To exercise any data-subject right (access, deletion, objection), contact
 **[info@neroland.co.za](mailto:info@neroland.co.za)** — for a crash report, include the

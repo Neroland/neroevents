@@ -81,7 +81,7 @@ class WavePayloadTest {
     }
 
     private static WavePayloadBase.Config config(int spawnPerTick, WaveTable.Wave... waves) {
-        return new WavePayloadBase.Config(List.of(waves), 0.0D, 24, 16, 28, spawnPerTick, 0.5D, true, false);
+        return new WavePayloadBase.Config(List.of(waves), 0.0D, 1.0D, 24, 16, 28, spawnPerTick, 0.5D, true, false);
     }
 
     private TickResult tick(WavePayloadBase.Config config, WavePayloadBase.State state) {
@@ -306,8 +306,8 @@ class WavePayloadTest {
 
     @Test
     void validateWarnsOnReservedBlockDamageAndUnknownTypes() {
-        WavePayloadBase.Config config = new WavePayloadBase.Config(List.of(wave(GHOST, 2, 0, 600)), 0.25D, 24, 30, 20,
-                2, 0.5D, true, true);
+        WavePayloadBase.Config config = new WavePayloadBase.Config(List.of(wave(GHOST, 2, 0, 600)), 0.25D, 1.0D, 24, 30,
+                20, 2, 0.5D, true, true);
         List<String> warnings = payload.validate(config);
         assertEquals(3, warnings.size(), warnings.toString());
         assertTrue(warnings.get(0).contains("never break blocks"));

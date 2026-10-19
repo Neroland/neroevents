@@ -9,6 +9,8 @@ rules. (The modes themselves are described in [How events work](Events.md#consen
   If more than one vote is open, add the event's id.
 - One vote per player. Voting again changes your vote. Someone who joins during the countdown may vote.
 - Events started by an operator, consent-exempt events and single-player worlds never vote.
+- In a single-player world (one player on an integrated server) consent is always off, whatever
+  `consentMode` says; it comes back when a second player joins over LAN.
 
 ## How the vote is decided
 

@@ -20,7 +20,8 @@ import za.co.neroland.neroevents.protect.ProtectionResult;
 /**
  * The deterministic, protection-aware anchor picker. It rolls a density cell by weight, then tries
  * uniformly random columns inside it; each column must be in a loaded chunk, have a surface, and clear
- * the protection query for the payload's whole footprint. Spawn protection, exclusion zones, the station
+ * the protection query for the payload's whole footprint, and no player may stand within the stand-off
+ * distance of it (a count from the world view, never a position). Spawn protection, exclusion zones, the station
  * dimension and the namespace guard all apply because they are protection sources.
  *
  * <p>Guarantees: never reads a player position (the world view has none), never loads a chunk, and the
@@ -45,7 +46,7 @@ public final class AnchorPicker {
 
     public static Result pick(WorldView world, ProtectionQuery protection, Identifier dimension,
             Function<BlockPos, Footprint> footprint, long seed, int cellBlocks, int attemptsPerCell,
-            int maxCellRolls) {
+            int maxCellRolls, int minPlayerDistanceBlocks) {
         Random rng = new Random(seed);
         DensityCells density = DensityCells.of(world, dimension, cellBlocks);
         if (density.isEmpty()) {
@@ -67,6 +68,10 @@ public final class AnchorPicker {
                 }
                 OptionalInt y = world.surfaceY(dimension, x, z);
                 if (y.isEmpty()) {
+                    continue;
+                }
+                if (minPlayerDistanceBlocks > 0
+                        && world.playersWithinBlocks(dimension, x, z, minPlayerDistanceBlocks) > 0) {
                     continue;
                 }
                 BlockPos anchor = new BlockPos(x, y.getAsInt(), z);

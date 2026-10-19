@@ -75,8 +75,17 @@ public final class WaveTable {
      */
     public static List<Planned> scaled(Wave wave, int onlineInDimension, double scalePerOnline, int maxPerWave,
             Predicate<Identifier> known) {
+        return scaled(wave, onlineInDimension, scalePerOnline, 1.0D, maxPerWave, known);
+    }
+
+    /**
+     * As above, with a separate factor for a lone player: with one player (or none) in the dimension every
+     * count is multiplied by {@code soloScale} instead of 1.0.
+     */
+    public static List<Planned> scaled(Wave wave, int onlineInDimension, double scalePerOnline, double soloScale,
+            int maxPerWave, Predicate<Identifier> known) {
         int online = Math.max(1, onlineInDimension);
-        double factor = 1.0D + Math.max(0.0D, scalePerOnline) * (online - 1);
+        double factor = online <= 1 ? soloScale : 1.0D + Math.max(0.0D, scalePerOnline) * (online - 1);
         List<Identifier> types = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
         for (MobEntry entry : wave.mobs()) {

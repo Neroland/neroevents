@@ -31,6 +31,8 @@ public final class NeroEventsFabric implements ModInitializer {
         // The creative gallery's station loops and demo (no-op without a gallery session); dropped on stop.
         ServerTickEvents.END_SERVER_TICK.register(GalleryShowcase::tick);
         ServerLifecycleEvents.SERVER_STOPPING.register(GalleryShowcase::onServerStopping);
+        // Running events save their resumable state when the server (or a single-player world) closes.
+        ServerLifecycleEvents.SERVER_STOPPING.register(EventEngine::onServerStopping);
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 EventCommands.register(dispatcher));
         // Event-entity damage (raid waves, the boss): observed after it was applied; one map lookup otherwise.

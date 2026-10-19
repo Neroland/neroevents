@@ -29,6 +29,19 @@ public final class ConsoleText {
         return key != null && !key.isEmpty() && Language.getInstance().has(key);
     }
 
+    /**
+     * The single-player wording of a key: {@code key + ".solo"} when the viewer is alone in their own world
+     * and the language has that variant, else the key.
+     */
+    public static String solo(String key, boolean single) {
+        return solo(key, single, ConsoleText::has);
+    }
+
+    /** {@link #solo(String, boolean)} against any key lookup (plain-JVM tests). */
+    public static String solo(String key, boolean single, java.util.function.Predicate<String> exists) {
+        return single && exists.test(key + ".solo") ? key + ".solo" : key;
+    }
+
     /** "Cindara", "the Overworld", "the Nether". */
     public static String dimensionName(Identifier dimension) {
         if (dimension == null) {

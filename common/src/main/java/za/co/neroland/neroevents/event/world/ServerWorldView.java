@@ -121,6 +121,21 @@ public final class ServerWorldView implements WorldView {
     }
 
     @Override
+    public int playersWithinBlocks(Identifier dimension, int x, int z, int blocks) {
+        int count = 0;
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            if (!player.level().dimension().identifier().equals(dimension)) {
+                continue;
+            }
+            BlockPos pos = player.blockPosition();
+            if (Math.max(Math.abs(pos.getX() - x), Math.abs(pos.getZ() - z)) <= blocks) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    @Override
     public boolean isChunkLoaded(Identifier dimension, int chunkX, int chunkZ) {
         ServerLevel level = level(dimension);
         return level != null && level.getChunkSource().getChunkNow(chunkX, chunkZ) != null;

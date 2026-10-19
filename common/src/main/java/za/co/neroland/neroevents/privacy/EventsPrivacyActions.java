@@ -10,6 +10,7 @@ import net.minecraft.server.MinecraftServer;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
 import za.co.neroland.neroevents.event.EventEngine;
+import za.co.neroland.neroevents.event.world.SinglePlayer;
 import za.co.neroland.neroevents.reward.CrateEntry;
 import za.co.neroland.neroevents.reward.RewardConfig;
 import za.co.neroland.neroevents.reward.RewardCrateState;
@@ -45,11 +46,22 @@ public final class EventsPrivacyActions {
         return store.set(player, false) ? "privacy.neroevents.optin.done" : "privacy.neroevents.optin.already";
     }
 
+    /** The single-player wording of a message key: {@code key + ".solo"} in a single-player world, else the key. */
+    public static String solo(MinecraftServer server, String key) {
+        return SinglePlayer.is(server) ? key + ".solo" : key;
+    }
+
+    /** A message key with any single-player suffix removed (for code that switches on the base key). */
+    public static String baseKey(String key) {
+        return key.endsWith(".solo") ? key.substring(0, key.length() - ".solo".length()) : key;
+    }
+
     // --- actions ------------------------------------------------------------------------------------------
 
     public static Component optOut(MinecraftServer server, UUID player) {
         RewardConfig cfg = RewardConfig.fromConfig();
-        return Component.translatable(optOutKey(PrivacyOptOuts.get(server), player), cfg.ledgerDays());
+        String key = optOutKey(PrivacyOptOuts.get(server), player);
+        return Component.translatable(key.endsWith(".done") ? solo(server, key) : key, cfg.ledgerDays());
     }
 
     public static Component optIn(MinecraftServer server, UUID player) {
@@ -66,7 +78,7 @@ public final class EventsPrivacyActions {
             waitingStacks = engine.crates().get().waitingStacks(player);
         }
         if (!cfg.rewardLedgerEnabled) {
-            return Component.translatable("privacy.neroevents.status.disabled");
+            return Component.translatable(solo(server, "privacy.neroevents.status.disabled"));
         }
         if (PrivacyOptOuts.get(server).isOptedOut(player)) {
             return Component.translatable("privacy.neroevents.status.out", waitingStacks);
@@ -97,7 +109,7 @@ public final class EventsPrivacyActions {
             String path = PrivacyExport.write(PrivacyExport.directory(server), player,
                     PrivacyExport.build(player, RewardLedgerState.get(server).rowsFor(player), crate, settings, live,
                             now));
-            return Component.translatable("privacy.neroevents.export.done", path);
+            return Component.translatable(solo(server, "privacy.neroevents.export.done"), path);
         } catch (IOException | RuntimeException failure) {
             COOLDOWN.refund(player);
             // The real message holds the UUID-named path: report the exception class only.

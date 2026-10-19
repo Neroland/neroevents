@@ -100,7 +100,8 @@ public abstract class WavePayloadBase implements PayloadType<WavePayloadBase.Con
     // --- config -------------------------------------------------------------------------------
 
     /** The {@code payload} object of a raid or invasion definition (snake_case keys). */
-    public record Config(List<WaveTable.Wave> waves, double scalePerOnline, int maxPerWave, int spawnRadiusMin,
+    public record Config(List<WaveTable.Wave> waves, double scalePerOnline, double soloScale, int maxPerWave,
+            int spawnRadiusMin,
             int spawnRadiusMax, int spawnPerTick, double successKillFraction, boolean survivalCredit,
             boolean blockDamage) implements PayloadConfig {
 
@@ -111,6 +112,7 @@ public abstract class WavePayloadBase implements PayloadType<WavePayloadBase.Con
         public static final MapCodec<Config> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 WaveTable.sized(WaveTable.Wave.CODEC.listOf(), 1, 8, "waves").fieldOf("waves").forGetter(Config::waves),
                 Codec.doubleRange(0.0D, 1.0D).optionalFieldOf("scale_per_online", 0.25D).forGetter(Config::scalePerOnline),
+                Codec.doubleRange(0.25D, 1.0D).optionalFieldOf("solo_scale", 0.6D).forGetter(Config::soloScale),
                 Codec.intRange(1, 64).optionalFieldOf("max_per_wave", 24).forGetter(Config::maxPerWave),
                 Codec.intRange(8, 64).optionalFieldOf("spawn_radius_min", 16).forGetter(Config::spawnRadiusMin),
                 Codec.intRange(8, 64).optionalFieldOf("spawn_radius_max", 28).forGetter(Config::spawnRadiusMax),
@@ -409,8 +411,8 @@ public abstract class WavePayloadBase implements PayloadType<WavePayloadBase.Con
     private void beginWave(PayloadContext ctx, CreatureWorld world, Config config, State state) {
         WaveTable.Wave wave = config.waves().get(state.waveIndex);
         int online = ctx.world().onlinePlayersPerDimension().getOrDefault(ctx.dimension(), 0);
-        List<WaveTable.Planned> plan = WaveTable.scaled(wave, online, config.scalePerOnline(), config.maxPerWave(),
-                knownTypes);
+        List<WaveTable.Planned> plan = WaveTable.scaled(wave, online, config.scalePerOnline(), config.soloScale(),
+                config.maxPerWave(), knownTypes);
         int budget = WaveTable.total(plan);
         state.handle = budget > 0 ? world.reserveWave(budget) : null;
         state.toPlace.clear();

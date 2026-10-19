@@ -34,6 +34,7 @@ public final class FakeWorldView implements WorldView {
     private final Map<Identifier, Integer> gates = new HashMap<>();
     private final Set<String> mods = new HashSet<>();
     private final Map<Identifier, Map<Long, Integer>> density = new HashMap<>();
+    private final Map<Identifier, List<int[]>> players = new HashMap<>();
     private final Map<Identifier, Set<Long>> loadedChunks = new HashMap<>();
     private final Set<Identifier> allChunksLoaded = new HashSet<>();
     private final Map<Identifier, Integer> surface = new HashMap<>();
@@ -86,6 +87,17 @@ public final class FakeWorldView implements WorldView {
     /** Puts {@code players} into one density cell (any cell size the caller later asks for). */
     public FakeWorldView denseCell(Identifier dimension, int cellX, int cellZ, int players) {
         density.computeIfAbsent(dimension, d -> new HashMap<>()).put(DensityCells.pack(cellX, cellZ), players);
+        return this;
+    }
+
+    /**
+     * A test-only player standing at column ({@code x}, {@code z}): it counts in {@link #densityCells} (in
+     * the cell of whatever size is asked for) and in {@link #playersWithinBlocks}. It does not change the
+     * online counts; set those with {@link #online}.
+     */
+    public FakeWorldView playerAt(Identifier dimension, int x, int z) {
+        dimension(dimension);
+        players.computeIfAbsent(dimension, d -> new ArrayList<>()).add(new int[] {x, z});
         return this;
     }
 
@@ -173,7 +185,22 @@ public final class FakeWorldView implements WorldView {
     @Override
     public Map<Long, Integer> densityCells(Identifier dimension, int cellBlocks) {
         densityCalls++;
-        return Map.copyOf(density.getOrDefault(dimension, Map.of()));
+        Map<Long, Integer> out = new HashMap<>(density.getOrDefault(dimension, Map.of()));
+        for (int[] p : players.getOrDefault(dimension, List.of())) {
+            out.merge(DensityCells.cellOf(p[0], p[1], cellBlocks), 1, Integer::sum);
+        }
+        return Map.copyOf(out);
+    }
+
+    @Override
+    public int playersWithinBlocks(Identifier dimension, int x, int z, int blocks) {
+        int count = 0;
+        for (int[] p : players.getOrDefault(dimension, List.of())) {
+            if (Math.max(Math.abs(p[0] - x), Math.abs(p[1] - z)) <= blocks) {
+                count++;
+            }
+        }
+        return count;
     }
 
     @Override

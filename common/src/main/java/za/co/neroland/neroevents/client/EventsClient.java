@@ -55,6 +55,16 @@ public final class EventsClient {
         *///?}
     }
 
+    /**
+     * Whether this client is alone in its own world: an integrated server with at most one player online (the
+     * server-side single-player rule, run on the client's own server). False on a dedicated connection.
+     */
+    public static boolean singlePlayer() {
+        Minecraft mc = Minecraft.getInstance();
+        var integrated = mc.getSingleplayerServer();
+        return integrated != null && integrated.getPlayerCount() <= 1;
+    }
+
     /** The key's current binding, for tooltips ("Press H to hide…"). */
     public static Component dismissKeyName() {
         return DISMISS_HUD.getTranslatedKeyMessage();

@@ -109,7 +109,7 @@ class MarketShockPayloadTest {
 
     private static SchedulerSnapshot snapshot(Set<String> mods) {
         return new SchedulerSnapshot(0L, 1, new PopulationBand("0-1", 0, 1, 1.0D, 1), false, ConsentMode.values()[0],
-                true, Map.of(), List.of(), Map.of(), Map.of(), Map.of(), mods, Map.of(), Map.of(), 0, 0L, Map.of(),
+                true, false, false, Map.of(), List.of(), Map.of(), Map.of(), Map.of(), mods, Map.of(), Map.of(), 0, 0L, Map.of(),
                 Map.of(), Long.MAX_VALUE);
     }
 

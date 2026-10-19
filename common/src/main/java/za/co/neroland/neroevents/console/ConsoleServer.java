@@ -40,6 +40,7 @@ import za.co.neroland.neroevents.event.EventInstance;
 import za.co.neroland.neroevents.event.EventPhase;
 import za.co.neroland.neroevents.event.EventView;
 import za.co.neroland.neroevents.event.VoteTally;
+import za.co.neroland.neroevents.event.world.SinglePlayer;
 import za.co.neroland.neroevents.history.EventHistoryState;
 import za.co.neroland.neroevents.history.HistoryEntry;
 import za.co.neroland.neroevents.network.EventNetwork;
@@ -274,7 +275,7 @@ public final class ConsoleServer {
             }
         }
 
-        boolean single = !server.isDedicatedServer() && server.getPlayerCount() <= 1;
+        boolean single = SinglePlayer.is(server);
         return new ConsoleSnapshot(liveRows, soonRows, past, isOperator(player), (byte) consent.ordinal(), single,
                 items, xp, player.getInventory().getFreeSlot() >= 0, menu.claimedHere(), cfg.rewardLedgerEnabled,
                 optedOut, cfg.ledgerDays(), cfg.crateDays(), ledger, ok, key, arg);
@@ -438,11 +439,12 @@ public final class ConsoleServer {
             case OPT_OUT -> EventsPrivacyActions.optOut(server, viewer);
             case OPT_IN -> EventsPrivacyActions.optIn(server, viewer);
         };
-        String key = answer.getContents() instanceof TranslatableContents t ? t.getKey() : "";
+        String key = answer.getContents() instanceof TranslatableContents t
+                ? EventsPrivacyActions.baseKey(t.getKey()) : "";
         switch (key) {
             // The command's export line names the file, whose name carries the player's id: never on a screen.
             case "privacy.neroevents.export.done" -> sendSnapshot(player, menu, true,
-                    "console.neroevents.privacy.export_done", "");
+                    EventsPrivacyActions.solo(server, "console.neroevents.privacy.export_done"), "");
             case "privacy.neroevents.export.cooldown" -> sendSnapshot(player, menu, false,
                     "console.neroevents.privacy.export_wait", firstArg(answer));
             case "privacy.neroevents.export.failed" -> sendSnapshot(player, menu, false,

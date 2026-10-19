@@ -239,6 +239,18 @@ class BudgetedRewardResolverTest {
     }
 
     @Test
+    void aLoneParticipantTakesTheWholeLineAndTheRankOneBonus() {
+        RewardHarness h = new RewardHarness();
+        EventDefinition def = TestInstances.definition("solo_bonus", "reward", "{\"budget\":10000,"
+                + "\"lines\":[{\"kind\":\"currency\",\"amount\":10}],\"top_bonus\":[{\"kind\":\"currency\",\"rank\":1,"
+                + "\"amount\":50}]}");
+        EventInstance instance = h.instance(def, EventOutcome.SUCCESS);
+        damage(instance, 10);
+        h.resolve(instance);
+        assertEquals(60L, h.sinks.currency.get(id(1)), "the whole main line + the rank-1 bonus");
+    }
+
+    @Test
     void aThrowingSinkOnlyLosesThatLine() {
         RewardHarness h = new RewardHarness();
         h.sinks.throwOnXp = true;

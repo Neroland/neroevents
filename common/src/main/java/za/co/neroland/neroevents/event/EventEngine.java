@@ -36,6 +36,7 @@ import za.co.neroland.neroevents.event.persist.InstanceRecord;
 import za.co.neroland.neroevents.event.reward.EventHistorySink;
 import za.co.neroland.neroevents.event.reward.RewardResolver;
 import za.co.neroland.neroevents.event.world.ServerWorldView;
+import za.co.neroland.neroevents.event.world.SinglePlayer;
 import za.co.neroland.neroevents.event.world.WorldView;
 import za.co.neroland.neroevents.history.EventHistoryState;
 import za.co.neroland.neroevents.history.PersistentHistorySink;
@@ -172,6 +173,25 @@ public final class EventEngine {
     public static void onSchedulerPass(Consumer<MinecraftServer> hook) {
         if (hook != null) {
             PASS_HOOKS.add(hook);
+        }
+    }
+
+    /**
+     * Loader hook: the server is stopping (in single-player, the world is closing). Saves the running
+     * events' resumable state so nothing since the last periodic save is lost.
+     */
+    public static void onServerStopping(MinecraftServer server) {
+        EventEngine engine = current;
+        if (engine == null || engine.server != server) {
+            return;
+        }
+        try {
+            engine.refreshPayloadStates();
+            engine.persist();
+        } catch (RuntimeException | LinkageError failure) {
+            NeroEventsTelemetry.captureHandledException(failure, "engine", "server_stopping");
+            NeroEventsCommon.LOGGER.warn("[NeroEvents] Saving running events on shutdown failed ({}).",
+                    failure.getClass().getName());
         }
     }
 
@@ -565,6 +585,12 @@ public final class EventEngine {
 
     private void roll(long now, Map<Identifier, EventDefinition> defs) {
         SchedulerSnapshot snap = snapshot(now, defs);
+        if (snap.firstEventHold()) {
+            // Single-player first-event delay: wait for the exact configured minute without touching the
+            // random sequence, so the rolls after the hold are the same as without it.
+            state.setNextRollAt(settings.singlePlayerFirstEventTicks());
+            return;
+        }
         Map<Identifier, Eligibility> eligible = new TreeMap<>();
         Map<Identifier, Integer> weights = new TreeMap<>();
         for (EventDefinition def : new TreeMap<>(defs).values()) {
@@ -583,7 +609,7 @@ public final class EventEngine {
         Identifier dimension = EventScheduler.pickDimension(eligible.get(def.id()).candidateDimensions(),
                 snap.onlinePerDimension(), random);
         createInstance(def, dimension, EventOrigin.SCHEDULER, null, now);
-        state.setNextRollAt(EventScheduler.nextRollAt(now, settings, snap.band(), random));
+        state.setNextRollAt(EventScheduler.nextRollAt(now, settings, snap.band(), snap.singlePlayer(), random));
     }
 
     // --- creation and requests ------------------------------------------------------------------------
@@ -731,7 +757,7 @@ public final class EventEngine {
             return new Creation(instance, failure, detail);
         }
         state.setLastFiredAt(now);
-        state.setCooldownUntil(def.id(), now + def.cooldownTicks());
+        state.setCooldownUntil(def.id(), now + cooldownTicks(def));
         live.add(instance);
         logPhase(instance, "(new)", EventPhase.SCHEDULED, null);
         publish(instance, EventSignal.Kind.SCHEDULED, now);
@@ -776,7 +802,7 @@ public final class EventEngine {
         long start = System.nanoTime();
         AnchorPicker.Result result = AnchorPicker.pick(world, protection, dimension,
                 a -> type.footprint(def, config, dimension, a), seed, settings.anchorDensityCellBlocks,
-                settings.anchorAttemptsPerCell, settings.anchorMaxCellRolls);
+                settings.anchorAttemptsPerCell, settings.anchorMaxCellRolls, settings.anchorMinPlayerDistanceBlocks);
         metrics.anchorNanos(System.nanoTime() - start);
         return result;
     }
@@ -1063,7 +1089,13 @@ public final class EventEngine {
     }
 
     private void halveCooldown(EventDefinition def, long now) {
-        state.setCooldownUntil(def.id(), now + def.cooldownTicks() / 2L);
+        state.setCooldownUntil(def.id(), now + cooldownTicks(def) / 2L);
+    }
+
+    /** The definition's cooldown, shortened by {@code singlePlayerCooldownMultiplier} while alone in single-player. */
+    private long cooldownTicks(EventDefinition def) {
+        boolean solo = settings.soloPacing(SinglePlayer.is(world));
+        return solo ? Math.round(def.cooldownTicks() * settings.singlePlayerCooldownMultiplier) : def.cooldownTicks();
     }
 
     private void change(EventInstance instance, EventPhase to, long now, @Nullable String reason) {

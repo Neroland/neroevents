@@ -23,7 +23,11 @@ counts.
 
 ## How it works
 
-- There are three waves; each one is scaled by the number of players online, up to a cap per wave.
+- There are three waves; each one is scaled by the number of players online, up to a cap per wave. With
+  two players the waves are 5 pirates and 3 drones, 6 and 4, then 5 pirates, 3 androids and 3 drones.
+- Alone on the planet the waves are about 60 % of the listed size (`solo_scale`): 2 pirates and a drone,
+  then 3 and 2, then 2 pirates, an android and a drone. A pirate raid needs only one player, so it also
+  comes to a single-player world.
 - Creatures spawn on a ring around the target, and every spawn spot is protection-checked first: no
   raider appears inside a claim, a colony, an exclusion zone or the spawn area.
 - A wave ends when all its creatures are dead or its time runs out; survivors simply vanish (no loot).

@@ -32,6 +32,11 @@ public final class EngineSettings {
     public int maxConcurrentBossEvents = 1;
     public int maxConcurrentInvasions = 1;
     public int maxConcurrentRaids = 1;
+    public boolean singlePlayerPacing = true;
+    public int singlePlayerFirstEventMinutes = 8;
+    public int singlePlayerCalmWindowMinutes = 30;
+    public double singlePlayerIntervalMultiplier = 1.0D;
+    public double singlePlayerCooldownMultiplier = 0.5D;
     public ConsentMode consentMode = ConsentMode.OFF;
     public boolean consentVotingEnabled = true;
     public int voteQuorumPlayers = 2;
@@ -50,6 +55,7 @@ public final class EngineSettings {
     public int anchorDensityCellBlocks = 256;
     public int anchorAttemptsPerCell = 16;
     public int anchorMaxCellRolls = 4;
+    public int anchorMinPlayerDistanceBlocks = 24;
     public int instanceRetainTicks = 1200;
     public int resumableSaveIntervalTicks = 200;
 
@@ -96,6 +102,11 @@ public final class EngineSettings {
         s.maxConcurrentBossEvents = NeroEventsConfig.MAX_CONCURRENT_BOSS_EVENTS.get();
         s.maxConcurrentInvasions = NeroEventsConfig.MAX_CONCURRENT_INVASIONS.get();
         s.maxConcurrentRaids = NeroEventsConfig.MAX_CONCURRENT_RAIDS.get();
+        s.singlePlayerPacing = NeroEventsConfig.SINGLE_PLAYER_PACING.get();
+        s.singlePlayerFirstEventMinutes = NeroEventsConfig.SINGLE_PLAYER_FIRST_EVENT_MINUTES.get();
+        s.singlePlayerCalmWindowMinutes = NeroEventsConfig.SINGLE_PLAYER_CALM_WINDOW_MINUTES.get();
+        s.singlePlayerIntervalMultiplier = NeroEventsConfig.SINGLE_PLAYER_INTERVAL_MULTIPLIER.get();
+        s.singlePlayerCooldownMultiplier = NeroEventsConfig.SINGLE_PLAYER_COOLDOWN_MULTIPLIER.get();
         ConsentMode mode = ConsentMode.parse(NeroEventsConfig.CONSENT_MODE.get());
         s.consentModeInvalid = mode == null;
         s.consentMode = mode == null ? ConsentMode.OFF : mode;
@@ -116,6 +127,7 @@ public final class EngineSettings {
         s.anchorDensityCellBlocks = NeroEventsConfig.ANCHOR_DENSITY_CELL_BLOCKS.get();
         s.anchorAttemptsPerCell = NeroEventsConfig.ANCHOR_ATTEMPTS_PER_CELL.get();
         s.anchorMaxCellRolls = NeroEventsConfig.ANCHOR_MAX_CELL_ROLLS.get();
+        s.anchorMinPlayerDistanceBlocks = NeroEventsConfig.ANCHOR_MIN_PLAYER_DISTANCE_BLOCKS.get();
         s.instanceRetainTicks = NeroEventsConfig.INSTANCE_RETAIN_TICKS.get();
         s.resumableSaveIntervalTicks = NeroEventsConfig.RESUMABLE_SAVE_INTERVAL_TICKS.get();
         s.meteorBlockDamage = NeroEventsConfig.METEOR_BLOCK_DAMAGE.get();
@@ -163,5 +175,25 @@ public final class EngineSettings {
     /** The calm window in ticks of overworld game time. */
     public long calmWindowTicks() {
         return calmWindowHours * 72000L;
+    }
+
+    /** The single-player first-event delay in ticks of overworld game time. */
+    public long singlePlayerFirstEventTicks() {
+        return singlePlayerFirstEventMinutes * 1200L;
+    }
+
+    /** The single-player calm window in ticks of overworld game time. */
+    public long singlePlayerCalmWindowTicks() {
+        return singlePlayerCalmWindowMinutes * 1200L;
+    }
+
+    /** The calm window that applies: the single-player one while alone (and pacing is on), else calmWindowHours. */
+    public long calmWindowTicks(boolean singlePlayer) {
+        return singlePlayer && singlePlayerPacing ? singlePlayerCalmWindowTicks() : calmWindowTicks();
+    }
+
+    /** Whether single-player pacing is in force for this pass. */
+    public boolean soloPacing(boolean singlePlayer) {
+        return singlePlayer && singlePlayerPacing;
     }
 }

@@ -71,6 +71,26 @@ class FactionWarPayloadTest {
         definition = TestInstances.definition("faction_war_test", "war", null);
     }
 
+    private static za.co.neroland.neroevents.event.SchedulerSnapshot snapshot(boolean factionsLoaded,
+            boolean singlePlayer) {
+        java.util.Set<String> mods = factionsLoaded ? java.util.Set.of(
+                za.co.neroland.neroevents.compat.factions.FactionsCompat.MOD_ID) : java.util.Set.of();
+        int online = singlePlayer ? 1 : 4;
+        return new za.co.neroland.neroevents.event.SchedulerSnapshot(0L, online,
+                za.co.neroland.neroevents.event.BandTable.DEFAULT.bandFor(online), false,
+                za.co.neroland.neroevents.event.ConsentMode.OFF, !singlePlayer, singlePlayer, false,
+                java.util.Map.of(), List.of(), java.util.Map.of(), java.util.Map.of(), java.util.Map.of(), mods,
+                java.util.Map.of(), java.util.Map.of(), 0, 0L, java.util.Map.of(), java.util.Map.of(), Long.MAX_VALUE);
+    }
+
+    @Test
+    void preflightExcludesSinglePlayerWithAReason() {
+        assertEquals(java.util.Optional.of("no_factions"), payload.preflight(snapshot(false, false), definition));
+        assertEquals(java.util.Optional.of("no_factions"), payload.preflight(snapshot(false, true), definition));
+        assertEquals(java.util.Optional.of("single_player"), payload.preflight(snapshot(true, true), definition));
+        assertEquals(java.util.Optional.empty(), payload.preflight(snapshot(true, false), definition));
+    }
+
     @AfterEach
     void tearDown() {
         FactionWarPayload.resetForTests();

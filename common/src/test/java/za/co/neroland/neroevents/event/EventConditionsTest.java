@@ -29,7 +29,7 @@ class EventConditionsTest {
     private static SchedulerSnapshot snap(int online, Map<Identifier, Integer> perDim, Map<Identifier, Long> dayTimes,
             Map<Identifier, Integer> gates, Set<String> mods) {
         return new SchedulerSnapshot(0L, online, BandTable.DEFAULT.bandFor(online), false, ConsentMode.OFF, true,
-                perDim, List.of(OVERWORLD, NETHER, PLANET), dayTimes, gates, Map.of(SPACE_TAG, Set.of(PLANET)), mods,
+                false, false, perDim, List.of(OVERWORLD, NETHER, PLANET), dayTimes, gates, Map.of(SPACE_TAG, Set.of(PLANET)), mods,
                 Map.of(), Map.of(), 0, 0L, Map.of(), Map.of(), Long.MAX_VALUE);
     }
 

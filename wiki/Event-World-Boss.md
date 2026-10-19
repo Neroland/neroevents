@@ -12,6 +12,8 @@ A world boss lands in a space dimension. Team up and bring it down.
 > **This build:** the NeroCreatures integration is switched off, so the world boss does not appear
 > yet. It will in a later build.
 
+Needs at least two players online; it is never rolled in a single-player world.
+
 ## What to do
 
 Find the boss and fight it. **Everyone who deals damage shares the reward**; damage is the only thing

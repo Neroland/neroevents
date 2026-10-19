@@ -22,6 +22,7 @@ capture. Holding beacons scores points over time. The score is shown under the c
 
 - Each faction needs at least `warMinMembersOnline` (2) members online; the two with the most members
   online fight. With fewer than two such factions the war is skipped.
+- Never rolled in a single-player world (`single_player` in `/neroevents preview`).
 - Your side is fixed the first time you come near the war: changing faction mid-war changes nothing.
 - Players in both factions or neither stay **neutral**: they never capture, score or earn.
 

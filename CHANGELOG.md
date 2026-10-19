@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.5.0-beta.2] - 2026-10-19
+
+NeroEvents for single-player worlds. Requires Neroland Core 1.15.0.
+
+### Added
+
+- **Single-player pacing.** In a world that is not open to LAN (one player online), the first event
+  comes after about 8 minutes of play (`singlePlayerFirstEventMinutes`), the fresh-world calm lasts 30
+  minutes instead of 48 hours (`singlePlayerCalmWindowMinutes`), events are not slowed by the 0–1 player
+  band (`singlePlayerIntervalMultiplier`) and per-event cooldowns are halved
+  (`singlePlayerCooldownMultiplier`). `singlePlayerPacing=false` restores server pacing. Opening the world
+  to LAN with someone joined switches back to server behaviour on the next scheduler pass.
+- **Solo raids.** Pirate raids now fire for one player, with waves scaled by the raid's `solo_scale`
+  (0.25–1.0, default 0.6). The world boss, alien invasion and major supply drop stay group events.
+- **Stand-off from players.** Events never anchor within `anchorMinPlayerDistanceBlocks` (24) of a
+  player; the protection rules still apply as before.
+- Single-player wording on the Event Console (title, tabs, Mine and Privacy), in reward and privacy
+  messages and on the Supply Beacon; voting stays hidden. `/neroevents status` shows the single-player
+  pacing and `/neroevents preview` the first-event wait.
+- Event state is saved when the world closes, so a quit mid-event resumes on reload.
+- Wiki: *Getting started* gains "Playing alone"; single-player notes on Configuration, Consent and
+  voting, Pirate raid, World boss, Faction war, Rewards, Protection and fair play, Privacy and Gallery.
+
+### Changed
+
+- Faction wars are skipped in single-player with the reason `single_player`.
+- The Supply Beacon's refusal messages no longer mention "the server" (they read correctly in
+  single-player), and the console's export reply says to ask the host for the file.
+
 ## [0.5.0-beta.1] - 2026-10-18
 
 The first playable NeroEvents: a server-wide event engine with consent voting, protection rules and

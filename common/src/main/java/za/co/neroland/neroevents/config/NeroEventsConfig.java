@@ -81,6 +81,28 @@ public final class NeroEventsConfig {
             "maxConcurrentRaids", 1, 0, 8, true,
             "most raid events at once");
 
+    // --- Single-player -----------------------------------------------------------
+
+    public static final ConfigValue<Boolean> SINGLE_PLAYER_PACING = SCHEMA.bool(
+            "singlePlayerPacing", true, true,
+            "use the singlePlayer* keys below when one player is alone on an integrated (non-dedicated) server; "
+                    + "false keeps dedicated-server pacing in single-player too");
+    public static final ConfigValue<Integer> SINGLE_PLAYER_FIRST_EVENT_MINUTES = SCHEMA.intRange(
+            "singlePlayerFirstEventMinutes", 8, 0, 720, true,
+            "minutes of play (world time) in a single-player world before the first automatic event is rolled; "
+                    + "0 = no wait");
+    public static final ConfigValue<Integer> SINGLE_PLAYER_CALM_WINDOW_MINUTES = SCHEMA.intRange(
+            "singlePlayerCalmWindowMinutes", 30, 0, 1440, true,
+            "minutes of play (world time) in a single-player world before automatic events other than "
+                    + "calm-exempt ones start; replaces calmWindowHours while alone");
+    public static final ConfigValue<Double> SINGLE_PLAYER_INTERVAL_MULTIPLIER = SCHEMA.doubleRange(
+            "singlePlayerIntervalMultiplier", 1.0D, 0.1D, 10.0D, true,
+            "multiplies schedulerBaseIntervalTicks while alone in a single-player world, in place of the "
+                    + "population band's multiplier (1.0 = about 30 minutes between events)");
+    public static final ConfigValue<Double> SINGLE_PLAYER_COOLDOWN_MULTIPLIER = SCHEMA.doubleRange(
+            "singlePlayerCooldownMultiplier", 0.5D, 0.1D, 1.0D, true,
+            "multiplies every event definition's cooldown when it fires while alone in a single-player world");
+
     // --- Consent ---------------------------------------------------------------
 
     public static final ConfigValue<String> CONSENT_MODE = SCHEMA.string(
@@ -159,6 +181,9 @@ public final class NeroEventsConfig {
     public static final ConfigValue<Integer> ANCHOR_MAX_CELL_ROLLS = SCHEMA.intRange(
             "anchorMaxCellRolls", 4, 1, 16, true,
             "areas tried before an event is skipped for lack of a place");
+    public static final ConfigValue<Integer> ANCHOR_MIN_PLAYER_DISTANCE_BLOCKS = SCHEMA.intRange(
+            "anchorMinPlayerDistanceBlocks", 24, 0, 128, true,
+            "events never anchor within this many blocks of a player (0 = off); counts only, never positions");
     public static final ConfigValue<Integer> INSTANCE_RETAIN_TICKS = SCHEMA.intRange(
             "instanceRetainTicks", 1200, 0, 72000, true,
             "ticks a finished event stays visible in /neroevents status");

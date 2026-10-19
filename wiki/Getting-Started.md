@@ -48,7 +48,24 @@ player to open it claims the drop, and everyone who opens it shares the rewards.
 
 Server operators can call one straight away to try it out: `/neroevents start neroevents:core/supply_drop`.
 
-## 5. Collect your rewards
+## 5. Playing alone
+
+NeroEvents works in a single-player world too. Your first supply drop is rolled 8 minutes into a new world
+and lands 5 minutes later; after a 30-minute calm period meteor showers, wrecks and (with NeroCreatures)
+smaller pirate raids join in, about one every half hour, never two at once. Votes never appear — there is
+nobody to ask. The world boss and faction wars need other players; open your world to LAN to see them.
+Events never land within 24 blocks of you or 64 blocks of world spawn, and craters keep away from chests
+and machines; to fence off your whole base type `/neroevents zones add home <x1> <z1> <x2> <z2>` (cheats
+must be on). The `singlePlayer*` keys in `config/neroevents.properties` tune all of this.
+
+- Events pause when you pause (while the world is not open to LAN).
+- If you leave the world during an event it carries on where it was when you come back, but your progress
+  toward its rewards starts again.
+- Retention and wreck decay count real days even while the world is closed; a market shock runs on the
+  clock, so pausing for an hour can end it.
+- `rewardBudgetPerDay` applies here too: a long solo session can reach it.
+
+## 6. Collect your rewards
 
 Taking part earns you a share of the event's rewards. Items and experience wait in your **reward
 crate**: open a console, go to **Mine** and press **CLAIM** (or type `/neroevents claim`). Credits go

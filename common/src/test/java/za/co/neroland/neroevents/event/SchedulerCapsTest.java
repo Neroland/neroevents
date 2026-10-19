@@ -123,6 +123,42 @@ class SchedulerCapsTest {
     }
 
     @Test
+    void firstEventHoldRuleOrderAndOrigins() {
+        int calm = EventScheduler.RULES.indexOf("calm_window");
+        assertEquals(calm + 1, EventScheduler.RULES.indexOf("first_event"));
+        t.world.dedicated = false; // one player on an integrated server
+        t.clock.now = 600L;
+        EventDefinition exempt = t.define("hold_exempt", type, "{\"calm_exempt\": true}");
+        SchedulerSnapshot snap = t.engine.snapshot();
+        assertTrue(snap.singlePlayer());
+        assertTrue(snap.firstEventHold());
+        assertEquals("first_event", code(exempt));
+        EventScheduler.RuleCheck rule = EventScheduler.explain(exempt, snap, t.settings).stream()
+                .filter(c -> c.rule().equals("first_event")).findFirst().orElseThrow();
+        assertEquals(false, rule.passed());
+        // The Supply Beacon (REQUEST) and operators (ADMIN) are never held.
+        assertInstanceOf(RequestResult.Queued.class,
+                t.engine.request(new EventRequest(exempt.id(), FakeWorldView.OVERWORLD, EventOrigin.REQUEST, null)));
+        t.engine.skipUpcoming("admin");
+        assertInstanceOf(RequestResult.Queued.class,
+                t.engine.request(new EventRequest(exempt.id(), FakeWorldView.OVERWORLD, EventOrigin.ADMIN, null)));
+    }
+
+    @Test
+    void schedulerRollDuringTheHoldCreatesNothingAndKeepsTheRandom() {
+        t.world.dedicated = false;
+        t.settings.schedulerEnabled = true;
+        t.define("held", type, "{\"calm_exempt\": true}");
+        Random twin = new Random(7L);
+        t.clock.now = 600L;
+        t.engine.tickOnce();
+        assertTrue(t.engine.live().isEmpty());
+        assertTrue(t.engine.recent().isEmpty());
+        assertEquals(t.settings.singlePlayerFirstEventTicks(), t.state.nextRollAt());
+        assertEquals(twin.nextLong(), t.random.nextLong(), "the hold consumed no random numbers");
+    }
+
+    @Test
     void adminConsentNeverRolls() {
         t.settings.consentMode = ConsentMode.ADMIN;
         t.world.online(FakeWorldView.OVERWORLD, 3);

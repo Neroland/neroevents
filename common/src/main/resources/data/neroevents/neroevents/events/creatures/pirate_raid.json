@@ -17,7 +17,7 @@
   "calm_exempt": false,
   "location_public": false,
   "conditions": {
-    "min_online": 2,
+    "min_online": 1,
     "requires_mods": ["nerocreatures"]
   },
   "bounds": { "kind": "target", "radius": 64, "fallback_to_density": true },

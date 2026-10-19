@@ -42,6 +42,8 @@ public final class NeroEventsNeoForge {
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> GalleryShowcase.tick(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) ->
                 GalleryShowcase.onServerStopping(event.getServer()));
+        // Running events save their resumable state when the server (or a single-player world) closes.
+        NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> EventEngine.onServerStopping(event.getServer()));
         NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> EventCommands.register(event.getDispatcher()));
         // Event-entity damage (raid waves, the boss): observed after it was applied; one map lookup otherwise.
         NeoForge.EVENT_BUS.addListener((LivingDamageEvent.Post e) ->

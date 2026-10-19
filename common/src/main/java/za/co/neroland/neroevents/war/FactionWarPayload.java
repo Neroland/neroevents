@@ -56,7 +56,8 @@ import za.co.neroland.neroevents.war.WarSides.Side;
  *   <li><b>Start:</b> factions with at least {@code warMinMembersOnline} members online are eligible; the top two
  *       by (online members desc, id asc) fight. Fewer than two ⇒ skipped {@code no_factions}. Each objective is
  *       placed only where {@code mayAffectAll} allows a cylinder r 8 and the block is air (the angle is retried
- *       +15° up to six times); none placed ⇒ skipped {@code protected}.</li>
+ *       +15° up to six times); none placed ⇒ skipped {@code protected}. In single-player (integrated server,
+ *       ≤ 1 online) the war is never rolled ({@code preflight} → {@code single_player}).</li>
  *   <li><b>Sides</b> are frozen per player at first contact ({@link WarSides}): in both or neither faction ⇒
  *       neutral, and neutrals never capture, score or earn.</li>
  *   <li><b>Scoring</b> ({@link WarScoring}) every 20 ticks; capturers are credited OBJECTIVE 1/n.</li>
@@ -317,7 +318,13 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
 
     @Override
     public Optional<String> preflight(SchedulerSnapshot snapshot, EventDefinition definition) {
-        return snapshot.loadedMods().contains(FactionsCompat.MOD_ID) ? Optional.empty() : Optional.of("no_factions");
+        if (!snapshot.loadedMods().contains(FactionsCompat.MOD_ID)) {
+            return Optional.of("no_factions");
+        }
+        if (snapshot.singlePlayer()) {
+            return Optional.of("single_player");
+        }
+        return Optional.empty();
     }
 
     @Override

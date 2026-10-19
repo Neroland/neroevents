@@ -15,7 +15,7 @@ import net.minecraft.resources.Identifier;
  * test runs on a plain JVM with a fake.
  *
  * <p><b>Privacy by construction:</b> no method here returns a player's position, name or UUID. Players
- * appear only as counts — per server, per dimension, per density cell, per open gate. The anchor
+ * appear only as counts — per server, per dimension, per density cell, per open gate, per stand-off circle. The anchor
  * picker therefore cannot aim at a specific player even by accident.
  *
  * <p>Dimensions are {@link Identifier}s; conversion to a level happens once, in the server adapter.
@@ -47,6 +47,12 @@ public interface WorldView {
 
     /** Online-player counts per density cell ({@code cellBlocks} square), never positions. Key = packed cell. */
     Map<Long, Integer> densityCells(Identifier dimension, int cellBlocks);
+
+    /**
+     * How many online players in that dimension stand within Chebyshev distance {@code blocks} of the
+     * column ({@code x}, {@code z}). A count, never a position.
+     */
+    int playersWithinBlocks(Identifier dimension, int x, int z, int blocks);
 
     /** Whether the chunk is loaded right now; never loads it. */
     boolean isChunkLoaded(Identifier dimension, int chunkX, int chunkZ);

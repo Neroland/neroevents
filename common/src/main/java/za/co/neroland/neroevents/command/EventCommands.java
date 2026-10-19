@@ -53,6 +53,7 @@ import za.co.neroland.neroevents.event.SchedulerSnapshot;
 import za.co.neroland.neroevents.event.ValidationIssue;
 import za.co.neroland.neroevents.event.VoteTally;
 import za.co.neroland.neroevents.event.anchor.AnchorPicker;
+import za.co.neroland.neroevents.event.world.SinglePlayer;
 import za.co.neroland.neroevents.history.EventHistoryState;
 import za.co.neroland.neroevents.privacy.EventsPrivacy;
 import za.co.neroland.neroevents.privacy.EventsPrivacyActions;
@@ -260,7 +261,16 @@ public final class EventCommands {
         int online = engine.world().onlinePlayers();
         reply(source, Component.translatable("command.neroevents.status.band",
                 engine.bands().bandFor(online).name(), online));
-        long calmLeft = settings.calmWindowTicks() - now;
+        boolean single = SinglePlayer.is(source.getServer());
+        if (single && settings.singlePlayerPacing) {
+            reply(source, Component.translatable("command.neroevents.status.single_player",
+                    settings.singlePlayerFirstEventMinutes, settings.singlePlayerCalmWindowMinutes,
+                    Double.toString(settings.singlePlayerIntervalMultiplier),
+                    Double.toString(settings.singlePlayerCooldownMultiplier)));
+        } else if (single) {
+            reply(source, Component.translatable("command.neroevents.status.single_player.off"));
+        }
+        long calmLeft = settings.calmWindowTicks(single) - now;
         reply(source, calmLeft > 0
                 ? Component.translatable("command.neroevents.status.calm", minutes(calmLeft))
                 : Component.translatable("command.neroevents.status.calm_over"));
@@ -409,6 +419,10 @@ public final class EventCommands {
                     ? "command.neroevents.preview.rule_ok" : "command.neroevents.preview.rule_fail",
                     check.rule(), check.detail() == null ? "" : check.detail()));
         }
+        if (snap.firstEventHold()) {
+            reply(source, Component.translatable("command.neroevents.preview.first_event",
+                    minutes(engine.settings().singlePlayerFirstEventTicks() - now)));
+        }
         Eligibility e = EventScheduler.eligibility(def, snap, engine.settings());
         List<Identifier> candidates = def.conditions().evaluate(snap).candidateDimensions();
         for (Identifier dimension : candidates) {
@@ -489,7 +503,8 @@ public final class EventCommands {
         EventEngine engine = EventEngine.get(server);
         int waiting = engine.crates().map(c -> c.waitingStacks(player.getUUID())).orElse(0);
         if (!cfg.rewardLedgerEnabled) {
-            reply(source, Component.translatable("command.neroevents.rewards.disabled"));
+            reply(source, Component.translatable(EventsPrivacyActions.solo(server,
+                    "command.neroevents.rewards.disabled")));
         } else if (PrivacyOptOuts.get(server).isOptedOut(player.getUUID())) {
             reply(source, Component.translatable("command.neroevents.rewards.opted_out"));
         } else {
@@ -583,7 +598,8 @@ public final class EventCommands {
         EngineSettings s = engine.settings();
         AnchorPicker.Result result = AnchorPicker.pick(engine.world(), engine.protection(), dimension,
                 a -> def.payload().footprint(def, def.payloadConfig(), dimension, a), now,
-                s.anchorDensityCellBlocks, s.anchorAttemptsPerCell, s.anchorMaxCellRolls);
+                s.anchorDensityCellBlocks, s.anchorAttemptsPerCell, s.anchorMaxCellRolls,
+                s.anchorMinPlayerDistanceBlocks);
         if (result instanceof AnchorPicker.Found f) {
             Footprint fp = def.payload().footprint(def, def.payloadConfig(), dimension, f.anchor());
             reply(source, Component.translatable("command.neroevents.preview.anchor", f.anchor().getX(),

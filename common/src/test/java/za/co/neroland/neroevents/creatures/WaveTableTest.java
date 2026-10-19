@@ -48,6 +48,35 @@ class WaveTableTest {
     }
 
     @Test
+    void aLonePlayerGetsTheSoloScale() {
+        // 4 × 0.6 = 2.4 → 2, 2 × 0.6 = 1.2 → 1
+        assertEquals(List.of(new WaveTable.Planned(PIRATE, 2), new WaveTable.Planned(DRONE, 1)),
+                WaveTable.scaled(wave(4, 2), 1, 0.25D, 0.6D, 24, id -> true));
+        assertEquals(List.of(new WaveTable.Planned(PIRATE, 2), new WaveTable.Planned(DRONE, 1)),
+                WaveTable.scaled(wave(4, 2), 0, 0.25D, 0.6D, 24, id -> true));
+        // Two players: unchanged from the old overload (factor 1.25 → 5 and 3).
+        List<WaveTable.Planned> two = WaveTable.scaled(wave(4, 2), 2, 0.25D, 0.6D, 24, id -> true);
+        assertEquals(List.of(new WaveTable.Planned(PIRATE, 5), new WaveTable.Planned(DRONE, 3)), two);
+        assertEquals(WaveTable.scaled(wave(4, 2), 2, 0.25D, 24, id -> true), two);
+        // A solo scale of 1.0 is the old behaviour.
+        assertEquals(WaveTable.scaled(wave(4, 2), 1, 0.25D, 24, id -> true),
+                WaveTable.scaled(wave(4, 2), 1, 0.25D, 1.0D, 24, id -> true));
+    }
+
+    @Test
+    void soloScaleCodecDefaultAndRange() {
+        String waves = "\"waves\": [{\"mobs\": [{\"type\": \"nerocreatures:space_pirate\", \"count\": 4}]}]";
+        var config = WavePayloadBase.Config.CODEC.codec().parse(JsonOps.INSTANCE,
+                JsonParser.parseString("{" + waves + "}")).result();
+        assertTrue(config.isPresent());
+        assertEquals(0.6D, config.get().soloScale());
+        assertTrue(WavePayloadBase.Config.CODEC.codec().parse(JsonOps.INSTANCE,
+                JsonParser.parseString("{" + waves + ", \"solo_scale\": 0.1}")).result().isEmpty());
+        assertEquals(1.0D, WavePayloadBase.Config.CODEC.codec().parse(JsonOps.INSTANCE,
+                JsonParser.parseString("{" + waves + ", \"solo_scale\": 1.0}")).result().orElseThrow().soloScale());
+    }
+
+    @Test
     void cappedByMaxPerWaveFromTheLargestLine() {
         List<WaveTable.Planned> plan = WaveTable.scaled(wave(20, 10), 1, 0.0D, 12, id -> true);
         assertEquals(12, WaveTable.total(plan));

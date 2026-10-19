@@ -11,9 +11,12 @@ import net.minecraft.resources.Identifier;
  * O(players + players × referenced gates). Every eligibility rule is an O(1) check against it.
  * {@code gateHolders} and {@code dimensionTags} hold only the gates and dimension-type tags the pool
  * actually references. {@code remainingDailyBudget} is {@code Long.MAX_VALUE} until rewards land.
+ * {@code singlePlayer} is the single-player rule this pass; {@code firstEventHold} is whether the
+ * single-player first-event delay is still running.
  */
 public record SchedulerSnapshot(long now, int online, PopulationBand band, boolean calmWindow,
-        ConsentMode effectiveConsent, boolean dedicated, Map<Identifier, Integer> onlinePerDimension,
+        ConsentMode effectiveConsent, boolean dedicated, boolean singlePlayer, boolean firstEventHold,
+        Map<Identifier, Integer> onlinePerDimension,
         List<Identifier> loadedDimensions, Map<Identifier, Long> dayTimePerDimension,
         Map<Identifier, Integer> gateHolders, Map<Identifier, Set<Identifier>> dimensionTags, Set<String> loadedMods,
         Map<EventCategory, Integer> activeByCategory, Map<Identifier, Integer> activeBossPerDimension,

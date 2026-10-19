@@ -88,6 +88,12 @@ public class EventConsoleScreen extends EventScreen<EventConsoleMenu> {
         setTitleLine(Component.translatable("console.neroevents.title"));
     }
 
+    /** Whether the viewer is alone in their own world: the last snapshot's flag, else the client's own check. */
+    private static boolean single() {
+        ConsoleSnapshot snap = ClientConsoleState.snapshot();
+        return snap != null ? snap.singlePlayer() : EventsClient.singlePlayer();
+    }
+
     // --- widgets -------------------------------------------------------------------------------------------
 
     /**
@@ -120,7 +126,7 @@ public class EventConsoleScreen extends EventScreen<EventConsoleMenu> {
         List<Component> tips = new ArrayList<>();
         for (String name : TAB_NAMES) {
             labels.add(Component.translatable("console.neroevents.tab." + name));
-            tips.add(Component.translatable("console.neroevents.tab." + name + ".help"));
+            tips.add(Component.translatable(ConsoleText.solo("console.neroevents.tab." + name + ".help", single())));
         }
         TabBar bar = new TabBar(left + ConsoleLayout.TABS_X, top + ConsoleLayout.TABS_Y, ConsoleLayout.TAB_W, labels,
                 tips, this::showTab);
@@ -234,7 +240,9 @@ public class EventConsoleScreen extends EventScreen<EventConsoleMenu> {
     @Override
     protected void refreshWidgets() {
         ConsoleSnapshot snap = ClientConsoleState.snapshot();
-        setSubtitle(Component.translatable("console.neroevents.subtitle." + TAB_NAMES[tab]));
+        boolean single = snap != null ? snap.singlePlayer() : EventsClient.singlePlayer();
+        setTitleLine(Component.translatable(ConsoleText.solo("console.neroevents.title", single)));
+        setSubtitle(Component.translatable(ConsoleText.solo("console.neroevents.subtitle." + TAB_NAMES[tab], single)));
         for (EventButton b : cancel) {
             if (b != null) {
                 b.visible = false;
@@ -370,7 +378,8 @@ public class EventConsoleScreen extends EventScreen<EventConsoleMenu> {
         opt.setMessage(Component.translatable(snap.optedOut() ? "console.neroevents.privacy.optin"
                 : "console.neroevents.privacy.optout"));
         if (!snap.ledgerEnabled()) {
-            opt.disable(Component.translatable("console.neroevents.privacy.ledger_off"));
+            opt.disable(Component.translatable(ConsoleText.solo("console.neroevents.privacy.ledger_off",
+                    snap.singlePlayer())));
         } else {
             opt.enable();
             opt.setHelp(Component.translatable(snap.optedOut() ? "console.neroevents.privacy.optin.help"
@@ -480,7 +489,8 @@ public class EventConsoleScreen extends EventScreen<EventConsoleMenu> {
     private void drawRows(GuiGraphicsExtractor g, ConsoleSnapshot snap, boolean live) {
         List<EventRow> rows = live ? snap.live() : snap.soon();
         if (rows.isEmpty()) {
-            centred(g, Component.translatable(live ? "console.neroevents.live.empty" : "console.neroevents.soon.empty"));
+            centred(g, Component.translatable(live ? "console.neroevents.live.empty"
+                    : ConsoleText.solo("console.neroevents.soon.empty", snap.singlePlayer())));
             return;
         }
         if (!live && snap.consent() == ConsentMode.ADMIN.ordinal()) {
@@ -598,7 +608,7 @@ public class EventConsoleScreen extends EventScreen<EventConsoleMenu> {
         List<LedgerRow> rows = snap.ledger();
         Component empty = null;
         if (!snap.ledgerEnabled()) {
-            empty = Component.translatable("console.neroevents.mine.ledger_off");
+            empty = Component.translatable(ConsoleText.solo("console.neroevents.mine.ledger_off", snap.singlePlayer()));
         } else if (snap.optedOut()) {
             empty = Component.translatable("console.neroevents.mine.opted_out");
         } else if (rows.isEmpty()) {
@@ -636,7 +646,8 @@ public class EventConsoleScreen extends EventScreen<EventConsoleMenu> {
         int bottom = y + kept.y1() - 2;
         Component ledger;
         if (!snap.ledgerEnabled()) {
-            ledger = Component.translatable("console.neroevents.privacy.row.ledger_off");
+            ledger = Component.translatable(ConsoleText.solo("console.neroevents.privacy.row.ledger_off",
+                    snap.singlePlayer()));
         } else if (snap.optedOut()) {
             ledger = Component.translatable("console.neroevents.privacy.row.ledger_opted_out");
         } else {
@@ -657,7 +668,7 @@ public class EventConsoleScreen extends EventScreen<EventConsoleMenu> {
         int limit = y + yours.y1() - 2;
         for (String key : new String[] {"console.neroevents.privacy.explain.export",
                 "console.neroevents.privacy.explain.optout", "console.neroevents.privacy.explain.erase"}) {
-            Component text = Component.translatable(key);
+            Component text = Component.translatable(ConsoleText.solo(key, snap.singlePlayer()));
             List<net.minecraft.util.FormattedCharSequence> lines = WidgetText.wrap(font, text,
                     ConsoleLayout.YOURS_TEXT_W);
             int drawn = 0;

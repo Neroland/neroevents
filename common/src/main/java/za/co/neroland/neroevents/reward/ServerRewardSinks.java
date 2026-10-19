@@ -13,6 +13,7 @@ import za.co.neroland.neroevents.economy.EconomyOutcome;
 import za.co.neroland.neroevents.economy.EventsEconomy;
 import za.co.neroland.neroevents.event.EventView;
 import za.co.neroland.neroevents.event.announce.Announcer;
+import za.co.neroland.neroevents.event.world.SinglePlayer;
 
 /**
  * The running-server {@link RewardSinks}: NeroEconomy through {@link EventsEconomy}, vanilla experience for
@@ -84,7 +85,9 @@ public final class ServerRewardSinks implements RewardSinks {
             rendered[i] = given[i] instanceof BudgetedRewardResolver.Translatable t
                     ? Component.translatable(t.key()) : given[i];
         }
-        target.sendSystemMessage(Component.translatable(key, rendered));
+        // The one reward line with single-player wording ("before you leave the world").
+        String shown = "reward.neroevents.crate_session_only".equals(key) && SinglePlayer.is(server) ? key + ".solo" : key;
+        target.sendSystemMessage(Component.translatable(shown, rendered));
     }
 
     @Override

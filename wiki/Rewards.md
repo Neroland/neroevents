@@ -70,6 +70,8 @@ under-counted by the last unsaved events (nobody is paid twice).
 
 Setting `rewardBudgetPerDay` to 0 switches event rewards off entirely: 0 pays nothing and says nothing.
 
+`rewardBudgetPerDay` applies in single-player too (a long solo session can reach it).
+
 ## The Supply Beacon
 
 Completing the *Supply Run* quest gives you a **Supply Beacon**. Use it to ask for a small supply drop

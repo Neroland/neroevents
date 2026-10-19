@@ -124,6 +124,19 @@ class RewardSplitTest {
     }
 
     @Test
+    void aLoneParticipantGetsEverything() {
+        List<RewardShare> ranked = ranked(new double[] {7}, false);
+        assertTrue(ranked.get(0).floorEligible());
+        assertEquals(SCALE, RewardSplit.shares(ranked, 0.05D, false).get(0).sharePpm());
+        assertEquals(1000L, RewardSplit.amounts(1000L, RewardSplit.shares(ranked, 0.05D, false))[0]);
+        // Not floor-eligible: the rest and the rounding shortfall still make the whole.
+        RewardShare only = ranked.get(0);
+        List<RewardShare> notEligible = List.of(new RewardShare(only.player(), only.rank(), only.weightMilli(),
+                only.sharePpm(), false));
+        assertEquals(SCALE, RewardSplit.shares(notEligible, 0.05D, false).get(0).sharePpm());
+    }
+
+    @Test
     void theFloorDivisionShortfallGoesToRankOne() {
         List<RewardShare> ranked = ranked(new double[] {3, 3, 3}, false);
         List<RewardShare> shares = RewardSplit.shares(ranked, 0.0D, false);

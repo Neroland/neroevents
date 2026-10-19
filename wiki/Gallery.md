@@ -3,7 +3,7 @@
 `/neroevents gallery` builds a showcase of everything NeroEvents adds, north of where you stand: every block
 and entity, plus one **station** per event type that shows the event happening, and a demo HUD and Event
 Console that cycle through every kind of event message. It is a tool for screenshots, videos and trying the
-mod out. It is for operators in creative mode only.
+mod out. It is for operators in creative mode only. In single-player, create the test world with cheats on.
 
 **Use a test world.** The gallery replaces every block in a 41 × 69 area (and 18 blocks up) north of you,
 and removes loose dropped items within 64 blocks.

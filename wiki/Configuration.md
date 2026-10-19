@@ -26,6 +26,20 @@ Times are in ticks: 20 ticks = 1 second, 1200 = 1 minute, 72000 = 1 hour.
 | `maxConcurrentInvasions` | `1` | Invasion events at once. |
 | `maxConcurrentRaids` | `1` | Raid events at once. |
 
+## Single-player
+
+These apply only while one player is alone on an integrated (non-dedicated) server — a single-player
+world, or one opened to LAN with nobody else connected. As soon as a second player joins, the next
+scheduler check uses the server pacing above.
+
+| Key | Default | What it does |
+| --- | --- | --- |
+| `singlePlayerPacing` | `true` | Use the `singlePlayer*` keys below when one player is alone on an integrated (non-dedicated) server; `false` keeps dedicated-server pacing in single-player too. |
+| `singlePlayerFirstEventMinutes` | `8` | Minutes of play (world time) in a single-player world before the first automatic event is rolled; `0` = no wait (0 to 720). |
+| `singlePlayerCalmWindowMinutes` | `30` | Minutes of play (world time) in a single-player world before automatic events other than calm-exempt ones start; replaces `calmWindowHours` while alone (0 to 1440). |
+| `singlePlayerIntervalMultiplier` | `1.0` | Multiplies `schedulerBaseIntervalTicks` while alone in a single-player world, in place of the population band's multiplier (1.0 = about 30 minutes between events). |
+| `singlePlayerCooldownMultiplier` | `0.5` | Multiplies every event definition's cooldown when it fires while alone in a single-player world (0.1 to 1.0). |
+
 ### Population bands
 
 Busy servers see events more often than quiet ones. Each band is `name:multiplier:cap`:
@@ -34,8 +48,8 @@ Busy servers see events more often than quiet ones. Each band is `name:multiplie
 - the **multiplier** scales `schedulerBaseIntervalTicks` (2.0 = half as often, 0.6 = more often),
 - the **cap** is how many events may run at once in that band.
 
-With the default, one player online gets an automatic event about once an hour and at most one at a
-time; ten or more players get one roughly every 18 minutes and up to three at once. Bands must start
+With the default, one player online on a server gets an automatic event about once an hour and at most
+one at a time (a single-player world uses the [single-player keys](#single-player) instead); ten or more players get one roughly every 18 minutes and up to three at once. Bands must start
 at 0 and follow on without gaps; a table with a mistake is replaced by the default (the log says
 which entry was wrong).
 
@@ -77,6 +91,7 @@ which entry was wrong).
 | `anchorDensityCellBlocks` | `256` | Events are placed where players are by counting players in squares of this size. Only the counts are used, never anyone's position. |
 | `anchorAttemptsPerCell` | `16` | Spots tried in a chosen square before moving on. |
 | `anchorMaxCellRolls` | `4` | Squares tried before the event is skipped for lack of a safe place. |
+| `anchorMinPlayerDistanceBlocks` | `24` | Events never anchor within this many blocks of a player (`0` = off); counts only, never positions. |
 | `instanceRetainTicks` | `1200` | How long a finished event stays visible in `/neroevents status`. |
 | `resumableSaveIntervalTicks` | `200` | How often running events save the state they need to survive a restart. |
 

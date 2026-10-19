@@ -99,6 +99,17 @@ class EventDefinitionCodecTest {
     }
 
     @Test
+    void shippedPirateRaidIsAOnePlayerEvent() throws Exception {
+        PayloadTypes.register(new za.co.neroland.neroevents.creatures.PirateRaidPayload(ctx -> null, () -> true,
+                id -> true));
+        EventDefinition def = load(resource("data/neroevents/neroevents/events/creatures/pirate_raid.json"))
+                .orElseThrow();
+        assertEquals(1, def.conditions().minOnline());
+        assertEquals(0.6D, ((za.co.neroland.neroevents.creatures.WavePayloadBase.Config) def.payloadConfig())
+                .soloScale());
+    }
+
+    @Test
     void fullExampleDecodesEveryField() throws Exception {
         EventDefinition def = load(resource("events/full_example.json")).orElseThrow();
         assertTrue(issues.isEmpty(), issues.toString());

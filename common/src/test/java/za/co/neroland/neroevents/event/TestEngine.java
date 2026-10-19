@@ -41,6 +41,8 @@ final class TestEngine implements AutoCloseable {
     EventEngineState state = new EventEngineState();
     final List<ProtectionSource> sources;
     EventEngine engine;
+    /** The engine's seeded random (re-seeded with 7 on every build). */
+    Random random;
     private final Consumer<EventSignal> listener = signals::add;
 
     TestEngine() {
@@ -61,7 +63,8 @@ final class TestEngine implements AutoCloseable {
 
     /** (Re)builds the engine over the current state (a restart keeps the state object). */
     EventEngine build() {
-        engine = new EventEngine(world, clock, new Random(7L), state, announcer,
+        random = new Random(7L);
+        engine = new EventEngine(world, clock, random, state, announcer,
                 (RewardResolver) instance -> {
                     rewarded.add(instance.shortId());
                     return RewardOutcome.NONE;
@@ -102,6 +105,41 @@ final class TestEngine implements AutoCloseable {
         Map<Identifier, EventDefinition> valid = EventDefinitions.validate(Map.of(id, parsed), item -> true,
                 mod -> true, PayloadTypes::get, issues);
         EventDefinition def = valid.get(id);
+        if (def == null) {
+            throw new AssertionError("definition did not validate: " + issues);
+        }
+        defs.put(id, def);
+        return def;
+    }
+
+    /**
+     * Adds a shipped definition file ({@code data/neroevents/neroevents/events/<path>.json}) under its real id,
+     * with its payload swapped for {@code type}: the scheduling fields (weight, cooldown, calm exemption,
+     * conditions, bounds) are exactly the shipped ones.
+     */
+    EventDefinition defineShipped(String path, RecordingPayloadType type) {
+        if (PayloadTypes.get(type.id()).isEmpty()) {
+            PayloadTypes.register(type);
+        }
+        String resource = "data/neroevents/neroevents/events/" + path + ".json";
+        JsonObject json;
+        try (java.io.InputStream in = TestEngine.class.getClassLoader().getResourceAsStream(resource)) {
+            if (in == null) {
+                throw new AssertionError("missing " + resource);
+            }
+            json = JsonParser.parseReader(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8))
+                    .getAsJsonObject();
+        } catch (java.io.IOException e) {
+            throw new AssertionError(resource, e);
+        }
+        json.addProperty("type", type.id().toString());
+        json.remove("payload");
+        Identifier id = Identifier.fromNamespaceAndPath("neroevents", path);
+        List<ValidationIssue> issues = new ArrayList<>();
+        EventDefinition parsed = EventDefinitions.parse(id, json, issues).orElseThrow(
+                () -> new AssertionError("definition did not parse: " + issues));
+        EventDefinition def = EventDefinitions.validate(Map.of(id, parsed), item -> true, mod -> true,
+                PayloadTypes::get, issues).get(id);
         if (def == null) {
             throw new AssertionError("definition did not validate: " + issues);
         }
