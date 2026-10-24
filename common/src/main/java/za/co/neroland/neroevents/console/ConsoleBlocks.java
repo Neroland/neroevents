@@ -13,12 +13,12 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 
-import za.co.neroland.nerolandcore.registry.CoreCreativeTab;
 import za.co.neroland.nerolandcore.registry.RegistrationProvider;
 import za.co.neroland.nerolandcore.registry.RegistrationProvider.RegistryEntry;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
 import za.co.neroland.neroevents.payload.registry.TooltipItems;
+import za.co.neroland.neroevents.registry.ModCreativeTab;
 
 /**
  * The Event Console's registrations — block, block entity, menu and tooltip block item — through Neroland
@@ -61,8 +61,8 @@ public final class ConsoleBlocks {
     private ConsoleBlocks() {
     }
 
-    /** Classload-forcing init (common init slot 3, after the war beacon); adds the console to Core's tab. */
+    /** Classload-forcing init (common init slot 3, after the war beacon); adds the console to the NeroEvents tab. */
     public static void init() {
-        CoreCreativeTab.add(EVENT_CONSOLE_ITEM::get);
+        ModCreativeTab.add(EVENT_CONSOLE_ITEM::get);
     }
 }

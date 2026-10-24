@@ -136,6 +136,7 @@
   "item.neroevents.supply_beacon.refused.unknown_definition": "Supply drops aren't available yet; keep the beacon.",
   "item.neroevents.supply_beacon.tooltip": "Calls a supply drop to where you stand. One use. Its rough landing spot is announced to everyone in the world.",
   "item.neroevents.supply_beacon.unavailable": "Supply drops aren't available yet; keep the beacon.",
+  "itemGroup.neroevents": "NeroEvents",
   "message.neroevents.supply_beacon_no_room": "A Supply Beacon is waiting for you — free an inventory slot; it is handed over on your next login.",
   "message.neroevents.supply_beacon_pending": "A Supply Beacon is reserved for you. NeroEvents will hand it over once supply drops arrive.",
   "phase.neroevents.active": "active",

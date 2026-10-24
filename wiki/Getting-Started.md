@@ -5,7 +5,7 @@ and more. You do not need to read anything to take part — this page is the sho
 
 ## 1. Place an Event Console
 
-Find the **Event Console** in Neroland Core's creative tab (or ask your server's operator for one)
+Find the **Event Console** in the NeroEvents creative tab (or ask your server's operator for one)
 and place it anywhere. Its screen faces you. Anyone can use any console.
 
 - While nothing is happening, the screen shows a slow cyan scan line.

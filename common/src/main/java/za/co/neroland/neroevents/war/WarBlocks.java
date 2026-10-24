@@ -11,11 +11,11 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 
-import za.co.neroland.nerolandcore.registry.CoreCreativeTab;
 import za.co.neroland.nerolandcore.registry.RegistrationProvider;
 import za.co.neroland.nerolandcore.registry.RegistrationProvider.RegistryEntry;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
+import za.co.neroland.neroevents.registry.ModCreativeTab;
 
 /**
  * The faction war's registrations: the {@code neroevents:war_beacon} block, its block-entity type and its
@@ -57,6 +57,6 @@ public final class WarBlocks {
 
     /** Classload-forcing init (common init slot 3, after {@code EventPayloads.init()}); adds the creative item. */
     public static void init() {
-        CoreCreativeTab.add(WAR_BEACON_ITEM::get);
+        ModCreativeTab.add(WAR_BEACON_ITEM::get);
     }
 }

@@ -501,6 +501,7 @@
   "item.neroevents.supply_beacon.refused.unknown_definition": "Supply drops aren't available yet; keep the beacon.",
   "item.neroevents.supply_beacon.tooltip": "Calls a supply drop to where you stand. One use. Its rough landing spot is announced to everyone in the world.",
   "item.neroevents.supply_beacon.unavailable": "Supply drops aren't available yet; keep the beacon.",
+  "itemGroup.neroevents": "NeroEvents",
   "key.neroevents.dismiss_hud": "Hide event messages",
   "ledger.neroevents.credits": "%s credits",
   "ledger.neroevents.item": "1 item",

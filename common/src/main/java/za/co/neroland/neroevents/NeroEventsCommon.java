@@ -21,6 +21,7 @@ import za.co.neroland.neroevents.platform.Services;
 import za.co.neroland.neroevents.privacy.EventsPrivacy;
 import za.co.neroland.neroevents.privacy.PrivacyOptOuts;
 import za.co.neroland.neroevents.progression.QuestHooks;
+import za.co.neroland.neroevents.registry.ModCreativeTab;
 import za.co.neroland.neroevents.reward.RewardCrateState;
 import za.co.neroland.neroevents.reward.RewardEvents;
 import za.co.neroland.neroevents.reward.RewardLedgerState;
@@ -80,6 +81,8 @@ public final class NeroEventsCommon {
         //    The Event Console: block, block entity, menu and item (anyone can read it; requests are checked
         //    per player on the server).
         ConsoleBlocks.init();
+        //    NeroEvents' own creative tab, after every contributor above has queued its items.
+        ModCreativeTab.init();
 
         // 4. Player-data erasure registration. Registered before any store can exist on purpose:
         //    registering late is how an erasure request silently misses a store (POPIA/GDPR). Every

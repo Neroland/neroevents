@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- **NeroEvents now has its own creative tab.** The Event Console, the war beacon and the event blocks and
+  salvage items moved out of Neroland Core's tab into a dedicated NeroEvents tab, in the same order. The
+  Supply Beacon stays out of every tab (it is a quest reward).
+
 ## [0.5.0-beta.2] - 2026-10-19
 
 NeroEvents for single-player worlds. Requires Neroland Core 1.15.0.

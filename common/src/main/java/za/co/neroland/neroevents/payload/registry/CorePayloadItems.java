@@ -5,15 +5,15 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
-import za.co.neroland.nerolandcore.registry.CoreCreativeTab;
 import za.co.neroland.nerolandcore.registry.RegistrationProvider;
 import za.co.neroland.nerolandcore.registry.RegistrationProvider.RegistryEntry;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
+import za.co.neroland.neroevents.registry.ModCreativeTab;
 
 /**
  * The Core-only payloads' items: the three salvage items and a tooltip-carrying {@link BlockItem} for every
- * payload block. Everything here joins Core's shared creative tab (players find these blocks in the world
+ * payload block. Everything here joins the NeroEvents creative tab (players find these blocks in the world
  * and want to search for them); the Supply Beacon stays out of it (a quest reward).
  */
 public final class CorePayloadItems {
@@ -52,16 +52,16 @@ public final class CorePayloadItems {
 
     /** Classload-forcing no-op (last of the four payload registries), then the creative-tab entries. */
     public static void init() {
-        CoreCreativeTab.add(METEOR_SLAG::get);
-        CoreCreativeTab.add(COOLED_CRUST::get);
-        CoreCreativeTab.add(EMBEDDED_METEOR_ORE::get);
-        CoreCreativeTab.add(CRATER_POCKET::get);
-        CoreCreativeTab.add(HULL_PLATING::get);
-        CoreCreativeTab.add(SCORCHED_PANEL::get);
-        CoreCreativeTab.add(BENT_STRUT::get);
-        CoreCreativeTab.add(SALVAGE_CRATE::get);
-        CoreCreativeTab.add(SALVAGE_PLATING::get);
-        CoreCreativeTab.add(SALVAGE_CONDUIT::get);
-        CoreCreativeTab.add(SALVAGE_CORE_FRAGMENT::get);
+        ModCreativeTab.add(METEOR_SLAG::get);
+        ModCreativeTab.add(COOLED_CRUST::get);
+        ModCreativeTab.add(EMBEDDED_METEOR_ORE::get);
+        ModCreativeTab.add(CRATER_POCKET::get);
+        ModCreativeTab.add(HULL_PLATING::get);
+        ModCreativeTab.add(SCORCHED_PANEL::get);
+        ModCreativeTab.add(BENT_STRUT::get);
+        ModCreativeTab.add(SALVAGE_CRATE::get);
+        ModCreativeTab.add(SALVAGE_PLATING::get);
+        ModCreativeTab.add(SALVAGE_CONDUIT::get);
+        ModCreativeTab.add(SALVAGE_CORE_FRAGMENT::get);
     }
 }
