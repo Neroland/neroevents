@@ -188,8 +188,14 @@ public class EventHudConfigScreen extends Screen {
 
     // --- input ---------------------------------------------------------------------------------------------
 
+    //? if >=1.21.9 {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+    //?} else {
+    /*@Override
+    public boolean mouseClicked(double eventX, double eventY, int button) {
+        MouseButtonEvent event = new MouseButtonEvent(eventX, eventY, button);
+    *///?}
         double mx = event.x();
         double my = event.y();
         for (Element element : new Element[] {Element.OBJECTIVES, Element.PILL, Element.BANNER}) {
@@ -207,8 +213,14 @@ public class EventHudConfigScreen extends Screen {
         return super.mouseClicked(event, doubleClick);
     }
 
+    //? if >=1.21.9 {
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+    //?} else {
+    /*@Override
+    public boolean mouseDragged(double eventX, double eventY, int button, double dx, double dy) {
+        MouseButtonEvent event = new MouseButtonEvent(eventX, eventY, button);
+    *///?}
         if (dragging != null) {
             int[] m = mini();
             dragX = Math.max(m[0], Math.min(m[0] + m[2] - 2, event.x() - grabDx));
@@ -218,8 +230,14 @@ public class EventHudConfigScreen extends Screen {
         return super.mouseDragged(event, dx, dy);
     }
 
+    //? if >=1.21.9 {
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
+    //?} else {
+    /*@Override
+    public boolean mouseReleased(double eventX, double eventY, int button) {
+        MouseButtonEvent event = new MouseButtonEvent(eventX, eventY, button);
+    *///?}
         Element element = dragging;
         if (element != null) {
             int[] m = mini();
@@ -236,8 +254,23 @@ public class EventHudConfigScreen extends Screen {
 
     // --- drawing -------------------------------------------------------------------------------------------
 
+    //? if >=26.1 {
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        drawBody(g, mouseX, mouseY);
+        super.extractRenderState(g, mouseX, mouseY, partialTick); // the buttons
+    }
+    //?} else {
+    /*// Before 26.1 Screen.render(..) (or the frame, from 1.21.6) draws the blurred background first; the panel
+    // goes on top of it here, then render(..) draws the buttons.
+    @Override
+    public void renderBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(g, mouseX, mouseY, partialTick);
+        drawBody(g, mouseX, mouseY);
+    }
+    *///?}
+
+    private void drawBody(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         int x = leftPos;
         int y = topPos;
         int w = ConsoleLayout.HUD_PANEL_W;
@@ -249,7 +282,6 @@ public class EventHudConfigScreen extends Screen {
                 x + ConsoleLayout.PAD, y + 17, w - 2 * ConsoleLayout.PAD, EventColours.SUBTLE);
         Hull.footer(g, font, x, y, w, h, ConsoleLayout.FOOTER_H, feedback);
         drawMiniature(g, mouseX, mouseY);
-        super.extractRenderState(g, mouseX, mouseY, partialTick); // the buttons
     }
 
     private void drawMiniature(GuiGraphicsExtractor g, int mouseX, int mouseY) {
@@ -285,7 +317,11 @@ public class EventHudConfigScreen extends Screen {
             if (hover && dragging == null) {
                 List<FormattedCharSequence> tip = font.split(Component.translatable("hud.neroevents.config.drag",
                         Component.translatable(e.nameKey())), 200);
+                //? if >=1.21.6 {
                 g.setTooltipForNextFrame(font, tip, mouseX, mouseY);
+                //?} else {
+                /*setTooltipForNextRenderPass(tip);
+                *///?}
             }
         }
         Element shown = selected;

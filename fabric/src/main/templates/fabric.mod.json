@@ -25,6 +25,6 @@
     "nerolandcore": ">=${nerolandcore_version} <2.0.0"
   },
   "suggests": {
-    "neroeconomy": ">=0.4.0-beta.1"${nerospace_suggest}${nerocreatures_suggest}${nerocolonies_suggest}${neroagriculture_suggest}${nerofactions_suggest}${opac_suggest}
+    "neroeconomy": ">=0.5.0-beta.1"${nerospace_suggest}${nerocreatures_suggest}${nerocolonies_suggest}${neroagriculture_suggest}${nerofactions_suggest}${opac_suggest}
   }
 }

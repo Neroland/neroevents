@@ -1,7 +1,5 @@
 package za.co.neroland.neroevents.war;
 
-import java.util.Set;
-
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -11,6 +9,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 
+import za.co.neroland.nerolandcore.registry.BlockEntityTypeCompat;
 import za.co.neroland.nerolandcore.registry.RegistrationProvider;
 import za.co.neroland.nerolandcore.registry.RegistrationProvider.RegistryEntry;
 
@@ -47,7 +46,7 @@ public final class WarBlocks {
 
     public static final RegistryEntry<BlockEntityType<WarBeaconBlockEntity>> WAR_BEACON_BLOCK_ENTITY =
             BLOCK_ENTITIES.register("war_beacon",
-                    key -> new BlockEntityType<>(WarBeaconBlockEntity::new, Set.of(WAR_BEACON.get())));
+                    key -> BlockEntityTypeCompat.create(WarBeaconBlockEntity::new, WAR_BEACON.get()));
 
     public static final RegistryEntry<BlockItem> WAR_BEACON_ITEM = ITEMS.register("war_beacon",
             key -> new WarBeaconItem(WAR_BEACON.get(), new Item.Properties().setId(key).useBlockDescriptionPrefix()));

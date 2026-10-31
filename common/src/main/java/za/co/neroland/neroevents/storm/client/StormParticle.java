@@ -23,7 +23,11 @@ import za.co.neroland.neroevents.storm.StormVariant;
  * <p>Each loader registers {@link #provider(StormVariant)} as the sprite-set provider for the matching
  * {@code StormParticles} type.
  */
+//? if >=1.21.9 {
 public final class StormParticle extends SingleQuadParticle {
+//?} else {
+/*public final class StormParticle extends net.minecraft.client.particle.TextureSheetParticle {
+*///?}
 
     /** Every storm particle counts against this one limit (the client clamps storms to 400 alive). */
     public static final ParticleLimit STORM_LIMIT = new ParticleLimit(400);
@@ -39,7 +43,12 @@ public final class StormParticle extends SingleQuadParticle {
 
     StormParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites,
             StormVariant variant) {
+        //? if >=1.21.9 {
         super(level, x, y, z, sprites.first());
+        //?} else {
+        /*super(level, x, y, z);
+        this.pickSprite(sprites);
+        *///?}
         this.sprites = sprites;
         this.variant = variant;
         this.xd = xd;
@@ -75,10 +84,17 @@ public final class StormParticle extends SingleQuadParticle {
         this.setSpriteFromAge(sprites);
     }
 
+    //? if >=1.21.9 {
     @Override
     protected SingleQuadParticle.Layer getLayer() {
         return SingleQuadParticle.Layer.TRANSLUCENT;
     }
+    //?} else {
+    /*@Override
+    public net.minecraft.client.particle.ParticleRenderType getRenderType() {
+        return net.minecraft.client.particle.ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+    }
+    *///?}
 
     @Override
     public Optional<ParticleLimit> getParticleLimit() {
@@ -136,8 +152,13 @@ public final class StormParticle extends SingleQuadParticle {
         }
 
         @Override
+        //? if >=1.21.9 {
         public Particle createParticle(SimpleParticleType options, ClientLevel level, double x, double y, double z,
                 double xd, double yd, double zd, RandomSource random) {
+        //?} else {
+        /*public Particle createParticle(SimpleParticleType options, ClientLevel level, double x, double y, double z,
+                double xd, double yd, double zd) {
+        *///?}
             return new StormParticle(level, x, y, z, xd, yd, zd, sprites, variant);
         }
     }

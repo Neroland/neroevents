@@ -92,6 +92,17 @@ public class SalvageCrateBlock extends BaseEntityBlock {
     }
 
     /** No mining progress while the crate holds loot (creative players still break it). */
+    //? if <1.21.5 {
+    /*// Before 1.21.5 there is no BlockEntity.preRemoveSideEffects: the block's onRemove runs the same drop.
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof SalvageCrateBlockEntity crate) {
+            crate.preRemoveSideEffects(pos, state);
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+    *///?}
+
     @Override
     protected float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof SalvageCrateBlockEntity crate && crate.holdsLoot()) {

@@ -3,12 +3,18 @@ package za.co.neroland.neroevents.fabric;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+//? if >=26.1 {
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+//?}
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+//? if >=26.1 {
 import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
+//?}
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+//? if >=1.21.6 {
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+//?}
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.Identifier;
@@ -57,9 +63,19 @@ public final class NeroEventsFabricClient implements ClientModInitializer {
         MenuScreens.register(ConsoleBlocks.EVENT_CONSOLE_MENU.get(), EventConsoleScreen::new);
         BlockEntityRendererRegistry.register(ConsoleBlocks.EVENT_CONSOLE_BLOCK_ENTITY.get(),
                 ctx -> new EventConsoleRenderer());
+        //? if >=1.21.6 {
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "event_hud"),
                 (graphics, delta) -> EventHud.render(graphics));
+        //?} else {
+        /*// Fabric API before 1.21.6 has no HUD element registry: the event HUD is drawn from the HUD callback.
+        net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.register(
+                (graphics, delta) -> EventHud.render(graphics));
+        *///?}
+        //? if >=26.1 {
         KeyMappingHelper.registerKeyMapping(EventsClient.DISMISS_HUD);
+        //?} else {
+        /*net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper.registerKeyBinding(EventsClient.DISMISS_HUD);
+        *///?}
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             EventsClient.tick();
             GalleryCaptureHarness.tick();
@@ -68,13 +84,23 @@ public final class NeroEventsFabricClient implements ClientModInitializer {
         });
         // The four storm particles.
         for (StormVariant variant : StormVariant.values()) {
+            //? if >=26.1 {
             ParticleProviderRegistry.getInstance().register(StormParticles.forVariant(variant).get(),
                     sprites -> StormParticle.provider(variant).apply(sprites));
+            //?} else {
+            /*net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry.getInstance().register(
+                    StormParticles.forVariant(variant).get(), sprites -> StormParticle.provider(variant).apply(sprites));
+            *///?}
         }
         // The five payload particles, the effects behind them and the client-only /nsevgallery and /nsevrender.
         for (EventParticles.Kind kind : EventParticles.Kind.values()) {
+            //? if >=26.1 {
             ParticleProviderRegistry.getInstance().register(EventParticles.forKind(kind).get(),
                     sprites -> EventParticle.provider(kind).apply(sprites));
+            //?} else {
+            /*net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry.getInstance().register(
+                    EventParticles.forKind(kind).get(), sprites -> EventParticle.provider(kind).apply(sprites));
+            *///?}
         }
         EventFxClient.install();
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {

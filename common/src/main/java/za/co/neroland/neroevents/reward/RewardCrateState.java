@@ -16,6 +16,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
+import za.co.neroland.nerolandcore.data.SavedDataCompat;
+
 import za.co.neroland.nerolandcore.data.SavedDataRecovery;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
@@ -55,7 +57,7 @@ public final class RewardCrateState extends SavedData {
     ).apply(inst, Root::new)).xmap(RewardCrateState::fromData, RewardCrateState::toData);
 
     public static final SavedDataType<RewardCrateState> TYPE =
-            new SavedDataType<>(ID, RewardCrateState::new, CODEC, null);
+            SavedDataCompat.type(ID, RewardCrateState::new, CODEC);
 
     private static final NeroEventsData.StoreEraser ERASER = eraser(RewardCrateState::get);
 

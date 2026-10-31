@@ -77,8 +77,13 @@ public final class EventHud {
         int since = ClientHudState.sinceUpdate();
         Identifier dimension = player.level().dimension().identifier();
 
+        //? if >=1.21.6 {
         g.pose().pushMatrix();
         g.pose().scale(scale, scale);
+        //?} else {
+        /*g.pose().pushPose();
+        g.pose().scale(scale, scale, 1.0F);
+        *///?}
         try {
             drawVignette(g, settings, dimension, screenW, screenH);
             List<Block> pillStack = new ArrayList<>();
@@ -131,7 +136,11 @@ public final class EventHud {
                 }
             }
         } finally {
+            //? if >=1.21.6 {
             g.pose().popMatrix();
+            //?} else {
+            /*g.pose().popPose();
+            *///?}
         }
     }
 

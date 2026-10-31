@@ -2,16 +2,25 @@
 // module's source directly (single copy -> no drift).
 
 plugins {
-    id 'net.fabricmc.fabric-loom'
+    // Two Loom flavours from the same plugin jar: `fabric-loom` for de-obfuscated 26.x (no mappings, no
+    // remap) and `fabric-loom-remap` for obfuscated 1.21.x (Mojang mappings + remapJar to intermediary).
+    // Neither is applied here; the node picks one below from its Minecraft version.
+    id 'net.fabricmc.fabric-loom' apply false
+    id 'net.fabricmc.fabric-loom-remap' apply false
     id 'eclipse'   // for eclipse.synchronizationTasks (VS Code / Buildship import hook)
     id 'maven-publish'
 }
 
 // MC version comes from the Stonecutter node (e.g. :fabric:26.1.2), not a global property.
 def mc = stonecutter.current.version
-// Upper bound of this cell's Minecraft range: the next minor line (26.1.2 -> 26.2, 26.2 -> 26.3), same
-// expression as Neroland Core, so each cell's jar declares only its own MC line.
-def mcCeiling = mc.tokenize('.').with { "${it[0]}.${it[1].toInteger() + 1}" }
+// Minecraft before 26.1 ships obfuscated, so those cells need mappings and a remapped jar.
+def obfuscated = mc.startsWith('1.')
+apply plugin: obfuscated ? 'net.fabricmc.fabric-loom-remap' : 'net.fabricmc.fabric-loom'
+// Minecraft range of this cell's jar, same expression as Neroland Core: 1.21.x cells are bounded to their API
+// line (mc_floor_<v> / mc_ceiling_<v> in gradle.properties); 26.x cells run up to the next minor line
+// (26.1.2 -> 26.2, 26.2 -> 26.3), so each jar declares only its own MC line.
+def mcCeiling = project.findProperty("mc_ceiling_${mc}") ?: mc.tokenize('.').with { "${it[0]}.${it[1].toInteger() + 1}" }
+def mcFloor = project.findProperty("mc_floor_${mc}") ?: mc
 def fabricApi = project.findProperty("fabric_api_version_${mc}")
 def jeiVersion = project.findProperty("jei_version_${mc}")
 def emiFile = project.findProperty("emi_file_fabric_${mc}")
@@ -32,7 +41,8 @@ def siblingIds = ['nerospace', 'nerocreatures', 'nerocolonies', 'neroagriculture
 def siblingPkg = [nerospace: 'nerospace', nerocreatures: 'creatures', nerocolonies: 'colonies', neroagriculture: 'agriculture', nerofactions: 'factions']
 def siblingCls = [nerospace: 'Nerospace', nerocreatures: 'Creatures', nerocolonies: 'Colonies', neroagriculture: 'Agriculture', nerofactions: 'Factions']
 def siblingRun = [nerospace: 'withNerospace', nerocreatures: 'withNeroCreatures', nerocolonies: 'withNeroColonies', neroagriculture: 'withNeroAgriculture', nerofactions: 'withNeroFactions']
-def siblingOn = siblingIds.collectEntries { id -> [(id): compatOn("${id}_compat")] }
+// `<x>_compat_<mc>=false` switches a sibling off for this Minecraft version only (no build of it for this line).
+def siblingOn = siblingIds.collectEntries { id -> [(id): compatOn("${id}_compat") && compatOn("${id}_compat_${mc}")] }
 def opacVersion = rootProject.findProperty("opac_version_${mc}")
 def opacOn = compatOn('opac_compat') && opacVersion != null
 siblingIds.each { id ->
@@ -59,7 +69,8 @@ publishing {
             groupId = rootProject.mod_group_id
             artifactId = "neroevents-fabric-${mc}"
             version = rootProject.mod_version
-            artifact tasks.named('jar')
+            // 1.21.x consumers remap this mod with modImplementation, so they need the intermediary jar.
+            artifact tasks.named(obfuscated ? 'remapJar' : 'jar')
         }
     }
     // Remote target so a fresh CI runner / clone (empty ~/.m2) can resolve NeroEvents — GitHub Packages
@@ -86,6 +97,16 @@ sourceSets.main.resources.srcDir rootProject.ext.commonResources
 
 dependencies {
     minecraft "com.mojang:minecraft:${mc}"
+    if (obfuscated) {
+        // Obfuscated 1.21.x: Mojang's official names, remapped to intermediary on jar. Mod dependencies
+        // (loader, Fabric API, Core, the optional siblings) go through mod* configurations so Loom remaps them.
+        mappings loom.officialMojangMappings()
+        modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+        if (fabricApi != null) {
+            modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApi}"
+        }
+        modImplementation "za.co.neroland.nerolandcore:nerolandcore-fabric-${mc}:${nerolandcoreVersion}"
+    } else {
     // NOTE: no `mappings` — de-obfuscated 26.x needs none (Fabric Loom 1.17+).
     implementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     if (fabricApi != null) {
@@ -97,24 +118,29 @@ dependencies {
     // remap and `modImplementation` isn't available. Core ships as its own mod and loads BEFORE
     // NeroEvents (see fabric.mod.json depends).
     implementation "za.co.neroland.nerolandcore:nerolandcore-fabric-${mc}:${nerolandcoreVersion}"
+    }
+
+    // On 1.21.x the Nero siblings are intermediary-named mod jars, so Loom must remap them (mod* configurations).
+    def siblingCompileOnly = obfuscated ? 'modCompileOnly' : 'compileOnly'
+    def siblingRuntimeOnly = obfuscated ? 'modRuntimeOnly' : 'runtimeOnly'
 
     // NeroEconomy — OPTIONAL. compileOnly: never bundled, never a hard requirement. Only the economy bridge
     // class imports it, and only after isModLoaded("neroeconomy"), so NeroEvents runs without it.
-    compileOnly "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${rootProject.neroeconomy_version}"
+    add(siblingCompileOnly, "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${rootProject.neroeconomy_version}")
     // Dev clients load NeroEconomy only with -PwithNeroEconomy; the default run proves it stays optional.
     if (project.hasProperty('withNeroEconomy')) {
-        runtimeOnly "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${rootProject.neroeconomy_version}"
+        add(siblingRuntimeOnly, "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${rootProject.neroeconomy_version}")
     }
 
     // Optional siblings — compileOnly, never bundled, never required (see the compat block above).
     siblingIds.each { id ->
         if (siblingOn[id]) {
             def coord = "za.co.neroland.${id}:${id}-fabric-${mc}:${rootProject.property("${id}_version")}"
-            compileOnly coord
+            add(siblingCompileOnly, coord)
             // Dev clients load a sibling only with -PwithNerospace / -PwithNeroCreatures / -PwithNeroColonies /
             // -PwithNeroAgriculture / -PwithNeroFactions.
             if (project.hasProperty(siblingRun[id])) {
-                runtimeOnly coord
+                add(siblingRuntimeOnly, coord)
             }
         }
     }
@@ -134,8 +160,12 @@ dependencies {
     // is runtime-only). Same per-MC version as NeoForge (jei_version_<mc>, BlameJared maven from the root).
     if (jeiVersion) {
         compileOnly "mezz.jei:jei-${mc}-common-api:${jeiVersion}"
-        compileOnly "mezz.jei:jei-${mc}-fabric-api:${jeiVersion}"
-        runtimeOnly "mezz.jei:jei-${mc}-fabric:${jeiVersion}"
+        // 1.21.x: the Mojang-named common API is enough to compile the shared plugin; the Fabric JEI jars
+        // are intermediary-named there, so they are only wired on de-obfuscated 26.x.
+        if (!obfuscated) {
+            compileOnly "mezz.jei:jei-${mc}-fabric-api:${jeiVersion}"
+            runtimeOnly "mezz.jei:jei-${mc}-fabric:${jeiVersion}"
+        }
     }
 
     // EMI (optional recipe-viewer compat). EMI ships one jar per loader with its API inside, so compile
@@ -162,7 +192,7 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
         mod_authors          : rootProject.mod_authors,
         mod_license          : rootProject.mod_license,
         fabric_loader_version: rootProject.fabric_loader_version,
-        minecraft_version    : mc,
+        minecraft_version    : mcFloor,
         minecraft_version_ceiling: mcCeiling,
         nerolandcore_version : nerolandcoreVersion,
         // fabric.mod.json "suggests" entries for the optional siblings: `, "<modid>": ">=<floor>"` or "".
@@ -181,8 +211,19 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
 sourceSets.main.resources.srcDir generateModMetadata
 eclipse.synchronizationTasks generateModMetadata
 
+// The access widener's namespace differs by era: 26.x is `official` (de-obfuscated), 1.21.x is `named`
+// (Mojang mappings, remapped in remapJar). The 1.21.x file is swapped into the jar under the same name.
+def awFile = obfuscated ? file("${branchDir}/src/main/accesswidener/legacy.accesswidener")
+        : file("${branchDir}/src/main/resources/neroevents.accesswidener")
+if (obfuscated) {
+    tasks.named('processResources', ProcessResources) {
+        exclude 'neroevents.accesswidener'
+        from(awFile) { rename { 'neroevents.accesswidener' } }
+    }
+}
+
 loom {
-    accessWidenerPath = file("${branchDir}/src/main/resources/neroevents.accesswidener")
+    accessWidenerPath = awFile
 
     runs {
         client {
@@ -241,7 +282,7 @@ tasks.register('ecjCheck', JavaExec) {
         ecjSources.text = sourceSets.main.java.files.collect { it.absolutePath.replace('\\', '/') }.join('\n') + '\n'
         def srcDirs = ['@' + ecjSources.absolutePath.replace('\\', '/')]
         args = [
-                '--release', '25',
+                '--release', "${project.javaRelease}",
                 '-proc:none',
                 '-d', 'none',
                 '-properties', rootProject.file('tools/ecj.prefs').absolutePath,

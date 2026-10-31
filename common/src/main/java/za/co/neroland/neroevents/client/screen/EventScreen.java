@@ -63,7 +63,13 @@ public abstract class EventScreen<T extends AbstractContainerMenu> extends Abstr
 
     protected EventScreen(T menu, Inventory inventory, Component title, int panelWidth, int panelHeight, int titleY,
             int subtitleY, LongSupplier versionSource) {
+        //? if >=26.1 {
         super(menu, inventory, title, panelWidth, panelHeight);
+        //?} else {
+        /*super(menu, inventory, title);
+        this.imageWidth = panelWidth;
+        this.imageHeight = panelHeight;
+        *///?}
         this.panelWidth = panelWidth;
         this.panelHeight = panelHeight;
         this.titleY = titleY;
@@ -225,6 +231,7 @@ public abstract class EventScreen<T extends AbstractContainerMenu> extends Abstr
 
     // --- drawing -------------------------------------------------------------------------------------------
 
+    //? if >=26.1 {
     @Override
     public final void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         ConfirmPanel modal = confirm;
@@ -238,6 +245,37 @@ public abstract class EventScreen<T extends AbstractContainerMenu> extends Abstr
             modal.extract(g, this.font, mouseX, mouseY, partialTick);
         }
     }
+    //?} else {
+    /*// Before 26.1 the container screen draws background (renderBg), widgets, slots and labels in render(..);
+    // the hull and panel go in renderBg so they stay behind the widgets, exactly as on 26.x.
+    @Override
+    public final void render(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        ConfirmPanel modal = confirm;
+        this.frameMouseX = modal != null ? OFFSCREEN : mouseX;
+        this.frameMouseY = modal != null ? OFFSCREEN : mouseY;
+        super.render(g, frameMouseX, frameMouseY, partialTick);
+        if (modal != null) {
+            //? if >=1.21.6 {
+            g.nextStratum();
+            modal.extract(g, this.font, mouseX, mouseY, partialTick);
+            //?} else {
+            /^// No GUI strata before 1.21.6: lift the modal above the slot items instead.
+            g.pose().pushPose();
+            g.pose().translate(0.0F, 0.0F, 400.0F);
+            modal.extract(g, this.font, mouseX, mouseY, partialTick);
+            g.pose().popPose();
+            ^///?}
+        } else {
+            this.renderTooltip(g, frameMouseX, frameMouseY);
+        }
+    }
+
+    @Override
+    protected final void renderBg(GuiGraphicsExtractor g, float partialTick, int mouseX, int mouseY) {
+        drawHull(g);
+        extractPanel(g, frameMouseX, frameMouseY, partialTick);
+    }
+    *///?}
 
     protected abstract void extractPanel(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick);
 
@@ -279,12 +317,17 @@ public abstract class EventScreen<T extends AbstractContainerMenu> extends Abstr
         int my = frameMouseY;
         if (mx >= x && mx < x + w && my >= y && my < y + h) {
             List<FormattedCharSequence> lines = font.split(text, TOOLTIP_WIDTH);
+            //? if >=1.21.6 {
             g.setTooltipForNextFrame(font, lines, mx, my);
+            //?} else {
+            /*setTooltipForNextRenderPass(lines);
+            *///?}
         }
     }
 
     // --- input ---------------------------------------------------------------------------------------------
 
+    //? if >=1.21.9 {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         ConfirmPanel modal = confirm;
@@ -309,6 +352,46 @@ public abstract class EventScreen<T extends AbstractContainerMenu> extends Abstr
         }
         return super.mouseDragged(event, dx, dy);
     }
+    //?} else {
+    /*// Before 1.21.9 screens receive raw mouse/key arguments; these bridges wrap them in the look-alike events
+    // (compat.mc) so subclasses override the same event-shaped methods as on newer lines.
+    @Override
+    public final boolean mouseClicked(double x, double y, int button) {
+        return mouseClicked(new MouseButtonEvent(x, y, button), false);
+    }
+
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        ConfirmPanel modal = confirm;
+        if (modal != null) {
+            return modal.mouseClicked(event, doubleClick);
+        }
+        return super.mouseClicked(event.x(), event.y(), event.button());
+    }
+
+    @Override
+    public final boolean mouseReleased(double x, double y, int button) {
+        return mouseReleased(new MouseButtonEvent(x, y, button));
+    }
+
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (confirm != null) {
+            return true;
+        }
+        return super.mouseReleased(event.x(), event.y(), event.button());
+    }
+
+    @Override
+    public final boolean mouseDragged(double x, double y, int button, double dx, double dy) {
+        return mouseDragged(new MouseButtonEvent(x, y, button), dx, dy);
+    }
+
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        if (confirm != null) {
+            return true;
+        }
+        return super.mouseDragged(event.x(), event.y(), event.button(), dx, dy);
+    }
+    *///?}
 
     @Override
     public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
@@ -326,6 +409,7 @@ public abstract class EventScreen<T extends AbstractContainerMenu> extends Abstr
         return false;
     }
 
+    //? if >=1.21.9 {
     @Override
     public boolean keyPressed(KeyEvent event) {
         ConfirmPanel modal = confirm;
@@ -342,4 +426,30 @@ public abstract class EventScreen<T extends AbstractContainerMenu> extends Abstr
         }
         return super.charTyped(event);
     }
+    //?} else {
+    /*@Override
+    public final boolean keyPressed(int key, int scancode, int modifiers) {
+        return keyPressed(new KeyEvent(key, scancode, modifiers));
+    }
+
+    public boolean keyPressed(KeyEvent event) {
+        ConfirmPanel modal = confirm;
+        if (modal != null) {
+            return modal.keyPressed(event);
+        }
+        return super.keyPressed(event.key(), event.scancode(), event.modifiers());
+    }
+
+    @Override
+    public final boolean charTyped(char codepoint, int modifiers) {
+        return charTyped(new CharacterEvent(codepoint, modifiers));
+    }
+
+    public boolean charTyped(CharacterEvent event) {
+        if (confirm != null) {
+            return true;
+        }
+        return super.charTyped((char) event.codepoint(), event.modifiers());
+    }
+    *///?}
 }

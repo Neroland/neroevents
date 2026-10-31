@@ -21,7 +21,11 @@ import za.co.neroland.neroevents.fx.EventParticles.Kind;
  * (a reward-gold ring rising off a landed pod) and {@code reward_spark} (an ember-tinted spark drifting up from
  * an open pod). The spawner passes the motion. All five share one cap of {@value #CAP} alive.
  */
+//? if >=1.21.9 {
 public final class EventParticle extends SingleQuadParticle {
+//?} else {
+/*public final class EventParticle extends net.minecraft.client.particle.TextureSheetParticle {
+*///?}
 
     /** Every payload particle counts against this one limit. */
     public static final int CAP = 800;
@@ -42,7 +46,12 @@ public final class EventParticle extends SingleQuadParticle {
 
     EventParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites,
             Kind kind) {
+        //? if >=1.21.9 {
         super(level, x, y, z, sprites.first());
+        //?} else {
+        /*super(level, x, y, z);
+        this.pickSprite(sprites);
+        *///?}
         this.sprites = sprites;
         this.kind = kind;
         this.xd = xd;
@@ -99,10 +108,17 @@ public final class EventParticle extends SingleQuadParticle {
         this.setColor(r / 255.0F, g / 255.0F, b / 255.0F);
     }
 
+    //? if >=1.21.9 {
     @Override
     protected SingleQuadParticle.Layer getLayer() {
         return SingleQuadParticle.Layer.TRANSLUCENT;
     }
+    //?} else {
+    /*@Override
+    public net.minecraft.client.particle.ParticleRenderType getRenderType() {
+        return net.minecraft.client.particle.ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+    }
+    *///?}
 
     @Override
     public Optional<ParticleLimit> getParticleLimit() {
@@ -154,8 +170,13 @@ public final class EventParticle extends SingleQuadParticle {
         }
 
         @Override
+        //? if >=1.21.9 {
         public Particle createParticle(SimpleParticleType options, ClientLevel level, double x, double y, double z,
                 double xd, double yd, double zd, RandomSource random) {
+        //?} else {
+        /*public Particle createParticle(SimpleParticleType options, ClientLevel level, double x, double y, double z,
+                double xd, double yd, double zd) {
+        *///?}
             return new EventParticle(level, x, y, z, xd, yd, zd, sprites, kind);
         }
     }

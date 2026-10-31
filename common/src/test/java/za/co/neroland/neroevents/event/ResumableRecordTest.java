@@ -54,7 +54,8 @@ class ResumableRecordTest {
                     assertEquals(original.anchor(), fromJson.anchor());
                     assertEquals(original.startsAt(), fromJson.startsAt());
                     assertEquals(original.endsAt(), fromJson.endsAt());
-                    assertEquals(7, fromJson.payloadState().getIntOr("ticks", -1));
+                    var tag = fromJson.payloadState();
+                    assertEquals(7, tag.getIntOr("ticks", -1));
                 }
             }
         }

@@ -36,8 +36,13 @@ public final class NeroEventsForge {
         NeroEventsCommon.init();
         // Common init created NeroEvents' deferred registers through Core's registration seam; this
         // attaches them to our mod bus group.
+        //? if >=1.21.6 {
         RegistrationProvider.attach(context.getModBusGroup());
+        //?} else {
+        /*RegistrationProvider.attach(context.getModEventBus());
+        *///?}
         ForgeEventNetwork.register();
+        //? if >=1.21.9 {
         // Quest hook delivery (pending hook gates on login) and the event engine ride the server tick.
         TickEvent.ServerTickEvent.Post.BUS.addListener(event -> QuestHooks.tick(event.server()));
         TickEvent.ServerTickEvent.Post.BUS.addListener(event -> EventEngine.tick(event.server()));
@@ -45,6 +50,14 @@ public final class NeroEventsForge {
         TickEvent.ServerTickEvent.Post.BUS.addListener(event -> ConsoleServer.tick(event.server()));
         // The creative gallery's station loops and demo (no-op without a gallery session); dropped on stop.
         TickEvent.ServerTickEvent.Post.BUS.addListener(event -> GalleryShowcase.tick(event.server()));
+        //?} else if >=1.21.6 {
+        /*// Forge 1.21.6 - 1.21.8: the tick event exposes its server through getServer().
+        TickEvent.ServerTickEvent.Post.BUS.addListener(event -> QuestHooks.tick(event.getServer()));
+        TickEvent.ServerTickEvent.Post.BUS.addListener(event -> EventEngine.tick(event.getServer()));
+        TickEvent.ServerTickEvent.Post.BUS.addListener(event -> ConsoleServer.tick(event.getServer()));
+        TickEvent.ServerTickEvent.Post.BUS.addListener(event -> GalleryShowcase.tick(event.getServer()));
+        *///?}
+        //? if >=1.21.6 {
         ServerStoppingEvent.BUS.addListener(event -> GalleryShowcase.onServerStopping(event.getServer()));
         // Running events save their resumable state when the server (or a single-player world) closes.
         ServerStoppingEvent.BUS.addListener(event -> EventEngine.onServerStopping(event.getServer()));
@@ -54,6 +67,23 @@ public final class NeroEventsForge {
         LivingDamageEvent.BUS.addListener(e -> {
             EventDamageHooks.afterDamage(e.getEntity(), e.getSource(), e.getAmount());
         });
+        //?} else {
+        /*// Forge before 1.21.6 (EventBus 6): one shared game bus, listeners typed by their lambda parameter.
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((TickEvent.ServerTickEvent.Post event) -> {
+            QuestHooks.tick(event.getServer());
+            EventEngine.tick(event.getServer());
+            ConsoleServer.tick(event.getServer());
+            GalleryShowcase.tick(event.getServer());
+        });
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> {
+            GalleryShowcase.onServerStopping(event.getServer());
+            EventEngine.onServerStopping(event.getServer());
+        });
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((RegisterCommandsEvent event) ->
+                EventCommands.register(event.getDispatcher()));
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((LivingDamageEvent e) ->
+                EventDamageHooks.afterDamage(e.getEntity(), e.getSource(), e.getAmount()));
+        *///?}
         // Client-only: the payload entities' renderers. Gated so client classes never load on a dedicated server.
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ForgeClientSetup.init(context);

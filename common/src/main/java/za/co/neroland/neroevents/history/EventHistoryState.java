@@ -11,6 +11,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
+import za.co.neroland.nerolandcore.data.SavedDataCompat;
+
 import za.co.neroland.nerolandcore.data.SavedDataRecovery;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
@@ -57,7 +59,7 @@ public final class EventHistoryState extends SavedData {
     ).apply(inst, Root::new)).xmap(EventHistoryState::fromData, EventHistoryState::toData);
 
     public static final SavedDataType<EventHistoryState> TYPE =
-            new SavedDataType<>(ID, EventHistoryState::new, CODEC, null);
+            SavedDataCompat.type(ID, EventHistoryState::new, CODEC);
 
     private final List<HistoryEntry> entries = new ArrayList<>();
     private DailyBudget budget = new DailyBudget(0L, 0L);

@@ -93,8 +93,14 @@ public final class ChatAnnouncer implements Announcer {
             return Component.translatable("announce.neroevents.where.somewhere",
                     Component.literal(view.dimension().toString()));
         }
+        //? if >=1.21.9 {
         LevelData.RespawnData spawn = server.overworld().getRespawnData();
         BlockPos origin = spawn.dimension().identifier().equals(view.dimension()) ? spawn.pos() : BlockPos.ZERO;
+        //?} else {
+        /*// Before 1.21.9 the world spawn always lies in the overworld.
+        BlockPos origin = net.minecraft.world.level.Level.OVERWORLD.identifier().equals(view.dimension())
+                ? server.overworld().getSharedSpawnPos() : BlockPos.ZERO;
+        *///?}
         int dx = anchor.getX() - origin.getX();
         int dz = anchor.getZ() - origin.getZ();
         double distance = Math.sqrt((double) dx * dx + (double) dz * dz);

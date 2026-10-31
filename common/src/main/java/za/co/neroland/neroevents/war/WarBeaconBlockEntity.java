@@ -185,9 +185,16 @@ public class WarBeaconBlockEntity extends BlockEntity {
         tag.putByte(KEY_PROGRESS_SIDE, progressSide);
     }
 
+    //? if >=1.21.6 {
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
+    //?} else {
+    /*@Override
+    protected void saveAdditional(net.minecraft.nbt.CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        ValueOutput output = ValueOutput.of(tag, registries);
+    *///?}
         if (instanceId != null) {
             output.putString(TAG_INSTANCE, instanceId.toString());
         }
@@ -202,9 +209,16 @@ public class WarBeaconBlockEntity extends BlockEntity {
         output.putByte(KEY_PROGRESS_SIDE, progressSide);
     }
 
+    //? if >=1.21.6 {
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
+    //?} else {
+    /*@Override
+    protected void loadAdditional(net.minecraft.nbt.CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        ValueInput input = ValueInput.of(tag, registries);
+    *///?}
         String raw = input.getStringOr(TAG_INSTANCE, "");
         try {
             this.instanceId = raw.isEmpty() ? null : UUID.fromString(raw);

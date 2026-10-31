@@ -7,8 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.6.0-beta.1] - 2026-10-30
+
+NeroEvents for Minecraft 1.21.x, next to 26.x. Requires Neroland Core 1.17.0.
+
+### Added
+
+- **Minecraft 1.21.x builds.** NeroEvents now also ships for Minecraft 1.21.1, 1.21.4, 1.21.5, 1.21.8,
+  1.21.10 and 1.21.11 on NeoForge, Fabric and Forge, next to the 26.x builds. The 1.21.8 build also runs
+  on 1.21.7 and the 1.21.10 build on 1.21.9. The 1.21.x builds need Java 21.
+- **Storms with Nerospace.** Solar storms, dust storms, ion squalls and cryo blizzards are now in the
+  build and run when Nerospace 2.0.1 or later is installed.
+- Open Parties and Claims claims are protected on the 1.21.x builds too.
+- On Minecraft 1.21.1 – 1.21.10 storms do not tint the sky and fog (those versions have no hook for it);
+  their particles, sounds and effects work as on newer versions.
+
 ### Changed
 
+- Now requires Neroland Core 1.17.0 or later.
+- The optional NeroEconomy support (market shocks) now needs NeroEconomy 0.5.0-beta.1 or later.
+- NeroColonies protection now needs NeroColonies 0.6.1-beta.1 or later, and works on the 1.21.x builds too.
 - **NeroEvents now has its own creative tab.** The Event Console, the war beacon and the event blocks and
   salvage items moved out of Neroland Core's tab into a dedicated NeroEvents tab, in the same order. The
   Supply Beacon stays out of every tab (it is a quest reward).

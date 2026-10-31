@@ -1,12 +1,14 @@
 # Project context for AI coding agents — neroevents
 
+> Modrinth is temporarily being removed from the upload and is no longer being referenced. Avoid making references to modrinth.
+
 > This and `CLAUDE.md` are kept byte-identical; update both together.
 
 ## The mod
 
 - **NeroEvents** — server events for the Neroland sci-fi Minecraft mod ecosystem, built on **Neroland
-  Core**. Current state: **0.5.0-beta.2** (0.5.0-beta.1 released; beta.2 adds single-player pacing and
-  wording), feature-complete except the NeroLink module, pending runtime verification. In: the event engine
+  Core**. Current state: **0.6.0-beta.1** (0.5.0-beta.1 and beta.2 released; 0.6.0 adds the Minecraft 1.21.x
+  builds and requires Core 1.17.0), feature-complete except the NeroLink module, pending runtime verification. In: the event engine
   (datapack definitions documented in `EVENT-DEFINITIONS.md`, payload registry, scheduler, lifecycle,
   resumable records, anchor picker, protection contract, `/neroevents` commands); participation, the
   budgeted reward split, reward crate, reward history and aggregate history, consent voting, the privacy
@@ -20,10 +22,12 @@
   (`USING-NEROLINK.md` describes the planned contract).
 - Mod id: **`neroevents`** (matches the registry namespace + every loader manifest). Package root:
   `za.co.neroland.neroevents`. Author: **Neroland**.
-- Version: **0.5.0-beta.2** (`mod_version` in `gradle.properties`; only bump it as part of a release).
-- Targets **MC 26.1.2, 26.2 AND 26.3** on **NeoForge, MinecraftForge/Forge, and Fabric** → the **"9 cells"**.
+- Version: **0.6.1-beta.1** (`mod_version` in `gradle.properties`; only bump it as part of a release).
+- Targets **MC 1.21.1, 1.21.4, 1.21.5, 1.21.8, 1.21.10, 1.21.11, 26.1.2, 26.2 AND 26.3** on **NeoForge,
+  MinecraftForge/Forge, and Fabric** → the **"27 cells"** (1.21.x cells compile for Java 21; old-version code lives in
+  `//?` blocks and the `legacyRenames` list in `stonecutter.gradle`; the source stays in the 26.x state).
   **Java 25.** Mappings = official Mojang names (26.x ships de-obfuscated; no Parchment).
-- Neroland Core is the only hard dependency (pinned `nerolandcore_version`, currently 1.15.0). See
+- Neroland Core is the only hard dependency (pinned `nerolandcore_version`, currently 1.17.0). See
   `USING-CORE.md` for how it resolves and which Core APIs are used. NeroEconomy and NeroQuests are
   optional and never required.
 
@@ -49,7 +53,7 @@
   (`:fabric:26.1.2 :fabric:26.2 :fabric:26.3 :neoforge:26.1.2 :neoforge:26.2 :neoforge:26.3
   :forge:26.1.2 :forge:26.2 :forge:26.3`). `common` is NOT a node — its source is spliced via
   `rootProject.ext.commonJava` / `commonResources`. Dependency pins live in `gradle.properties` as
-  `*_version_<mc>` keys; `mc_versions=26.1.2,26.2,26.3`.
+  `*_version_<mc>` keys; `mc_versions=1.21.1,1.21.4,1.21.5,1.21.8,1.21.10,1.21.11,26.1.2,26.2,26.3`.
 - **Version-specific code in `common/`.** Non-active nodes run `common/` through Stonecutter
   (`stonecutterProcessCommon`), so shared code uses the same `//? if >=26.3 {` blocks as the loader
   `src/` trees. Keep the files in the vcsVersion state, and never put a `*/` inside a disabled block.

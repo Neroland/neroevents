@@ -14,6 +14,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
+import za.co.neroland.nerolandcore.data.SavedDataCompat;
+
 import za.co.neroland.nerolandcore.data.SavedDataRecovery;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
@@ -61,7 +63,7 @@ public final class EventEngineState extends SavedData {
     }));
 
     public static final SavedDataType<EventEngineState> TYPE =
-            new SavedDataType<>(ID, EventEngineState::new, CODEC, null);
+            SavedDataCompat.type(ID, EventEngineState::new, CODEC);
 
     private final List<InstanceRecord> instances = new ArrayList<>();
     private final Map<Identifier, Long> cooldownUntil = new HashMap<>();

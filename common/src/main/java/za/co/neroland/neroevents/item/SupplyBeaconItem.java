@@ -40,8 +40,24 @@ public class SupplyBeaconItem extends Item {
         tooltip.accept(Component.translatable("item.neroevents.supply_beacon.tooltip").withStyle(ChatFormatting.GRAY));
     }
 
+    //? if >=1.21.2 {
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
+    //?} else {
+    /*// Before 1.21.2 Item.use answered with an InteractionResultHolder around the held stack.
+    @Override
+    public net.minecraft.world.InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        InteractionResult result = beaconUse(level, player, hand);
+        ItemStack held = player.getItemInHand(hand);
+        if (result == InteractionResult.SUCCESS) {
+            return net.minecraft.world.InteractionResultHolder.success(held);
+        }
+        return result == InteractionResult.FAIL ? net.minecraft.world.InteractionResultHolder.fail(held)
+                : net.minecraft.world.InteractionResultHolder.pass(held);
+    }
+
+    private InteractionResult beaconUse(Level level, Player player, InteractionHand hand) {
+    *///?}
         if (!(player instanceof ServerPlayer serverPlayer) || level.isClientSide()) {
             return InteractionResult.SUCCESS;
         }

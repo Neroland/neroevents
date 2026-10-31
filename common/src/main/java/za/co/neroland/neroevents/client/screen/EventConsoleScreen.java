@@ -417,7 +417,11 @@ public class EventConsoleScreen extends EventScreen<EventConsoleMenu> {
 
     /** Erase never runs anything here: it opens the chat with Core's erase command typed in. */
     private void openEraseChat() {
+        //? if >=1.21.9 {
         EventsClient.setScreen(new ChatScreen("/neroland data eraseme", false));
+        //?} else {
+        /*EventsClient.setScreen(new ChatScreen("/neroland data eraseme"));
+        *///?}
     }
 
     @Override

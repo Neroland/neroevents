@@ -15,6 +15,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
+import za.co.neroland.nerolandcore.data.SavedDataCompat;
+
 import org.jetbrains.annotations.Nullable;
 
 import za.co.neroland.nerolandcore.data.SavedDataRecovery;
@@ -50,7 +52,7 @@ public final class PrivacyOptOuts extends SavedData {
             Codec.STRING.listOf().optionalFieldOf("opted_out", List.of()).forGetter(Root::optedOut)
     ).apply(inst, Root::new)).xmap(PrivacyOptOuts::fromData, PrivacyOptOuts::toData);
 
-    public static final SavedDataType<PrivacyOptOuts> TYPE = new SavedDataType<>(ID, PrivacyOptOuts::new, CODEC, null);
+    public static final SavedDataType<PrivacyOptOuts> TYPE = SavedDataCompat.type(ID, PrivacyOptOuts::new, CODEC);
 
     private static final NeroEventsData.StoreEraser ERASER = eraser(PrivacyOptOuts::get);
 

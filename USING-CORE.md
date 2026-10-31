@@ -5,7 +5,7 @@ and is never bundled into the NeroEvents jar.
 
 ## How the build resolves Core
 
-- The version is pinned once, as `nerolandcore_version` in `gradle.properties` (currently `1.15.0`).
+- The version is pinned once, as `nerolandcore_version` in `gradle.properties` (currently `1.17.0`).
 - Each loader node depends on `za.co.neroland.nerolandcore:nerolandcore-<loader>-<mc>:<version>`.
 - `stonecutter.gradle` resolves it from `mavenLocal()` first (a Core you published locally with Core's
   `publishToMavenLocal`), then from Core's GitHub Packages Maven

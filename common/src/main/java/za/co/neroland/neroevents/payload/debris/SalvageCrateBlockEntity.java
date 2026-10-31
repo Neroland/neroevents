@@ -132,7 +132,9 @@ public class SalvageCrateBlockEntity extends BlockEntity implements Container, M
      * The crate is being replaced by another block (an explosion, a creative player, a command): whatever it
      * holds — rolled now if nobody opened it yet — drops on the spot, so the loot is never voided.
      */
+    //? if >=1.21.5 {
     @Override
+    //?}
     public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         if (!(level instanceof ServerLevel serverLevel)) {
             return;
@@ -252,9 +254,16 @@ public class SalvageCrateBlockEntity extends BlockEntity implements Container, M
 
     // --- persistence ----------------------------------------------------------------------------
 
+    //? if >=1.21.6 {
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
+    //?} else {
+    /*@Override
+    protected void saveAdditional(net.minecraft.nbt.CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        ValueOutput output = ValueOutput.of(tag, registries);
+    *///?}
         ContainerHelper.saveAllItems(output, items);
         UUID instance = instanceId;
         if (instance != null) {
@@ -269,9 +278,16 @@ public class SalvageCrateBlockEntity extends BlockEntity implements Container, M
         output.putBoolean(KEY_ROLLED, lootRolled);
     }
 
+    //? if >=1.21.6 {
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
+    //?} else {
+    /*@Override
+    protected void loadAdditional(net.minecraft.nbt.CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        ValueInput input = ValueInput.of(tag, registries);
+    *///?}
         items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
         ContainerHelper.loadAllItems(input, items);
         String instance = input.getStringOr(KEY_INSTANCE, "");

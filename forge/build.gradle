@@ -12,7 +12,10 @@ plugins {
 def mc = stonecutter.current.version
 // Upper bound of this cell's Minecraft range: the next minor line (26.1.2 -> 26.2, 26.2 -> 26.3), same
 // expression as Neroland Core, so each cell's jar declares only its own MC line.
-def mcCeiling = mc.tokenize('.').with { "${it[0]}.${it[1].toInteger() + 1}" }
+//
+// 1.21.x cells are bounded to their API line instead (mc_floor_<v> / mc_ceiling_<v> in gradle.properties).
+def mcCeiling = project.findProperty("mc_ceiling_${mc}") ?: mc.tokenize('.').with { "${it[0]}.${it[1].toInteger() + 1}" }
+def mcFloor = project.findProperty("mc_floor_${mc}") ?: mc
 def forgeVersion = project.findProperty("forge_version_${mc}")
 def jeiVersion = project.findProperty("jei_version_${mc}")
 def emiFile = project.findProperty("emi_file_neoforge_${mc}")
@@ -37,7 +40,8 @@ def siblingIds = ['nerospace', 'nerocreatures', 'nerocolonies', 'neroagriculture
 def siblingPkg = [nerospace: 'nerospace', nerocreatures: 'creatures', nerocolonies: 'colonies', neroagriculture: 'agriculture', nerofactions: 'factions']
 def siblingCls = [nerospace: 'Nerospace', nerocreatures: 'Creatures', nerocolonies: 'Colonies', neroagriculture: 'Agriculture', nerofactions: 'Factions']
 def siblingRun = [nerospace: 'withNerospace', nerocreatures: 'withNeroCreatures', nerocolonies: 'withNeroColonies', neroagriculture: 'withNeroAgriculture', nerofactions: 'withNeroFactions']
-def siblingOn = siblingIds.collectEntries { id -> [(id): compatOn("${id}_compat")] }
+// `<x>_compat_<mc>=false` switches a sibling off for this Minecraft version only (no build of it for this line).
+def siblingOn = siblingIds.collectEntries { id -> [(id): compatOn("${id}_compat") && compatOn("${id}_compat_${mc}")] }
 def opacVersion = rootProject.findProperty("opac_version_${mc}")
 def opacOn = compatOn('opac_compat') && opacVersion != null
 siblingIds.each { id ->
@@ -129,7 +133,10 @@ repositories {
 
 dependencies {
     implementation minecraft.dependency("net.minecraftforge:forge:${forgeVersion}")
-    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.6'
+    // EventBus 7's compile-time validator; Forge before 1.21.6 ships EventBus 6, which it cannot validate.
+    if (stonecutter.eval(mc, '>=1.21.6')) {
+        annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.6'
+    }
 
     // Neroland Core — REQUIRED shared foundation (config schema). Core ships as its own mod and
     // loads BEFORE NeroEvents (see mods.toml, ordering = AFTER); it is never bundled.
@@ -185,7 +192,7 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
         mod_authors               : rootProject.mod_authors,
         mod_license               : rootProject.mod_license,
         forge_loader_version_range: "[${forgeMajor},)",
-        minecraft_version_range   : "[${mc},${mcCeiling})",
+        minecraft_version_range   : "[${mcFloor},${mcCeiling})",
         // Floor at the compiled Core version — see the NeoForge build script for the reasoning.
         nerolandcore_version_range: "[${nerolandcoreVersion},2.0)",
         nerospace_dep       : siblingOn.nerospace ? tomlDep('nerospace', rootProject.nerospace_version, 'mandatory', 'false') : '',
@@ -237,7 +244,7 @@ tasks.register('ecjCheck', JavaExec) {
         ecjSources.text = sourceSets.main.java.files.collect { it.absolutePath.replace('\\', '/') }.join('\n') + '\n'
         def srcDirs = ['@' + ecjSources.absolutePath.replace('\\', '/')]
         args = [
-                '--release', '25',
+                '--release', "${project.javaRelease}",
                 '-proc:none',
                 '-d', 'none',
                 '-properties', rootProject.file('tools/ecj.prefs').absolutePath,

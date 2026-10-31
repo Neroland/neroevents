@@ -14,6 +14,8 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
+import za.co.neroland.nerolandcore.data.SavedDataCompat;
+
 import za.co.neroland.nerolandcore.data.SavedDataRecovery;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
@@ -50,7 +52,7 @@ public final class WreckState extends SavedData implements WreckDecay.Store {
             RECORD_CODEC.listOf().optionalFieldOf("records", List.of()).forGetter(Root::records)
     ).apply(inst, Root::new)).xmap(WreckState::fromData, WreckState::toData);
 
-    public static final SavedDataType<WreckState> TYPE = new SavedDataType<>(ID, WreckState::new, CODEC, null);
+    public static final SavedDataType<WreckState> TYPE = SavedDataCompat.type(ID, WreckState::new, CODEC);
 
     private final List<WreckRecord> records = new ArrayList<>();
     private int cursor;

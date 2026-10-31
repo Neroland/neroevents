@@ -1,10 +1,9 @@
 package za.co.neroland.neroevents.payload.registry;
 
-import java.util.Set;
-
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
+import za.co.neroland.nerolandcore.registry.BlockEntityTypeCompat;
 import za.co.neroland.nerolandcore.registry.RegistrationProvider;
 import za.co.neroland.nerolandcore.registry.RegistrationProvider.RegistryEntry;
 
@@ -25,13 +24,13 @@ public final class CorePayloadBlockEntities {
 
     public static final RegistryEntry<BlockEntityType<CraterPocketBlockEntity>> CRATER_POCKET =
             BLOCK_ENTITIES.register("crater_pocket",
-                    key -> new BlockEntityType<>(CraterPocketBlockEntity::new,
-                            Set.of(CorePayloadBlocks.CRATER_POCKET.get())));
+                    key -> BlockEntityTypeCompat.create(CraterPocketBlockEntity::new,
+                            CorePayloadBlocks.CRATER_POCKET.get()));
 
     public static final RegistryEntry<BlockEntityType<SalvageCrateBlockEntity>> SALVAGE_CRATE =
             BLOCK_ENTITIES.register("salvage_crate",
-                    key -> new BlockEntityType<>(SalvageCrateBlockEntity::new,
-                            Set.of(CorePayloadBlocks.SALVAGE_CRATE.get())));
+                    key -> BlockEntityTypeCompat.create(SalvageCrateBlockEntity::new,
+                            CorePayloadBlocks.SALVAGE_CRATE.get()));
 
     private CorePayloadBlockEntities() {
     }

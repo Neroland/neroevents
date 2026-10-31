@@ -1,7 +1,5 @@
 package za.co.neroland.neroevents.console;
 
-import java.util.Set;
-
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
@@ -13,6 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 
+import za.co.neroland.nerolandcore.registry.BlockEntityTypeCompat;
 import za.co.neroland.nerolandcore.registry.RegistrationProvider;
 import za.co.neroland.nerolandcore.registry.RegistrationProvider.RegistryEntry;
 
@@ -48,7 +47,7 @@ public final class ConsoleBlocks {
 
     public static final RegistryEntry<BlockEntityType<EventConsoleBlockEntity>> EVENT_CONSOLE_BLOCK_ENTITY =
             BLOCK_ENTITIES.register("event_console",
-                    key -> new BlockEntityType<>(EventConsoleBlockEntity::new, Set.of(EVENT_CONSOLE.get())));
+                    key -> BlockEntityTypeCompat.create(EventConsoleBlockEntity::new, EVENT_CONSOLE.get()));
 
     public static final RegistryEntry<MenuType<EventConsoleMenu>> EVENT_CONSOLE_MENU = MENUS.register("event_console",
             key -> new MenuType<>(EventConsoleMenu::new, FeatureFlags.VANILLA_SET));

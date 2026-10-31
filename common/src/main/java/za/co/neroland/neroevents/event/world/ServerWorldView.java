@@ -156,11 +156,19 @@ public final class ServerWorldView implements WorldView {
 
     @Override
     public Optional<BlockPos> spawnPosition(Identifier dimension) {
+        //? if >=1.21.9 {
         LevelData.RespawnData spawn = server.overworld().getRespawnData();
         if (spawn.dimension() == null || !spawn.dimension().identifier().equals(dimension)) {
             return Optional.empty();
         }
         return Optional.of(spawn.pos());
+        //?} else {
+        /*// Before 1.21.9 the world spawn always lies in the overworld.
+        if (!net.minecraft.world.level.Level.OVERWORLD.identifier().equals(dimension)) {
+            return Optional.empty();
+        }
+        return Optional.of(server.overworld().getSharedSpawnPos());
+        *///?}
     }
 
     @Override

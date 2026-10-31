@@ -58,7 +58,7 @@ NeroEvents is designed to store **the minimum possible**. The scheduler and part
 
 ## Requirements & compatibility
 
-- **Requires [Neroland Core](https://modrinth.com/mod/nerolandcore)** — install it alongside NeroEvents (it loads first).
+- **Requires [Neroland Core](https://nerolandmc.net/mods/neroland-core/)** — install it alongside NeroEvents (it loads first).
 - Soft synergies with **Nerospace**, **NeroEconomy**, **NeroFactions**, **NeroCreatures**, **NeroRuins** and **NeroAgriculture** — each unlocks more event payloads when present, none is required.
 - **Modpacks are allowed and encouraged** — any platform, no need to ask. Use the official files and credit *NeroEvents by Neroland* with links to the [CurseForge page](https://www.curseforge.com/minecraft/mc-mods/neroevents) and the [GitHub repository](https://github.com/Neroland/neroevents). Full terms: [LICENSE](https://github.com/Neroland/neroevents/blob/main/LICENSE).
 

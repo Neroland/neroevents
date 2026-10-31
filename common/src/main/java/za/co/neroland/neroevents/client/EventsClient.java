@@ -27,8 +27,13 @@ import za.co.neroland.neroevents.platform.Services;
 public final class EventsClient {
 
     /** Hides the event HUD until the next phase change. */
+    //? if >=1.21.9 {
     public static final KeyMapping DISMISS_HUD = new KeyMapping("key.neroevents.dismiss_hud", InputConstants.KEY_H,
             KeyMapping.Category.MISC);
+    //?} else {
+    /*public static final KeyMapping DISMISS_HUD = new KeyMapping("key.neroevents.dismiss_hud", InputConstants.KEY_H,
+            "key.categories.misc");
+    *///?}
 
     private static @Nullable HudSettings settings;
     private static boolean tintRegistered;
@@ -106,7 +111,11 @@ public final class EventsClient {
             return;
         }
         try {
+            //? if >=26.1 {
             mc.getBlockColors().register(List.of(ConsoleTint.INSTANCE), ConsoleBlocks.EVENT_CONSOLE.get());
+            //?} else {
+            /*mc.getBlockColors().register(ConsoleTint.INSTANCE, ConsoleBlocks.EVENT_CONSOLE.get());
+            *///?}
         } catch (RuntimeException | LinkageError e) {
             NeroEventsCommon.LOGGER.debug("[NeroEvents] console tint not registered ({})", e.getClass().getName());
         }
@@ -122,6 +131,12 @@ public final class EventsClient {
     private static java.lang.reflect.Method hudIsHidden;
 
     public static boolean isGuiHidden(Minecraft mc) {
+        //? if <26.1 {
+        /*// Before 26.1 the flag was the public Options.hideGui.
+        if (mc != null) {
+            return mc.options.hideGui;
+        }
+        *///?}
         if (!hideGuiResolved) {
             hideGuiResolved = true;
             try {

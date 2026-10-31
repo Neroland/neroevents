@@ -55,32 +55,77 @@ public final class ForgeClientSetup {
 
     /** Forge 26.x: each event class owns a static {@code BUS}; the client-setup event lives on the mod bus group. */
     public static void init(FMLJavaModLoadingContext context) {
+        //? if >=1.21.9 {
         FMLClientSetupEvent.getBus(context.getModBusGroup()).addListener(ForgeClientSetup::onClientSetup);
         EntityRenderersEvent.RegisterRenderers.BUS.addListener(ForgeClientSetup::onRegisterEntityRenderers);
         RegisterParticleProvidersEvent.BUS.addListener(ForgeClientSetup::onRegisterParticleProviders);
-        AddGuiOverlayLayersEvent.BUS.addListener(event -> event.getLayeredDraw().add(
-                Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "event_hud"), (g, delta) -> EventHud.render(g)));
+        AddGuiOverlayLayersEvent.BUS.addListener(ForgeClientSetup::onAddGuiLayers);
         RegisterKeyMappingsEvent.BUS.addListener(event -> event.register(EventsClient.DISMISS_HUD));
-        RegisterColorHandlersEvent.Block.BUS.addListener(event ->
-                event.register(List.of(ConsoleTint.INSTANCE), ConsoleBlocks.EVENT_CONSOLE.get()));
-        TickEvent.ClientTickEvent.Post.BUS.addListener(event -> {
-            EventsClient.tick();
-            GalleryCaptureHarness.tick();
-        });
+        RegisterColorHandlersEvent.Block.BUS.addListener(ForgeClientSetup::onRegisterBlockColors);
+        TickEvent.ClientTickEvent.Post.BUS.addListener(event -> clientTick());
+        RegisterClientCommandsEvent.BUS.addListener(ForgeClientSetup::onRegisterClientCommands);
+        ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(event -> loggedOut());
+        //?} else if >=1.21.6 {
+        /*// Forge 1.21.6 - 1.21.8: the mod-bus events are reached through the mod's bus group.
+        var modBusGroup = context.getModBusGroup();
+        FMLClientSetupEvent.getBus(modBusGroup).addListener(ForgeClientSetup::onClientSetup);
+        EntityRenderersEvent.RegisterRenderers.getBus(modBusGroup).addListener(ForgeClientSetup::onRegisterEntityRenderers);
+        RegisterParticleProvidersEvent.getBus(modBusGroup).addListener(ForgeClientSetup::onRegisterParticleProviders);
+        AddGuiOverlayLayersEvent.getBus(modBusGroup).addListener(ForgeClientSetup::onAddGuiLayers);
+        RegisterKeyMappingsEvent.getBus(modBusGroup).addListener(event -> event.register(EventsClient.DISMISS_HUD));
+        RegisterColorHandlersEvent.Block.getBus(modBusGroup).addListener(ForgeClientSetup::onRegisterBlockColors);
+        TickEvent.ClientTickEvent.Post.BUS.addListener(event -> clientTick());
+        RegisterClientCommandsEvent.BUS.addListener(ForgeClientSetup::onRegisterClientCommands);
+        ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(event -> loggedOut());
+        *///?} else {
+        /*// Forge before 1.21.6 (EventBus 6): mod-lifecycle events on the mod's own bus, game events on the shared
+        // MinecraftForge bus, listeners typed by their parameter.
+        net.minecraftforge.eventbus.api.IEventBus modBus = context.getModEventBus();
+        modBus.addListener(ForgeClientSetup::onClientSetup);
+        modBus.addListener(ForgeClientSetup::onRegisterEntityRenderers);
+        modBus.addListener(ForgeClientSetup::onRegisterParticleProviders);
+        modBus.addListener(ForgeClientSetup::onAddGuiLayers);
+        modBus.addListener((RegisterKeyMappingsEvent event) -> event.register(EventsClient.DISMISS_HUD));
+        modBus.addListener(ForgeClientSetup::onRegisterBlockColors);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((TickEvent.ClientTickEvent.Post event) -> clientTick());
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(ForgeClientSetup::onRegisterClientCommands);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(
+                (ClientPlayerNetworkEvent.LoggingOut event) -> loggedOut());
+        *///?}
         // The payload effects (trails, impact flash, pod beacon) and the client-only /nsevgallery and /nsevrender.
         EventFxClient.install();
-        RegisterClientCommandsEvent.BUS.addListener(event -> {
-            GalleryCaptureHarness.registerClientCommands(event.getDispatcher());
-            RenderBudgetCommand.register(event.getDispatcher());
-        });
         context.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> new EventHudConfigScreen(parent)));
-        ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(event -> {
-            StormClient.reset();
-            EventFxClient.reset();
-            RenderBudget.reset();
-            EventNetwork.clearClientCaches();
-        });
+    }
+
+    private static void clientTick() {
+        EventsClient.tick();
+        GalleryCaptureHarness.tick();
+    }
+
+    private static void loggedOut() {
+        StormClient.reset();
+        EventFxClient.reset();
+        RenderBudget.reset();
+        EventNetwork.clearClientCaches();
+    }
+
+    private static void onAddGuiLayers(AddGuiOverlayLayersEvent event) {
+        event.getLayeredDraw().add(
+                Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "event_hud"), (g, delta) -> EventHud.render(g));
+    }
+
+    private static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event) {
+        //? if >=26.1 {
+        event.register(List.of(ConsoleTint.INSTANCE), ConsoleBlocks.EVENT_CONSOLE.get());
+        //?} else {
+        /*event.register(ConsoleTint.INSTANCE, ConsoleBlocks.EVENT_CONSOLE.get());
+        *///?}
+    }
+
+    private static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
+        GalleryCaptureHarness.registerClientCommands(event.getDispatcher());
+        RenderBudgetCommand.register(event.getDispatcher());
     }
 
     private static void onClientSetup(FMLClientSetupEvent event) {

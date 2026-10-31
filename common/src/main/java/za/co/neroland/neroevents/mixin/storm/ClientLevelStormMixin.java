@@ -3,7 +3,9 @@ package za.co.neroland.neroevents.mixin.storm;
 import java.util.function.BooleanSupplier;
 
 import net.minecraft.client.multiplayer.ClientLevel;
+//? if >=1.21.11 {
 import net.minecraft.world.attribute.EnvironmentAttributeSystem;
+//?}
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,11 +31,20 @@ import za.co.neroland.neroevents.storm.client.StormRenderHooks;
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelStormMixin {
 
+    //? if >=1.21.11 {
     @Inject(method = "addEnvironmentAttributeLayers", at = @At("RETURN"), require = 0)
     private void neroevents$stormLayers(EnvironmentAttributeSystem.Builder builder,
             CallbackInfoReturnable<EnvironmentAttributeSystem.Builder> cir) {
         StormRenderHooks.addLayers((ClientLevel) (Object) this, builder);
     }
+    //?} else {
+    /*// Before 1.21.11 there are no environment attributes (no storm sky/fog tint, see StormRenderHooks); the
+    // constructor is still where a new client level starts.
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void neroevents$newLevel(CallbackInfo ci) {
+        StormRenderHooks.newLevel();
+    }
+    *///?}
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void neroevents$stormTick(BooleanSupplier haveTime, CallbackInfo ci) {

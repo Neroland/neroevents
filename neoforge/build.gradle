@@ -15,7 +15,10 @@ def mc = stonecutter.current.version
 // Upper bound of this cell's Minecraft range: the next minor line (26.1.2 -> 26.2, 26.2 -> 26.3), same
 // expression as Neroland Core. Without it a jar built for one line loads on the next and fails on a changed
 // signature at runtime instead of a clean loader message.
-def mcCeiling = mc.tokenize('.').with { "${it[0]}.${it[1].toInteger() + 1}" }
+//
+// 1.21.x cells are bounded to their API line instead (mc_floor_<v> / mc_ceiling_<v> in gradle.properties).
+def mcCeiling = project.findProperty("mc_ceiling_${mc}") ?: mc.tokenize('.').with { "${it[0]}.${it[1].toInteger() + 1}" }
+def mcFloor = project.findProperty("mc_floor_${mc}") ?: mc
 def neoVersion = project.findProperty("neo_version_${mc}")
 def jeiVersion = project.findProperty("jei_version_${mc}")
 def emiFile = project.findProperty("emi_file_neoforge_${mc}")
@@ -36,7 +39,8 @@ def siblingIds = ['nerospace', 'nerocreatures', 'nerocolonies', 'neroagriculture
 def siblingPkg = [nerospace: 'nerospace', nerocreatures: 'creatures', nerocolonies: 'colonies', neroagriculture: 'agriculture', nerofactions: 'factions']
 def siblingCls = [nerospace: 'Nerospace', nerocreatures: 'Creatures', nerocolonies: 'Colonies', neroagriculture: 'Agriculture', nerofactions: 'Factions']
 def siblingRun = [nerospace: 'withNerospace', nerocreatures: 'withNeroCreatures', nerocolonies: 'withNeroColonies', neroagriculture: 'withNeroAgriculture', nerofactions: 'withNeroFactions']
-def siblingOn = siblingIds.collectEntries { id -> [(id): compatOn("${id}_compat")] }
+// `<x>_compat_<mc>=false` switches a sibling off for this Minecraft version only (no build of it for this line).
+def siblingOn = siblingIds.collectEntries { id -> [(id): compatOn("${id}_compat") && compatOn("${id}_compat_${mc}")] }
 def opacVersion = rootProject.findProperty("opac_version_${mc}")
 def opacOn = compatOn('opac_compat') && opacVersion != null
 siblingIds.each { id ->
@@ -185,7 +189,7 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
         mod_name               : rootProject.mod_name,
         mod_authors            : rootProject.mod_authors,
         mod_license            : rootProject.mod_license,
-        minecraft_version_range: "[${mc},${mcCeiling})",
+        minecraft_version_range: "[${mcFloor},${mcCeiling})",
         // Floor at the compiled Core version: a too-old Core would be missing APIs NeroEvents
         // links against, which surfaces as a NoSuchMethodError deep in gameplay instead of a clean
         // "update Neroland Core" loader message.
@@ -282,7 +286,7 @@ tasks.register('ecjCheck', JavaExec) {
         ecjSources.text = sourceSets.main.java.files.collect { it.absolutePath.replace('\\', '/') }.join('\n') + '\n'
         def srcDirs = ['@' + ecjSources.absolutePath.replace('\\', '/')]
         args = [
-                '--release', '25',
+                '--release', "${project.javaRelease}",
                 '-proc:none',
                 '-d', 'none',
                 '-properties', rootProject.file('tools/ecj.prefs').absolutePath,

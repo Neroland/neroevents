@@ -9,6 +9,11 @@ import net.minecraft.network.chat.Component;
 
 import org.jetbrains.annotations.Nullable;
 
+//? if <1.21.9 {
+/*import za.co.neroland.neroevents.compat.mc.KeyEvent;
+import za.co.neroland.neroevents.compat.mc.MouseButtonEvent;
+*///?}
+
 /**
  * Base of every interactive NeroEvents widget (the NeroSecurity widget pattern). It owns the rule the "no
  * manual needed" test checks hardest: <b>a disabled control always says why</b> — {@link #disable(Component)}
@@ -114,4 +119,29 @@ public abstract class EventWidget extends AbstractWidget {
     protected void updateWidgetNarration(NarrationElementOutput output) {
         defaultButtonNarrationText(output);
     }
+
+    //? if <1.21.9 {
+    /*// Before 1.21.9 widgets receive raw mouse and key arguments. These bridges wrap them in the look-alike events
+    // (compat.mc) and route them to the event-shaped methods the widgets override, as on newer lines.
+    @Override
+    public final void onClick(double mouseX, double mouseY) {
+        onClick(new MouseButtonEvent(mouseX, mouseY, 0), false);
+    }
+
+    public void onClick(MouseButtonEvent event, boolean doubleClick) {
+    }
+
+    public final boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        return mouseClicked(event.x(), event.y(), event.button());
+    }
+
+    @Override
+    public final boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        return keyPressed(new KeyEvent(keyCode, scanCode, modifiers));
+    }
+
+    public boolean keyPressed(KeyEvent event) {
+        return false;
+    }
+    *///?}
 }

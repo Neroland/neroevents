@@ -134,6 +134,12 @@ public class SupplyPodEntity extends Entity {
         return this.interpolation;
     }
     //?}
+    //? if <1.21.5 {
+    /*@Override
+    public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
+        this.interpolation.interpolateTo(x, y, z, yRot, xRot, steps);
+    }
+    *///?}
 
     public int tier() {
         return Math.max(1, Math.min(3, this.entityData.get(DATA_TIER)));
@@ -248,13 +254,24 @@ public class SupplyPodEntity extends Entity {
         return !isRemoved();
     }
 
+    //? if >=1.21.2 {
     @Override
     public boolean hurtServer(ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float amount) {
+    //?} else {
+    /*@Override
+    public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
+    *///?}
         return false; // indestructible
     }
 
+    //? if >=1.21.6 {
     @Override
     protected void readAdditionalSaveData(ValueInput input) {
+    //?} else {
+    /*@Override
+    protected void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        ValueInput input = ValueInput.of(tag, this.registryAccess());
+    *///?}
         String instance = input.getStringOr("NeroEventsInstance", "");
         this.instanceId = instance.isEmpty() ? null : parseUuid(instance);
         this.entityData.set(DATA_TIER, input.getIntOr("Tier", 1));
@@ -277,8 +294,14 @@ public class SupplyPodEntity extends Entity {
         }
     }
 
+    //? if >=1.21.6 {
     @Override
     protected void addAdditionalSaveData(ValueOutput output) {
+    //?} else {
+    /*@Override
+    protected void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        ValueOutput output = ValueOutput.of(tag, this.registryAccess());
+    *///?}
         UUID instance = instanceId;
         if (instance != null) {
             output.putString("NeroEventsInstance", instance.toString());

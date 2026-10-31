@@ -13,9 +13,9 @@ and kill switches.
 
 ## Build targets
 
-- **Minecraft:** 26.1.2, 26.2 and 26.3
-- **Loaders:** NeoForge, MinecraftForge/Forge, Fabric (the "9 cells")
-- **Java:** 25
+- **Minecraft:** 1.21.1, 1.21.4, 1.21.5, 1.21.8 (also 1.21.7), 1.21.10 (also 1.21.9), 1.21.11, 26.1.2, 26.2 and 26.3
+- **Loaders:** NeoForge, MinecraftForge/Forge, Fabric (the "27 cells")
+- **Java:** 21 for the 1.21.x cells, 25 for 26.x (build with JDK 25; Gradle provisions 21)
 - Mod id: `neroevents` · package `za.co.neroland.neroevents`
 - Required: Neroland Core (see [USING-CORE.md](USING-CORE.md)). Everything else is optional.
 
@@ -81,9 +81,8 @@ The build is the repo root, with a flattened cross-loader structure driven by St
 
 ```sh
 ./gradlew :fabric:26.2:build          # one cell
-./gradlew :neoforge:26.1.2:build :neoforge:26.2:build :neoforge:26.3:build \
-          :forge:26.1.2:build :forge:26.2:build :forge:26.3:build \
-          :fabric:26.1.2:build :fabric:26.2:build :fabric:26.3:build   # all nine
+./gradlew :neoforge:1.21.1:build :fabric:1.21.1:build :forge:1.21.1:build   # one Minecraft line, all loaders
+# all 27: :<fabric|neoforge|forge>:<1.21.1|1.21.4|1.21.5|1.21.8|1.21.10|1.21.11|26.1.2|26.2|26.3>:build
 ./gradlew :fabric:26.2:ecjCheck        # static analysis
 ```
 

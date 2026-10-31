@@ -71,9 +71,16 @@ public class CraterPocketBlockEntity extends BlockEntity {
         return true;
     }
 
+    //? if >=1.21.6 {
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
+    //?} else {
+    /*@Override
+    protected void saveAdditional(net.minecraft.nbt.CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        ValueOutput output = ValueOutput.of(tag, registries);
+    *///?}
         UUID instance = instanceId;
         if (instance != null) {
             output.putString(KEY_INSTANCE, instance.toString());
@@ -87,9 +94,16 @@ public class CraterPocketBlockEntity extends BlockEntity {
         output.putBoolean(KEY_ROLLED, rolled);
     }
 
+    //? if >=1.21.6 {
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
+    //?} else {
+    /*@Override
+    protected void loadAdditional(net.minecraft.nbt.CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        ValueInput input = ValueInput.of(tag, registries);
+    *///?}
         instanceId = parseUuid(input.getStringOr(KEY_INSTANCE, ""));
         String table = input.getStringOr(KEY_TABLE, "");
         lootTable = table.isEmpty() ? null : Identifier.tryParse(table);

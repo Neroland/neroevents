@@ -69,8 +69,7 @@ permission and creative mode; `/nsevrender` needs neither.
   The screenshots stay on your computer. Other players are **not** hidden: if anyone else is in the
   world, their name tag and skin can appear in a frame, and the capture says so in chat. A player's
   name is personal data, and a published image cannot be taken back, so **look at every capture for
-  other players' names before you add it to the repository's gallery** (the gallery workflow publishes
-  every tracked screenshot to Modrinth). Best of all, capture in a world where nobody else is online.
+  other players' names before you add it to the repository's gallery**. Best of all, capture in a world where nobody else is online.
 - `/nsevrender` — how many meteors, pods, debris and war beacons were drawn per frame, how long their
   renderers took, the frame time and the effect particles spawned (averaged over the last 200 frames).
   `/nsevrender reset` starts the count again.

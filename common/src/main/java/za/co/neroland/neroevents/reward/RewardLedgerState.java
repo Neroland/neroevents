@@ -13,6 +13,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
+import za.co.neroland.nerolandcore.data.SavedDataCompat;
+
 import za.co.neroland.nerolandcore.data.SavedDataRecovery;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
@@ -46,7 +48,7 @@ public final class RewardLedgerState extends SavedData {
     ).apply(inst, Root::new)).xmap(RewardLedgerState::fromData, RewardLedgerState::toData);
 
     public static final SavedDataType<RewardLedgerState> TYPE =
-            new SavedDataType<>(ID, RewardLedgerState::new, CODEC, null);
+            SavedDataCompat.type(ID, RewardLedgerState::new, CODEC);
 
     private static final NeroEventsData.StoreEraser ERASER = eraser(RewardLedgerState::get);
 

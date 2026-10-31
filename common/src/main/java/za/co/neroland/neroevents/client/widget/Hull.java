@@ -92,8 +92,15 @@ public final class Hull {
 
     /** One 8x8 glyph from the sheet, tinted {@code rgb} (the sheet is white with a baked dark outline). */
     public static void glyph(GuiGraphicsExtractor g, int x, int y, int slot, int rgb) {
+        //? if >=1.21.2 {
         g.blit(RenderPipelines.GUI_TEXTURED, GLYPHS, x, y, slot * (float) GLYPH, 0.0F, GLYPH, GLYPH, 64, 16,
                 EventColours.opaque(rgb));
+        //?} else {
+        /*// 1.21.1's blit has no colour argument: tint through the shader colour instead.
+        g.setColor(((rgb >> 16) & 0xFF) / 255.0F, ((rgb >> 8) & 0xFF) / 255.0F, (rgb & 0xFF) / 255.0F, 1.0F);
+        g.blit(GLYPHS, x, y, slot * (float) GLYPH, 0.0F, GLYPH, GLYPH, 64, 16);
+        g.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        *///?}
     }
 
     /** The severity glyph in its colour. */

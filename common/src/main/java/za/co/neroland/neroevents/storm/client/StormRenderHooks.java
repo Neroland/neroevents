@@ -1,5 +1,6 @@
 package za.co.neroland.neroevents.storm.client;
 
+//? if >=1.21.11 {
 import java.util.Optional;
 
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -11,6 +12,7 @@ import net.minecraft.world.attribute.EnvironmentAttributes;
 
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+//?}
 
 /**
  * Client only. Adds the storm's sky and fog to a client level's environment-attribute system: time-based
@@ -38,7 +40,17 @@ public final class StormRenderHooks {
         return installed;
     }
 
-    /** Called from {@code ClientLevel#addEnvironmentAttributeLayers}. */
+    //? if <1.21.11 {
+    /*// Before 1.21.11 there is no environment-attribute system to layer the storm sky and fog onto, so the tint
+    // is gated off there (particles, sounds and gameplay are unaffected). The level constructor is still the
+    // "new level" point that clears the client storm mirror.
+    public static void newLevel() {
+        StormClient.reset();
+    }
+    *///?}
+
+    //? if >=1.21.11 {
+    // Called from ClientLevel#addEnvironmentAttributeLayers.
     public static void addLayers(ClientLevel level, EnvironmentAttributeSystem.Builder builder) {
         installed = true;
         StormClient.reset();
@@ -82,7 +94,7 @@ public final class StormRenderHooks {
         builder.addTimeBasedLayer(raw, layer);
     }
 
-    /** Tints a packed ARGB {@code Integer} or a {@code Vector3fc}; anything else passes through. */
+    // Tints a packed ARGB Integer or a Vector3fc; anything else passes through.
     static Object tint(Identifier dimension, Object value) {
         Optional<ClientStormState.View> view = ClientStormState.view(dimension);
         if (view.isEmpty() || value == null) {
@@ -100,4 +112,5 @@ public final class StormRenderHooks {
         }
         return value;
     }
+//?}
 }
