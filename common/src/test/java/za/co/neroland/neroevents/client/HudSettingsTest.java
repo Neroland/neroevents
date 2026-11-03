@@ -102,4 +102,83 @@ class HudSettingsTest {
         assertEquals(1.0F, s.scale());
         assertEquals(Anchor.TOP_CENTRE, HudSettings.read(dir.resolve("missing.properties")).anchor(Element.PILL));
     }
+
+    @Test
+    void dropsAwayFromADotStayWhereTheyLand() {
+        HudSettings s = new HudSettings();
+        int w = 640;
+        int h = 360;
+        // Dropped at (100, 200): nearest anchor is middle-left, well outside the snap radius.
+        s.dropAt(Element.PILL, 100, 200, 120, 16, w, h, 6);
+        assertEquals(Anchor.MIDDLE_LEFT, s.anchor(Element.PILL));
+        assertTrue(s.isFree(Element.PILL));
+        assertEquals(100, s.x(Element.PILL, w, 120), 1);
+        assertEquals(200, s.y(Element.PILL, h, 16), 1);
+    }
+
+    @Test
+    void dropsNearADotSnapOntoIt() {
+        HudSettings s = new HudSettings();
+        int w = 640;
+        int h = 360;
+        // Element centre lands 3 px from the bottom-right corner point.
+        s.dropAt(Element.BANNER, w - 3 - 110, h - 3 - 14, 220, 28, w, h, 6);
+        assertEquals(Anchor.BOTTOM_RIGHT, s.anchor(Element.BANNER));
+        assertFalse(s.isFree(Element.BANNER));
+    }
+
+    @Test
+    void freePlacementScalesWithTheScreenAndStaysOnIt() {
+        HudSettings s = new HudSettings();
+        s.dropAt(Element.OBJECTIVES, 100, 200, 160, 36, 640, 360, 6);
+        int smallX = s.x(Element.OBJECTIVES, 320, 160);
+        assertTrue(smallX >= 0 && smallX + 160 <= 320, "kept on a smaller screen");
+        s.setPlacement(Element.OBJECTIVES, Anchor.TOP_LEFT, HudSettings.MAX_OFFSET * 5, -HudSettings.MAX_OFFSET * 5);
+        assertEquals(HudSettings.MAX_OFFSET, s.offsetX(Element.OBJECTIVES), "offsets are clamped");
+        assertEquals(640 - 160, s.x(Element.OBJECTIVES, 640, 160), "never past the right edge");
+        assertEquals(0, s.y(Element.OBJECTIVES, 360, 36), "never past the top edge");
+    }
+
+    @Test
+    void arrowNudgesAlwaysMoveAndSetAnchorClearsThem() {
+        HudSettings s = new HudSettings();
+        int before = s.x(Element.PILL, 640, 120);
+        s.nudge(Element.PILL, 1, 0, 4000, 2000);
+        assertTrue(s.offsetX(Element.PILL) >= 1, "a one-pixel nudge on a huge screen still moves");
+        s.nudge(Element.PILL, -10, 10, 640, 360);
+        assertTrue(s.x(Element.PILL, 640, 120) < before);
+        assertTrue(s.isFree(Element.PILL));
+        s.setAnchor(Element.PILL, Anchor.TOP_CENTRE);
+        assertFalse(s.isFree(Element.PILL));
+    }
+
+    @Test
+    void sharedSpotNeedsTheSameAnchorAndOffset() {
+        HudSettings s = new HudSettings();
+        assertTrue(s.sharesSpot(Element.PILL, Element.OBJECTIVES));
+        s.nudge(Element.OBJECTIVES, 0, 10, 640, 360);
+        assertFalse(s.sharesSpot(Element.PILL, Element.OBJECTIVES));
+    }
+
+    @Test
+    void offsetsRoundTripAndBadOnesFallBackToZero() {
+        HudSettings s = new HudSettings();
+        s.setPlacement(Element.BANNER, Anchor.BOTTOM_LEFT, 125, -40);
+        Properties props = new Properties();
+        s.store(props);
+        HudSettings back = new HudSettings();
+        back.load(props);
+        assertEquals(Anchor.BOTTOM_LEFT, back.anchor(Element.BANNER));
+        assertEquals(125, back.offsetX(Element.BANNER));
+        assertEquals(-40, back.offsetY(Element.BANNER));
+
+        props.setProperty("offset.banner", "lots,of");
+        back.load(props);
+        assertFalse(back.isFree(Element.BANNER));
+        Properties old = new Properties();
+        old.setProperty("anchor.pill", "BOTTOM_RIGHT"); // a file written before offsets existed
+        back.load(old);
+        assertEquals(Anchor.BOTTOM_RIGHT, back.anchor(Element.PILL));
+        assertFalse(back.isFree(Element.PILL));
+    }
 }

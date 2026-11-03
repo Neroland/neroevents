@@ -34,7 +34,7 @@ import za.co.neroland.neroevents.storm.client.ClientStormState;
  * to the pill, up to three objective lines, the storm shelter line and vignette, and a world marker toward a
  * public event's anchor while the player is inside its bounds (never for raid targets — the server never sends
  * one). Every element is a 2-px severity band, the 8x8 glyph, an {@code INK} body at alpha {@code 0xC0}, a 1-px
- * {@code EDGE} border and {@code TITLE} text; each sits at its own anchor from {@link HudSettings}. Everything
+ * {@code EDGE} border and {@code TITLE} text; each sits at its own anchor (plus the player's free offset) from {@link HudSettings}. Everything
  * drawn here arrived in {@code HudState}. CLIENT-ONLY.
  */
 public final class EventHud {
@@ -103,29 +103,31 @@ public final class EventHud {
             if (storm.isPresent() && storm.get().exposed() && settings.on(Toggle.COUNTDOWN)) {
                 pillStack.add(shelter(font, storm.get().variant()));
             }
-            Anchor pillAnchor = settings.anchor(Element.PILL);
-            int stackBottom = drawStack(g, font, pillStack, pillAnchor, screenW, screenH);
+            int[] pillSpan = drawStack(g, font, pillStack, settings, Element.PILL, screenW, screenH);
 
             HudEntry focus = firstActive(entries);
             if (focus != null && settings.on(Toggle.OBJECTIVES)) {
                 List<Component> lines = objectives(focus);
                 if (!lines.isEmpty()) {
-                    Anchor anchor = settings.anchor(Element.OBJECTIVES);
                     List<Block> blocks = new ArrayList<>();
                     for (Component line : lines) {
                         blocks.add(new Block(EventColours.severityOf(focus.severity()), line, null, OBJECTIVE_W,
                                 OBJECTIVE_LINE, false));
                     }
-                    if (anchor == pillAnchor && !pillStack.isEmpty()) {
-                        drawStackFrom(g, font, blocks, anchor, screenW, stackBottom);
+                    if (settings.sharesSpot(Element.OBJECTIVES, Element.PILL) && !pillStack.isEmpty()) {
+                        // Same spot as the pill: stack away from the screen edge (below at the top and middle
+                        // rows, above at the bottom row) so the two never overlap or run off screen.
+                        int startY = settings.anchor(Element.PILL).stacksDown() ? pillSpan[1]
+                                : pillSpan[0] - stackHeight(blocks) - GAP;
+                        drawStackFrom(g, font, blocks, settings, Element.OBJECTIVES, screenW, startY);
                     } else {
-                        drawStack(g, font, blocks, anchor, screenW, screenH);
+                        drawStack(g, font, blocks, settings, Element.OBJECTIVES, screenW, screenH);
                     }
                 }
             }
             HudEntry bannerEntry = banner;
             if (bannerEntry != null) {
-                drawBanner(g, font, bannerEntry, since, settings.anchor(Element.BANNER), screenW, screenH);
+                drawBanner(g, font, bannerEntry, since, settings, screenW, screenH);
             }
             if (settings.on(Toggle.MARKER)) {
                 for (HudEntry entry : entries) {
@@ -202,33 +204,37 @@ public final class EventHud {
         return Math.max(block.minW(), text + pad);
     }
 
-    /** Draws a stack from its anchor; returns the y just past the stack (downward) or its top (upward). */
-    private static int drawStack(GuiGraphicsExtractor g, Font font, List<Block> blocks, Anchor anchor, int screenW,
-            int screenH) {
-        if (blocks.isEmpty()) {
-            return anchor.y(screenH, 0);
-        }
+    /** Total height of a stack of blocks, gaps included. */
+    private static int stackHeight(List<Block> blocks) {
         int total = 0;
         for (Block block : blocks) {
             total += block.h() + GAP;
         }
-        int y = anchor.y(screenH, total - GAP);
-        for (Block block : blocks) {
-            int w = blockWidth(font, block);
-            drawBlock(g, font, block, anchor.x(screenW, w), y, w);
-            y += block.h() + GAP;
-        }
-        return y;
+        return Math.max(0, total - GAP);
     }
 
-    private static void drawStackFrom(GuiGraphicsExtractor g, Font font, List<Block> blocks, Anchor anchor,
-            int screenW, int startY) {
+    /** Draws a stack at {@code element}'s placement; returns {top, y just past the bottom}. */
+    private static int[] drawStack(GuiGraphicsExtractor g, Font font, List<Block> blocks, HudSettings settings,
+            Element element, int screenW, int screenH) {
+        if (blocks.isEmpty()) {
+            int y = settings.y(element, screenH, 0);
+            return new int[] {y, y};
+        }
+        int top = settings.y(element, screenH, stackHeight(blocks));
+        int bottom = drawStackFrom(g, font, blocks, settings, element, screenW, top);
+        return new int[] {top, bottom};
+    }
+
+    /** Draws a stack downward from {@code startY} at {@code element}'s horizontal placement; returns the y past it. */
+    private static int drawStackFrom(GuiGraphicsExtractor g, Font font, List<Block> blocks, HudSettings settings,
+            Element element, int screenW, int startY) {
         int y = startY;
         for (Block block : blocks) {
             int w = blockWidth(font, block);
-            drawBlock(g, font, block, anchor.x(screenW, w), y, w);
+            drawBlock(g, font, block, settings.x(element, screenW, w), y, w);
             y += block.h() + GAP;
         }
+        return y;
     }
 
     private static void drawBlock(GuiGraphicsExtractor g, Font font, Block block, int x, int y, int w) {
@@ -249,12 +255,13 @@ public final class EventHud {
         }
     }
 
-    private static void drawBanner(GuiGraphicsExtractor g, Font font, HudEntry entry, int since, Anchor anchor,
-            int screenW, int screenH) {
+    private static void drawBanner(GuiGraphicsExtractor g, Font font, HudEntry entry, int since,
+            HudSettings settings, int screenW, int screenH) {
+        Anchor anchor = settings.anchor(Element.BANNER);
         int age = entry.phaseAge() + since;
         int w = BANNER_W;
-        int x = anchor.x(screenW, w);
-        int y = anchor.y(screenH, BANNER_H);
+        int x = settings.x(Element.BANNER, screenW, w);
+        int y = settings.y(Element.BANNER, screenH, BANNER_H);
         int offset = 0;
         if (age < SLIDE_TICKS) {
             offset = -(BANNER_H + HudSettings.MARGIN) * (SLIDE_TICKS - age) / SLIDE_TICKS;

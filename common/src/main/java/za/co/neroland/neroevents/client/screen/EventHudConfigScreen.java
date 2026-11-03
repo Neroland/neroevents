@@ -6,6 +6,7 @@ import java.util.Map;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -27,9 +28,10 @@ import za.co.neroland.neroevents.client.widget.WidgetText;
 
 /**
  * "Where event messages appear": a miniature of the game screen with the countdown pill, the banner and the
- * objective lines drawn small — drag any of them and it snaps to one of nine anchors — plus the six show/hide
- * switches, the scale ladder and Reset. Every change is saved at once to this computer only; nothing is sent to
- * a server. Opened from the console's gear and from the mod list's config button. CLIENT-ONLY.
+ * objective lines drawn small — drag any of them anywhere (it snaps onto one of nine anchors when dropped near
+ * its dot) and nudge the selected one with the arrow keys (Shift: ten pixels) — plus the six show/hide switches,
+ * the scale ladder and Reset. Every change is saved at once to this computer only; nothing is sent to a server.
+ * Opened from the console's gear, the mod list's config button and the "Move event messages" key. CLIENT-ONLY.
  */
 public class EventHudConfigScreen extends Screen {
 
@@ -176,12 +178,15 @@ public class EventHudConfigScreen extends Screen {
         if (element == dragging) {
             return new int[] {(int) Math.round(dragX), (int) Math.round(dragY), size[0], size[1]};
         }
-        Anchor anchor = settings().anchor(element);
-        int x = m[0] + anchor.x(m[2], size[0]);
-        int y = m[1] + anchor.y(m[3], size[1]);
-        if (element == Element.OBJECTIVES && settings().anchor(Element.PILL) == anchor) {
+        HudSettings s = settings();
+        int x = m[0] + s.x(element, m[2], size[0]);
+        int y = m[1] + s.y(element, m[3], size[1]);
+        if (element == Element.OBJECTIVES && dragging != Element.PILL
+                && s.sharesSpot(Element.OBJECTIVES, Element.PILL)) {
+            // Mirrors EventHud: objectives stack under the pill, or above it on the bottom row.
             int[] pill = elementSize(Element.PILL, m[2]);
-            y += anchor.stacksDown() ? pill[1] + 1 : -(pill[1] + 1);
+            int pillY = m[1] + s.y(Element.PILL, m[3], pill[1]);
+            y = s.anchor(Element.PILL).stacksDown() ? pillY + pill[1] + 1 : pillY - size[1] - 1;
         }
         return new int[] {x, y, size[0], size[1]};
     }
@@ -242,15 +247,44 @@ public class EventHudConfigScreen extends Screen {
         if (element != null) {
             int[] m = mini();
             int[] size = elementSize(element, m[2]);
-            double cx = dragX + size[0] / 2.0 - m[0];
-            double cy = dragY + size[1] / 2.0 - m[1];
             dragging = null;
-            settings().setAnchor(element, Anchor.nearest(cx, cy, m[2], m[3]));
+            // Dropped near a dot: snaps onto that anchor. Anywhere else: stays exactly where it was dropped.
+            settings().dropAt(element, dragX - m[0], dragY - m[1], size[0], size[1], m[2], m[3],
+                    ConsoleLayout.SNAP_RADIUS);
             changed();
             return true;
         }
         return super.mouseReleased(event);
     }
+
+    /** Arrow keys nudge the selected element by one GUI pixel (ten with Shift). */
+    private boolean nudgeSelected(KeyEvent event) {
+        Element element = selected;
+        if (element == null || dragging != null) {
+            return false;
+        }
+        int step = (event.modifiers() & 1) != 0 ? 10 : 1; // GLFW_MOD_SHIFT
+        int px = event.isLeft() ? -step : event.isRight() ? step : 0;
+        int py = event.isUp() ? -step : event.isDown() ? step : 0;
+        if (px == 0 && py == 0) {
+            return false;
+        }
+        settings().nudge(element, px, py, screenW(), screenH());
+        changed();
+        return true;
+    }
+
+    //? if >=1.21.9 {
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        return nudgeSelected(event) || super.keyPressed(event);
+    }
+    //?} else {
+    /*@Override
+    public boolean keyPressed(int key, int scancode, int modifiers) {
+        return nudgeSelected(new KeyEvent(key, scancode, modifiers)) || super.keyPressed(key, scancode, modifiers);
+    }
+    *///?}
 
     // --- drawing -------------------------------------------------------------------------------------------
 
@@ -326,7 +360,8 @@ public class EventHudConfigScreen extends Screen {
         }
         Element shown = selected;
         if (shown != null) {
-            Component name = Component.translatable("hud.neroevents.config.anchor_name",
+            Component name = Component.translatable(settings().isFree(shown)
+                    ? "hud.neroevents.config.anchor_name.free" : "hud.neroevents.config.anchor_name",
                     Component.translatable(shown.nameKey()), Component.translatable(settings().anchor(shown).nameKey()));
             WidgetText.drawCentredFitted(g, font, name, leftPos + area.x0() + area.width() / 2,
                     topPos + ConsoleLayout.ANCHOR_NAME_Y, area.width() + 8, EventColours.TITLE);

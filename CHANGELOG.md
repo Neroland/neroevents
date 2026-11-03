@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.7.0-beta.1] - 2026-11-02
+
+Move event messages anywhere on screen. Requires Neroland Core 1.17.0.
+
+### Added
+
+- **Move event messages from anywhere.** A new key, **J** ("Move event messages" under *Controls*),
+  opens *Where event messages appear* from anywhere in a world, with no Event Console needed. Fabric
+  players can now open it too (Fabric has no mod-list config button).
+- **Free placement.** Drag the countdown, the banner or the objectives anywhere and they stay where you
+  let go. Dropping one on one of the nine dots still snaps it exactly there. The label under the picture
+  reads "near Top right" when a message is not exactly on a dot.
+- **Arrow keys** nudge the selected message one pixel at a time (hold Shift for ten).
+
+### Changed
+
+- Positions are saved as a share of the screen, so they stay put when the window is resized or the GUI
+  scale changes, and a message is never pushed off the edge. Settings files from earlier versions load
+  unchanged (every message stays on its anchor).
+- *Reset to default* now also clears any free placement.
+
+### Fixed
+
+- When the countdown and the objectives shared a bottom-row spot, the objectives were drawn below the
+  countdown and ran off the screen; they now stack above it.
+
 ## [0.6.0-beta.1] - 2026-10-30
 
 NeroEvents for Minecraft 1.21.x, next to 26.x. Requires Neroland Core 1.17.0.

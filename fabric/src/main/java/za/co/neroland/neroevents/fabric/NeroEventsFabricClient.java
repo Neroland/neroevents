@@ -73,8 +73,10 @@ public final class NeroEventsFabricClient implements ClientModInitializer {
         *///?}
         //? if >=26.1 {
         KeyMappingHelper.registerKeyMapping(EventsClient.DISMISS_HUD);
+        KeyMappingHelper.registerKeyMapping(EventsClient.OPEN_HUD_SETTINGS);
         //?} else {
         /*net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper.registerKeyBinding(EventsClient.DISMISS_HUD);
+        net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper.registerKeyBinding(EventsClient.OPEN_HUD_SETTINGS);
         *///?}
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             EventsClient.tick();

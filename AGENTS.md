@@ -7,8 +7,8 @@
 ## The mod
 
 - **NeroEvents** — server events for the Neroland sci-fi Minecraft mod ecosystem, built on **Neroland
-  Core**. Current state: **0.6.0-beta.1** (0.5.0-beta.1 and beta.2 released; 0.6.0 adds the Minecraft 1.21.x
-  builds and requires Core 1.17.0), feature-complete except the NeroLink module, pending runtime verification. In: the event engine
+  Core**. Current state: **0.7.0-beta.1** (0.5.0-beta.1 and beta.2 released; 0.6.0 adds the Minecraft 1.21.x
+  builds and requires Core 1.17.0; 0.7.0 makes event messages freely movable), feature-complete except the NeroLink module, pending runtime verification. In: the event engine
   (datapack definitions documented in `EVENT-DEFINITIONS.md`, payload registry, scheduler, lifecycle,
   resumable records, anchor picker, protection contract, `/neroevents` commands); participation, the
   budgeted reward split, reward crate, reward history and aggregate history, consent voting, the privacy
@@ -22,7 +22,7 @@
   (`USING-NEROLINK.md` describes the planned contract).
 - Mod id: **`neroevents`** (matches the registry namespace + every loader manifest). Package root:
   `za.co.neroland.neroevents`. Author: **Neroland**.
-- Version: **0.6.1-beta.1** (`mod_version` in `gradle.properties`; only bump it as part of a release).
+- Version: **0.7.0-beta.1** (`mod_version` in `gradle.properties`; only bump it as part of a release).
 - Targets **MC 1.21.1, 1.21.4, 1.21.5, 1.21.8, 1.21.10, 1.21.11, 26.1.2, 26.2 AND 26.3** on **NeoForge,
   MinecraftForge/Forge, and Fabric** → the **"27 cells"** (1.21.x cells compile for Java 21; old-version code lives in
   `//?` blocks and the `legacyRenames` list in `stonecutter.gradle`; the source stays in the 26.x state).

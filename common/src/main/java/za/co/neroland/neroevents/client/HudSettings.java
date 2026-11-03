@@ -12,8 +12,8 @@ import java.util.Optional;
 import java.util.Properties;
 
 /**
- * The player's own HUD preferences: where each element sits (one of nine snap anchors), which elements show,
- * and the scale ladder. Client-local only — written to {@code config/neroevents-hud.properties} and never sent
+ * The player's own HUD preferences: where each element sits (one of nine snap anchors plus a free offset from
+ * it), which elements show, and the scale ladder. Client-local only — written to {@code config/neroevents-hud.properties} and never sent
  * to a server. Pure Java (no Minecraft client classes): the snapping and the file round trip are unit-tested.
  */
 public final class HudSettings {
@@ -24,6 +24,11 @@ public final class HudSettings {
     public static final float[] SCALES = {0.75F, 1.0F, 1.25F};
     /** Pixels kept clear of the screen edge. */
     public static final int MARGIN = 4;
+    /**
+     * Largest offset from an anchor along either axis, in thousandths of the screen. Offsets are stored as a
+     * fraction of the screen rather than pixels so a placement survives a window resize or GUI-scale change.
+     */
+    public static final int MAX_OFFSET = 1000;
 
     /** The nine snap points: corners, edge centres and centre. */
     public enum Anchor {
@@ -130,16 +135,18 @@ public final class HudSettings {
 
     private final Map<Element, Anchor> anchors = new EnumMap<>(Element.class);
     private final Map<Toggle, Boolean> toggles = new EnumMap<>(Toggle.class);
+    private final Map<Element, int[]> offsets = new EnumMap<>(Element.class);
     private int scaleIndex = 1;
 
     public HudSettings() {
         reset();
     }
 
-    /** Back to the defaults: everything shown, top centre, scale 1.0. */
+    /** Back to the defaults: everything shown, top centre (no offset), scale 1.0. */
     public void reset() {
         for (Element element : Element.values()) {
             anchors.put(element, Anchor.TOP_CENTRE);
+            offsets.put(element, new int[] {0, 0});
         }
         for (Toggle toggle : Toggle.values()) {
             toggles.put(toggle, true);
@@ -151,10 +158,98 @@ public final class HudSettings {
         return anchors.getOrDefault(element, Anchor.TOP_CENTRE);
     }
 
+    /** Snaps {@code element} exactly onto {@code anchor} (clears any free offset). */
     public void setAnchor(Element element, Anchor anchor) {
+        setPlacement(element, anchor, 0, 0);
+    }
+
+    /** Puts {@code element} at {@code anchor} moved by ({@code dx}, {@code dy}) thousandths of the screen. */
+    public void setPlacement(Element element, Anchor anchor, int dx, int dy) {
         if (element != null && anchor != null) {
             anchors.put(element, anchor);
+            offsets.put(element, new int[] {clampOffset(dx), clampOffset(dy)});
         }
+    }
+
+    /** Horizontal offset from the anchor, in thousandths of the screen width. */
+    public int offsetX(Element element) {
+        return offsets.getOrDefault(element, new int[] {0, 0})[0];
+    }
+
+    /** Vertical offset from the anchor, in thousandths of the screen height. */
+    public int offsetY(Element element) {
+        return offsets.getOrDefault(element, new int[] {0, 0})[1];
+    }
+
+    /** Whether {@code element} sits off its anchor (moved freely or nudged). */
+    public boolean isFree(Element element) {
+        return offsetX(element) != 0 || offsetY(element) != 0;
+    }
+
+    /** Whether two elements share one spot (same anchor, same offset), so they stack instead of overlapping. */
+    public boolean sharesSpot(Element a, Element b) {
+        return anchor(a) == anchor(b) && offsetX(a) == offsetX(b) && offsetY(a) == offsetY(b);
+    }
+
+    /** Left edge of a {@code w}-wide {@code element} on a {@code screenW}-wide screen, kept fully on screen. */
+    public int x(Element element, int screenW, int w) {
+        int x = anchor(element).x(screenW, w) + Math.round(offsetX(element) * screenW / (float) MAX_OFFSET);
+        return clamp(x, screenW, w);
+    }
+
+    /** Top edge of an {@code h}-tall {@code element} on a {@code screenH}-tall screen, kept fully on screen. */
+    public int y(Element element, int screenH, int h) {
+        int y = anchor(element).y(screenH, h) + Math.round(offsetY(element) * screenH / (float) MAX_OFFSET);
+        return clamp(y, screenH, h);
+    }
+
+    /**
+     * Places {@code element} where it was dropped: its top-left at ({@code x}, {@code y}) for a {@code ew} x
+     * {@code eh} element on a {@code screenW} x {@code screenH} screen. It belongs to the nearest anchor; inside
+     * {@code snapRadius} of that anchor it snaps onto it, otherwise it keeps the exact drop spot as an offset.
+     */
+    public void dropAt(Element element, double x, double y, int ew, int eh, int screenW, int screenH,
+            int snapRadius) {
+        double cx = x + ew / 2.0;
+        double cy = y + eh / 2.0;
+        Anchor near = Anchor.nearest(cx, cy, screenW, screenH);
+        if (Anchor.within(cx, cy, screenW, screenH, snapRadius).isPresent()) {
+            setAnchor(element, near);
+            return;
+        }
+        int dx = (int) Math.round((x - near.x(screenW, ew)) * MAX_OFFSET / Math.max(1, screenW));
+        int dy = (int) Math.round((y - near.y(screenH, eh)) * MAX_OFFSET / Math.max(1, screenH));
+        setPlacement(element, near, dx, dy);
+    }
+
+    /**
+     * Moves {@code element} by ({@code px}, {@code py}) pixels of a {@code screenW} x {@code screenH} screen
+     * (the arrow keys). Always moves at least one step in the pressed direction.
+     */
+    public void nudge(Element element, int px, int py, int screenW, int screenH) {
+        if (element == null) {
+            return;
+        }
+        int dx = step(px, screenW);
+        int dy = step(py, screenH);
+        setPlacement(element, anchor(element), offsetX(element) + dx, offsetY(element) + dy);
+    }
+
+    private static int step(int pixels, int size) {
+        if (pixels == 0) {
+            return 0;
+        }
+        int step = Math.round(pixels * MAX_OFFSET / (float) Math.max(1, size));
+        return step != 0 ? step : Integer.signum(pixels);
+    }
+
+    private static int clamp(int pos, int screen, int size) {
+        int max = Math.max(0, screen - size);
+        return Math.max(0, Math.min(max, pos));
+    }
+
+    private static int clampOffset(int value) {
+        return Math.max(-MAX_OFFSET, Math.min(MAX_OFFSET, value));
     }
 
     public boolean on(Toggle toggle) {
@@ -185,6 +280,8 @@ public final class HudSettings {
     public void store(Properties out) {
         for (Element element : Element.values()) {
             out.setProperty("anchor." + element.name().toLowerCase(Locale.ROOT), anchor(element).name());
+            out.setProperty("offset." + element.name().toLowerCase(Locale.ROOT),
+                    offsetX(element) + "," + offsetY(element));
         }
         for (Toggle toggle : Toggle.values()) {
             out.setProperty(toggle.property(), Boolean.toString(on(toggle)));
@@ -198,6 +295,10 @@ public final class HudSettings {
         for (Element element : Element.values()) {
             Anchor.parse(in.getProperty("anchor." + element.name().toLowerCase(Locale.ROOT)))
                     .ifPresent(a -> anchors.put(element, a));
+            int[] offset = parseOffset(in.getProperty("offset." + element.name().toLowerCase(Locale.ROOT)));
+            if (offset != null) {
+                offsets.put(element, offset);
+            }
         }
         for (Toggle toggle : Toggle.values()) {
             String raw = in.getProperty(toggle.property());
@@ -219,6 +320,23 @@ public final class HudSettings {
             } catch (NumberFormatException ignored) {
                 scaleIndex = 1;
             }
+        }
+    }
+
+    /** "dx,dy" in thousandths of the screen; null when missing or unreadable (the offset stays zero). */
+    private static int[] parseOffset(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String[] parts = raw.split(",");
+        if (parts.length != 2) {
+            return null;
+        }
+        try {
+            return new int[] {clampOffset(Integer.parseInt(parts[0].trim())),
+                    clampOffset(Integer.parseInt(parts[1].trim()))};
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 

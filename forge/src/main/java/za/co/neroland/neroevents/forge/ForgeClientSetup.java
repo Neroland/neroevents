@@ -60,7 +60,10 @@ public final class ForgeClientSetup {
         EntityRenderersEvent.RegisterRenderers.BUS.addListener(ForgeClientSetup::onRegisterEntityRenderers);
         RegisterParticleProvidersEvent.BUS.addListener(ForgeClientSetup::onRegisterParticleProviders);
         AddGuiOverlayLayersEvent.BUS.addListener(ForgeClientSetup::onAddGuiLayers);
-        RegisterKeyMappingsEvent.BUS.addListener(event -> event.register(EventsClient.DISMISS_HUD));
+        RegisterKeyMappingsEvent.BUS.addListener(event -> {
+            event.register(EventsClient.DISMISS_HUD);
+            event.register(EventsClient.OPEN_HUD_SETTINGS);
+        });
         RegisterColorHandlersEvent.Block.BUS.addListener(ForgeClientSetup::onRegisterBlockColors);
         TickEvent.ClientTickEvent.Post.BUS.addListener(event -> clientTick());
         RegisterClientCommandsEvent.BUS.addListener(ForgeClientSetup::onRegisterClientCommands);
@@ -72,7 +75,10 @@ public final class ForgeClientSetup {
         EntityRenderersEvent.RegisterRenderers.getBus(modBusGroup).addListener(ForgeClientSetup::onRegisterEntityRenderers);
         RegisterParticleProvidersEvent.getBus(modBusGroup).addListener(ForgeClientSetup::onRegisterParticleProviders);
         AddGuiOverlayLayersEvent.getBus(modBusGroup).addListener(ForgeClientSetup::onAddGuiLayers);
-        RegisterKeyMappingsEvent.getBus(modBusGroup).addListener(event -> event.register(EventsClient.DISMISS_HUD));
+        RegisterKeyMappingsEvent.getBus(modBusGroup).addListener(event -> {
+            event.register(EventsClient.DISMISS_HUD);
+            event.register(EventsClient.OPEN_HUD_SETTINGS);
+        });
         RegisterColorHandlersEvent.Block.getBus(modBusGroup).addListener(ForgeClientSetup::onRegisterBlockColors);
         TickEvent.ClientTickEvent.Post.BUS.addListener(event -> clientTick());
         RegisterClientCommandsEvent.BUS.addListener(ForgeClientSetup::onRegisterClientCommands);
@@ -85,7 +91,10 @@ public final class ForgeClientSetup {
         modBus.addListener(ForgeClientSetup::onRegisterEntityRenderers);
         modBus.addListener(ForgeClientSetup::onRegisterParticleProviders);
         modBus.addListener(ForgeClientSetup::onAddGuiLayers);
-        modBus.addListener((RegisterKeyMappingsEvent event) -> event.register(EventsClient.DISMISS_HUD));
+        modBus.addListener((RegisterKeyMappingsEvent event) -> {
+            event.register(EventsClient.DISMISS_HUD);
+            event.register(EventsClient.OPEN_HUD_SETTINGS);
+        });
         modBus.addListener(ForgeClientSetup::onRegisterBlockColors);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((TickEvent.ClientTickEvent.Post event) -> clientTick());
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(ForgeClientSetup::onRegisterClientCommands);

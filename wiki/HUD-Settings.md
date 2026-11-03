@@ -21,16 +21,22 @@ something changes — a new event is announced, a vote opens, an event starts or
 
 ## Move and resize them
 
-Open the settings from the gear next to the Event Console's title, or from the mod list's config
+Press **J** anywhere in a world (change it under *Controls*, "Move event messages") to open the
+settings. You can also use the gear next to the Event Console's title, or the mod list's config
 button (NeoForge and Forge).
 
-- **Drag** the countdown, the banner or the objectives in the small picture of your screen. Each one
-  snaps to the nearest of nine spots: the corners, the middle of each edge, or the centre. The name of
-  the spot appears under the picture.
+- **Drag** the countdown, the banner or the objectives anywhere in the small picture of your screen.
+  Drop one on one of the nine dots (the corners, the middle of each edge, or the centre) and it
+  snaps exactly there; drop it anywhere else and it stays where you let go. The name of the nearest
+  spot appears under the picture ("near Top right" when it is not exactly on the dot).
+- **Arrow keys** nudge the selected message one pixel at a time (hold **Shift** for ten).
+- Positions are kept as a share of your screen, so they stay put when you resize the window or
+  change the GUI scale, and a message is never pushed off the edge.
+- If the countdown and the objectives sit on the same spot they stack instead of overlapping.
 - **Switches:** Show countdown, Show banner, Show objectives, Show world marker, Impact flash and Storm
   vignette.
 - **Scale:** 0.75×, 1.0× or 1.25×.
-- **Reset to default** puts everything back at the top centre, all shown, at normal size.
+- **Reset to default** puts everything back exactly on the top centre, all shown, at normal size.
 
 Every change is saved at once (the bottom line says "Saved"). The settings live in
 `config/neroevents-hud.properties` on your own computer and are never sent to a server.

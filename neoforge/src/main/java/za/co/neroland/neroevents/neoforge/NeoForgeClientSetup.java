@@ -61,7 +61,10 @@ public final class NeoForgeClientSetup {
                 event.register(ConsoleBlocks.EVENT_CONSOLE_MENU.get(), EventConsoleScreen::new));
         modEventBus.addListener((RegisterGuiLayersEvent event) -> event.registerAboveAll(
                 Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "event_hud"), (g, delta) -> EventHud.render(g)));
-        modEventBus.addListener((RegisterKeyMappingsEvent event) -> event.register(EventsClient.DISMISS_HUD));
+        modEventBus.addListener((RegisterKeyMappingsEvent event) -> {
+            event.register(EventsClient.DISMISS_HUD);
+            event.register(EventsClient.OPEN_HUD_SETTINGS);
+        });
         //? if >=26.1 {
         modEventBus.addListener((RegisterColorHandlersEvent.BlockTintSources event) ->
                 event.register(List.of(ConsoleTint.INSTANCE), ConsoleBlocks.EVENT_CONSOLE.get()));

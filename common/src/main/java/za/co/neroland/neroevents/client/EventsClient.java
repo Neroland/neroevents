@@ -15,11 +15,13 @@ import org.jetbrains.annotations.Nullable;
 import za.co.neroland.neroevents.NeroEventsCommon;
 import za.co.neroland.neroevents.client.hud.EventHud;
 import za.co.neroland.neroevents.client.render.ConsoleTint;
+import za.co.neroland.neroevents.client.screen.EventHudConfigScreen;
 import za.co.neroland.neroevents.console.ConsoleBlocks;
 import za.co.neroland.neroevents.platform.Services;
 
 /**
  * The client half of the console and HUD that every loader shares: the dismiss key (default {@code H}), the
+ * "move event messages" key (default {@code J}, opens the HUD position screen from anywhere), the
  * player's HUD settings (loaded once from {@code config/neroevents-hud.properties}), the per-tick work and the
  * console tint fallback. Each loader registers the key, the HUD layer, the menu screen and the renderer through its
  * own API and calls {@link #tick()} from its client tick. CLIENT-ONLY.
@@ -35,18 +37,37 @@ public final class EventsClient {
             "key.categories.misc");
     *///?}
 
+    /**
+     * Opens "Where event messages appear" from anywhere in the world — no console needed, and the only way in on
+     * a loader without a mod-list config button (Fabric without Mod Menu).
+     */
+    //? if >=1.21.9 {
+    public static final KeyMapping OPEN_HUD_SETTINGS = new KeyMapping("key.neroevents.hud_settings",
+            InputConstants.KEY_J, KeyMapping.Category.MISC);
+    //?} else {
+    /*public static final KeyMapping OPEN_HUD_SETTINGS = new KeyMapping("key.neroevents.hud_settings",
+            InputConstants.KEY_J, "key.categories.misc");
+    *///?}
+
     private static @Nullable HudSettings settings;
     private static boolean tintRegistered;
 
     private EventsClient() {
     }
 
-    /** One client tick: the HUD's local countdown, the dismiss key. */
+    /** One client tick: the HUD's local countdown, the dismiss key, the HUD-settings key. */
     public static void tick() {
         ClientHudState.tick();
         EventHud.tick();
         while (DISMISS_HUD.consumeClick()) {
             ClientHudState.dismiss();
+        }
+        boolean open = false;
+        while (OPEN_HUD_SETTINGS.consumeClick()) {
+            open = true;
+        }
+        if (open && Minecraft.getInstance().player != null) {
+            setScreen(new EventHudConfigScreen(null));
         }
     }
 
