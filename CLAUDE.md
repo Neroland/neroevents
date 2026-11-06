@@ -206,3 +206,7 @@
 - Reuse Neroland Core's network registry, call `Player#openMenu` directly, or load `SavedData` without
   `SavedDataRecovery`.
 - Change `mod_version` outside a release.
+
+## Translation workflow
+
+English is the source language for new and changed text. Community translations are intended to be contributed through Weblate; other-language translations are not required when implementing a feature. Preserve existing translations. This supersedes older instructions that require translating every change.
