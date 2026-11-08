@@ -263,7 +263,7 @@ public class EventHudConfigScreen extends Screen {
         if (element == null || dragging != null) {
             return false;
         }
-        int step = (event.modifiers() & 1) != 0 ? 10 : 1; // GLFW_MOD_SHIFT
+        int step = event.hasShiftDown() ? 10 : 1;
         int px = event.isLeft() ? -step : event.isRight() ? step : 0;
         int py = event.isUp() ? -step : event.isDown() ? step : 0;
         if (px == 0 && py == 0) {

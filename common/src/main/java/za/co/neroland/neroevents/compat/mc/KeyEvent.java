@@ -39,5 +39,9 @@ package za.co.neroland.neroevents.compat.mc;
     public boolean isDown() {
         return this.key == 264;
     }
+
+    public boolean hasShiftDown() {
+        return (this.modifiers & 1) != 0;
+    }
 }
 *///?}
