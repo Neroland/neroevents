@@ -32,6 +32,8 @@ Move event messages anywhere on screen. Requires Neroland Core 1.17.0.
 
 - When the countdown and the objectives shared a bottom-row spot, the objectives were drawn below the
   countdown and ran off the screen; they now stack above it.
+- On Minecraft 26.3, holding Shift while nudging a message with the arrow keys still moved it one pixel at a
+  time. Shift+arrow now moves it ten pixels, as on every other version.
 
 ## [0.6.0-beta.1] - 2026-10-30
 
