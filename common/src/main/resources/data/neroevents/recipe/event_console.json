@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "neroevents:salvage_plating",
+    "G": "minecraft:glass_pane",
+    "C": "neroevents:salvage_conduit",
+    "M": "#neroland:meteor/grindable",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "PGP",
+    "CMC",
+    "PRP"
+  ],
+  "result": {
+    "id": "neroevents:event_console",
+    "count": 1
+  }
+}

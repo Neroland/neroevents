@@ -4,6 +4,39 @@ The **Event Console** (`neroevents:event_console`) is the one place to see what 
 server, vote, claim rewards and look after your own data. Anyone can place one and anyone can use
 any console. It needs no power.
 
+## Getting one
+
+Craft it at a crafting table:
+
+| | | |
+| --- | --- | --- |
+| Salvage Plating | Glass Pane | Salvage Plating |
+| Salvage Conduit | Meteor material | Salvage Conduit |
+| Salvage Plating | Redstone | Salvage Plating |
+
+The salvage comes from events: plating from wreck salvage crates, conduits from wreck crates and supply pods.
+**Meteor material** is any Neroland meteor material: Nero alloy dust, starsteel dust, void crystal dust or
+plasma glass. Mining a crater's embedded meteor ore gives the dusts, and crater pockets and supply pods hold
+them too. The recipe shows in your recipe book the first time you pick up plating or a conduit. It is also in
+the NeroEvents creative tab.
+
+## Getting the other items
+
+Everything else NeroEvents adds comes from events, never from a crafting table:
+
+| Item | Where it comes from |
+| --- | --- |
+| Meteor Slag, Cooled Crust | Meteor Shower craters; mine them and they drop themselves |
+| Embedded Meteor Ore | Meteor Shower craters; it drops Nero alloy or starsteel dust, never itself |
+| Crater Pocket | The heart of a crater; breaking it rolls its loot once |
+| Hull Plating, Scorched Panel, Bent Strut | Debris Crash wrecks; they drop themselves (wrecks slowly decay) |
+| Salvage Crate | Debris Crash wrecks; empty it, then it breaks to nothing |
+| War Beacon | Placed by a Faction War and removed when it ends |
+| Supply Beacon | A quest reward (*Supply Run*); use it to call a supply drop |
+
+Salvage Plating smelts (or blasts) into a starsteel nugget. With NeroEconomy installed, the three salvage
+items (plating, conduits and core fragments) can be sold to the Merchant Houses.
+
 ## The screen on the block
 
 - **Idle:** a cyan scan line — nothing is announced or running.

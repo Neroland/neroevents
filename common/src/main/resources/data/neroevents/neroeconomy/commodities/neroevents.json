@@ -1,0 +1,31 @@
+{
+  "commodities": [
+    {
+      "item": "neroevents:salvage_plating",
+      "reference_price": 3,
+      "npc_daily_demand": 64,
+      "class": "farmable",
+      "house": "general",
+      "sector": "mining",
+      "required": false
+    },
+    {
+      "item": "neroevents:salvage_conduit",
+      "reference_price": 5,
+      "npc_daily_demand": 32,
+      "class": "farmable",
+      "house": "general",
+      "sector": "mining",
+      "required": false
+    },
+    {
+      "item": "neroevents:salvage_core_fragment",
+      "reference_price": 12,
+      "npc_daily_demand": 16,
+      "class": "rare",
+      "house": "general",
+      "sector": "mining",
+      "required": false
+    }
+  ]
+}

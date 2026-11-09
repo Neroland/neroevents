@@ -5,8 +5,8 @@ and more. You do not need to read anything to take part — this page is the sho
 
 ## 1. Place an Event Console
 
-Find the **Event Console** in the NeroEvents creative tab (or ask your server's operator for one)
-and place it anywhere. Its screen faces you. Anyone can use any console.
+Craft an **Event Console** from wreck and meteor salvage (see [The Event Console](Console.md#getting-one)),
+take one from the NeroEvents creative tab, or ask your server's operator for one. Place it anywhere. Its screen faces you. Anyone can use any console.
 
 - While nothing is happening, the screen shows a slow cyan scan line.
 - When an event is announced or running, the screen turns the event's colour and shows its symbol.
