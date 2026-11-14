@@ -225,7 +225,8 @@ class FactionWarPayloadTest {
         c.contributions().credit(blues[0], ContributionTable.Kind.OBJECTIVE, 1.0D);
 
         assertEquals(EventOutcome.SUCCESS, payload.onTimeout(c, cfg, state));
-        assertEquals(List.of("red:10", "blue:-5"), reputation.lines.stream().sorted((x, y) -> y.compareTo(x)).toList());
+        assertEquals(List.of("red:10"), world.awards, "the victor is paid through NeroFactions");
+        assertEquals(List.of("blue:-5"), reputation.lines, "the loser through Core; the victor never twice");
         assertEquals(2, fired.size());
         assertTrue(fired.stream().anyMatch(f -> f.scope().equals(RED.toString()) && f.rising()));
         assertTrue(fired.stream().anyMatch(f -> f.scope().equals(BLUE.toString()) && !f.rising()));
@@ -285,7 +286,8 @@ class FactionWarPayloadTest {
         assertTrue(last instanceof TickResult.Resolved, "the capture reaches win_score");
         assertEquals(EventOutcome.SUCCESS, state.outcome);
         assertEquals(0, state.pending().size(), "the deciding pass's credit was drained before resolving");
-        assertEquals(List.of("red:10"), reputation.lines, "the deciding capturer earns reputation");
+        assertEquals(List.of("red:10"), world.awards, "the deciding capturer earns reputation");
+        assertTrue(reputation.lines.isEmpty());
     }
 
     @Test
@@ -314,5 +316,123 @@ class FactionWarPayloadTest {
         FactionWarPayload.forget(reds[0]);
         assertFalse(state.sides().holds(reds[0]));
         assertEquals(0, state.pending().size());
+    }
+
+    // --- NeroFactions victory awards -----------------------------------------------------------
+
+    /** A started 2 v 2 war (one beacon) that red has won on score, red's capturer credited; blue is side A. */
+    private FactionWarPayload.State wonByRed(PayloadContext c, FactionWarPayload.Config cfg, UUID redCapturer) {
+        world.faction(RED, redCapturer, UUID.randomUUID()).faction(BLUE, players(2));
+        FactionWarPayload.State state = payload.createState(null, cfg);
+        assertTrue(payload.onStart(c, cfg, state).started());
+        world.presence.put(state.objectives().get(0).pos(), List.of(redCapturer));
+        for (int t = 0; t < 200; t++) {
+            payload.tick(c, cfg, state);
+        }
+        c.contributions().credit(redCapturer, ContributionTable.Kind.OBJECTIVE, 1.0D);
+        return state;
+    }
+
+    private static final FactionWarPayload.Config ONE_BEACON =
+            new FactionWarPayload.Config(1, 48, 6, 200, 10, 0, 0, 10, 5);
+
+    @Test
+    void oneEligibleOutcomeAwardsOnceWithTheConfiguredAmountAndReportsWhatWasApplied() {
+        PayloadContext c = ctx();
+        FactionWarPayload.State state = wonByRed(c, ONE_BEACON, UUID.randomUUID());
+        world.awardAnswer = 7; // NeroFactions applied less than asked (near the daily cap)
+        assertEquals(EventOutcome.SUCCESS, payload.onTimeout(c, ONE_BEACON, state));
+        assertEquals(List.of("red:10"), world.awards, "reputation_win, capped by the per-event cap (25)");
+        assertEquals(List.of(FactionWarPayload.MSG_REPUTATION_GAINED + "|7|red"), world.told,
+                "the feedback uses the applied amount, not the asked one");
+        assertEquals("neroevents:war_victory", FactionWarPayload.REASON_WAR_VICTORY.toString());
+    }
+
+    @Test
+    void perEventCapAndZeroWinTurnTheAwardDownOrOff() {
+        FactionWarPayload.useForTests(ctx -> world, true, 2, 4, reputation);
+        PayloadContext c = ctx();
+        FactionWarPayload.State state = wonByRed(c, ONE_BEACON, UUID.randomUUID());
+        payload.onTimeout(c, ONE_BEACON, state);
+        assertEquals(List.of("red:4"), world.awards);
+
+        FactionWarPayload.resetForTests();
+        FactionWarPayload.useForTests(ctx -> world, true, 2, 25, reputation);
+        world.awards.clear();
+        FactionWarPayload.Config off = new FactionWarPayload.Config(1, 48, 6, 200, 10, 0, 0, 0, 5);
+        PayloadContext c2 = ctx();
+        FactionWarPayload.State state2 = wonByRed(c2, off, UUID.randomUUID());
+        assertEquals(EventOutcome.SUCCESS, payload.onTimeout(c2, off, state2));
+        assertTrue(world.awards.isEmpty(), "reputation_win 0 awards nothing");
+    }
+
+    @Test
+    void repeatedOrReTickedOutcomeAwardsNothingMore() {
+        PayloadContext c = ctx();
+        EventInstance instance = c.instance();
+        FactionWarPayload.State state = wonByRed(c, ONE_BEACON, UUID.randomUUID());
+        assertEquals(EventOutcome.SUCCESS, payload.onTimeout(c, ONE_BEACON, state));
+        assertEquals(EventOutcome.SUCCESS, payload.onTimeout(c, ONE_BEACON, state), "a repeated timeout");
+        assertTrue(payload.tick(c, ONE_BEACON, state) instanceof TickResult.Resolved, "a re-tick after resolving");
+        assertEquals(EventOutcome.SUCCESS, FactionWarPayload.resolveWar(c, ONE_BEACON, state));
+        assertEquals(1, world.awards.size());
+        assertEquals(1, world.told.size());
+
+        // A resolved war that is saved and loaded again stays resolved and never pays again.
+        FactionWarPayload.State loaded = payload.loadState(instance, ONE_BEACON, payload.saveState(state));
+        assertTrue(payload.onResume(ctx(instance), ONE_BEACON, loaded).resumed());
+        TickResult again = payload.tick(ctx(instance), ONE_BEACON, loaded);
+        assertTrue(again instanceof TickResult.Resolved);
+        assertEquals(EventOutcome.SUCCESS, ((TickResult.Resolved) again).outcome());
+        assertEquals(EventOutcome.SUCCESS, payload.onTimeout(ctx(instance), ONE_BEACON, loaded));
+        assertEquals(1, world.awards.size());
+    }
+
+    @Test
+    void aPlayerListedTwiceIsPaidOnce() {
+        UUID red = UUID.randomUUID();
+        world.faction(RED, red);
+        List<WarScoring.ReputationLine> lines = List.of(new WarScoring.ReputationLine(red, RED, 10),
+                new WarScoring.ReputationLine(red, RED, 10));
+        assertEquals(1, FactionWarPayload.awardVictors(world, lines, "Red"));
+        assertEquals(List.of("red:10"), world.awards);
+    }
+
+    @Test
+    void unknownFactionIdAwardsNothingAndSaysNothing() {
+        PayloadContext c = ctx();
+        FactionWarPayload.State state = wonByRed(c, ONE_BEACON, UUID.randomUUID());
+        world.factions.remove(RED); // NeroFactions no longer defines red (a datapack reload mid-war)
+        assertEquals(EventOutcome.SUCCESS, payload.onTimeout(c, ONE_BEACON, state));
+        assertTrue(world.awards.isEmpty());
+        assertTrue(world.told.isEmpty());
+
+        UUID stranger = UUID.randomUUID();
+        Identifier unknown = Identifier.fromNamespaceAndPath("test", "unknown");
+        assertEquals(0, FactionWarPayload.awardVictors(world,
+                List.of(new WarScoring.ReputationLine(stranger, unknown, 10)), "Unknown"));
+        assertTrue(world.awards.isEmpty());
+    }
+
+    @Test
+    void eventCapReachedReportsNothingGainedWithoutFailing() {
+        PayloadContext c = ctx();
+        FactionWarPayload.State state = wonByRed(c, ONE_BEACON, UUID.randomUUID());
+        world.awardAnswer = 0; // the player's daily EVENT cap is reached
+        assertEquals(EventOutcome.SUCCESS, payload.onTimeout(c, ONE_BEACON, state));
+        assertEquals(List.of("red:10"), world.awards, "asked once");
+        assertEquals(List.of(FactionWarPayload.MSG_REPUTATION_NONE + "|red"), world.told);
+        assertEquals(2, fired.size(), "war_resolved still fires for both factions");
+    }
+
+    @Test
+    void aFailedAwardSaysNothingAndStillResolves() {
+        PayloadContext c = ctx();
+        FactionWarPayload.State state = wonByRed(c, ONE_BEACON, UUID.randomUUID());
+        world.awardAnswer = -1; // NeroFactions could not be asked
+        assertEquals(EventOutcome.SUCCESS, payload.onTimeout(c, ONE_BEACON, state));
+        assertTrue(world.told.isEmpty());
+        assertEquals(0, FactionWarPayload.awardVictors(null,
+                List.of(new WarScoring.ReputationLine(UUID.randomUUID(), RED, 10)), "Red"), "no world, no award");
     }
 }

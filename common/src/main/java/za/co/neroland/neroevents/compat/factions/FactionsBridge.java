@@ -17,12 +17,19 @@ import net.minecraft.server.MinecraftServer;
  */
 public interface FactionsBridge {
 
-    /** Every faction defined on this server ({@code FactionDefinitions.factionsForServer}). May throw. */
+    /** Every faction defined on this server ({@code NeroFactionsApi.factions(server).keySet()}). May throw. */
     Set<Identifier> factionIds(MinecraftServer server);
 
-    /** The factions a player belongs to ({@code FactionMembership.membershipOf}). May throw. */
+    /** The factions a player belongs to ({@code NeroFactionsApi.membershipOf}); empty when unknown. May throw. */
     Set<Identifier> membershipOf(MinecraftServer server, UUID player);
 
-    /** A faction's display name ({@code FactionDefinition.displayName()}); empty if unknown. May throw. */
+    /** A faction's display name ({@code FactionView.displayName()}); empty if unknown. May throw. */
     Optional<String> displayName(MinecraftServer server, Identifier faction);
+
+    /**
+     * Awards EVENT-source reputation ({@code NeroFactionsApi.awardEvent}) on the owning server thread. Returns the
+     * applied amount: {@code 0} for an invalid call, an unknown faction, the wrong thread or server, or when the
+     * player's daily EVENT cap is reached. <b>Not deduplicated</b>: the caller awards once per outcome. May throw.
+     */
+    int awardEvent(MinecraftServer server, UUID player, Identifier faction, int amount, Identifier reason);
 }

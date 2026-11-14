@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -174,6 +175,26 @@ final class ServerWarWorld implements WarWorld {
                         32.0F, za.co.neroland.neroevents.payload.PayloadSounds.captureTickPitch(progressTicks,
                                 beacon.captureTicks()));
             }
+        }
+    }
+
+    @Override
+    public int awardVictory(UUID player, Identifier faction, int amount) {
+        // Runs inside the payload's resolve, on the server tick: the owning server thread NeroFactions requires.
+        try {
+            int applied = bridge.awardEvent(server, player, faction, amount, FactionWarPayload.REASON_WAR_VICTORY);
+            return Math.max(0, applied);
+        } catch (RuntimeException | LinkageError failure) {
+            failed(failure);
+            return -1;
+        }
+    }
+
+    @Override
+    public void tell(UUID player, String key, Object... args) {
+        ServerPlayer online = server.getPlayerList().getPlayer(player);
+        if (online != null) {
+            online.sendSystemMessage(Component.translatable(key, args));
         }
     }
 

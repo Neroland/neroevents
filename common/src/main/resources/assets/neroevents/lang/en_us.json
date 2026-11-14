@@ -514,6 +514,8 @@
   "ledger.neroevents.nothing": "nothing paid",
   "ledger.neroevents.row": "%1$s — %2$s · %3$s",
   "ledger.neroevents.xp": "%s XP",
+  "message.neroevents.faction_war.reputation_gained": "Victory! +%1$s reputation with %2$s.",
+  "message.neroevents.faction_war.reputation_none": "Victory! No reputation with %s this time: you may have reached today's limit for event reputation.",
   "message.neroevents.supply_beacon_no_room": "A Supply Beacon is waiting for you — free an inventory slot; it is handed over on your next login.",
   "message.neroevents.supply_beacon_pending": "A Supply Beacon is reserved for you. NeroEvents will hand it over once supply drops arrive.",
   "phase.neroevents.active": "active",

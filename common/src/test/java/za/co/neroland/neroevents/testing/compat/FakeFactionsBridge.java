@@ -14,6 +14,9 @@ public final class FakeFactionsBridge implements FactionsBridge {
 
     public boolean throwing;
     public int calls;
+    /** What {@link #awardEvent} answers. */
+    public int awardAnswer;
+    public int awards;
 
     private void call() {
         calls++;
@@ -38,5 +41,12 @@ public final class FakeFactionsBridge implements FactionsBridge {
     public Optional<String> displayName(MinecraftServer server, Identifier faction) {
         call();
         return Optional.empty();
+    }
+
+    @Override
+    public int awardEvent(MinecraftServer server, UUID player, Identifier faction, int amount, Identifier reason) {
+        call();
+        awards++;
+        return awardAnswer;
     }
 }

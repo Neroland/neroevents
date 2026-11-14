@@ -5,7 +5,7 @@ The two factions with the most members online fight over a ring of war beacons.
 | | |
 | --- | --- |
 | Severity | **WAR** (purple two chevrons) |
-| Needs | **NeroFactions** |
+| Needs | **NeroFactions** 0.7.0-beta.1 or later |
 | Can damage | Players in the fight. The war beacons are placed only in empty air outside protected areas, cannot be broken, and are removed when the war ends |
 | Location | Public — the announcement, the console and the HUD say roughly where it is |
 
@@ -28,10 +28,16 @@ capture. Holding beacons scores points over time. The score is shown under the c
 
 ## Rewards
 
-Everyone on a side who took part shares the event's credits and XP — see [Rewards](Rewards.md). The
-winning side's fighters gain reputation with their own faction and the losing side's lose a little,
-at most `rewardReputationMaxDeltaPerEvent` (25) per event. NeroEvents only reads which faction you are
-in; NeroFactions keeps the reputation.
+Everyone on a side who took part shares the event's credits and XP — see [Rewards](Rewards.md).
+
+- **Winners** gain event reputation with their own faction: the war's `reputation_win` (10), at most
+  `rewardReputationMaxDeltaPerEvent` (25). It is awarded once per war, and a chat line tells you how much
+  NeroFactions actually applied. NeroFactions limits how much event reputation you can earn per day, so
+  near that limit you may get less, or "No reputation ... this time".
+- **Losers** lose a little (`reputation_loss`, 5), within the same per-event limit.
+- Set `reputation_win` to `0` in a war's definition to turn the victory award off.
+
+NeroEvents only reads which faction you are in; NeroFactions keeps the reputation.
 
 ## Switches
 

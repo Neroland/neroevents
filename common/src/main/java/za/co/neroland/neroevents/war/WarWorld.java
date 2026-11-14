@@ -55,4 +55,15 @@ public interface WarWorld {
 
     /** Plays {@code block.war_beacon.captured} at the beacon (a world sound). */
     void playCaptured(BlockPos pos);
+
+    /**
+     * Awards NeroFactions EVENT reputation for a committed victory ({@code reason} {@code neroevents:war_victory}).
+     * Not deduplicated: the payload calls it once per eligible player per outcome. Returns the applied amount;
+     * {@code 0} when nothing was applied (an unknown faction, or the player's daily EVENT cap reached); {@code -1}
+     * when NeroFactions could not be asked.
+     */
+    int awardVictory(UUID player, Identifier faction, int amount);
+
+    /** A translated chat line to one online player (nothing when they are offline). */
+    void tell(UUID player, String key, Object... args);
 }

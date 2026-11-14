@@ -99,6 +99,23 @@ public final class FactionsCompat {
         }
     }
 
+    /**
+     * Awards EVENT reputation once (the caller deduplicates); the applied amount, {@code 0} when absent, failing,
+     * capped or refused. Server thread only.
+     */
+    public static int awardEvent(MinecraftServer server, UUID player, Identifier faction, int amount,
+            Identifier reason) {
+        FactionsBridge b = available() ? bridge : null;
+        if (b == null || player == null || faction == null || reason == null || amount <= 0) {
+            return 0;
+        }
+        try {
+            return Math.max(0, b.awardEvent(server, player, faction, amount, reason));
+        } catch (RuntimeException | LinkageError failure) {
+            return 0;
+        }
+    }
+
     /** Tests only. */
     public static synchronized void resetForTests() {
         bridge = null;
@@ -146,6 +163,17 @@ public final class FactionsCompat {
         public Optional<String> displayName(MinecraftServer server, Identifier faction) {
             try {
                 return delegate.displayName(server, faction);
+            } catch (RuntimeException | LinkageError failure) {
+                HEALTH.fail(failure);
+                throw failure;
+            }
+        }
+
+        @Override
+        public int awardEvent(MinecraftServer server, UUID player, Identifier faction, int amount,
+                Identifier reason) {
+            try {
+                return delegate.awardEvent(server, player, faction, amount, reason);
             } catch (RuntimeException | LinkageError failure) {
                 HEALTH.fail(failure);
                 throw failure;

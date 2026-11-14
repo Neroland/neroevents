@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.9.0-beta.1] - 2026-11-14
+
+### Changed
+
+- **Faction wars use NeroFactions' public API** and need NeroFactions **0.7.0-beta.1** or later (the
+  optional dependency's version floor is raised to match).
+- **Winning a faction war pays NeroFactions event reputation.** Winners get the war's `reputation_win`
+  (within `rewardReputationMaxDeltaPerEvent`) once per war, and a chat line says how much NeroFactions
+  actually applied, or that nothing was gained when today's event-reputation limit is reached. Losers still
+  lose `reputation_loss`.
+
+### Fixed
+
+- A faction war that has been decided remembers it across a save, so it can never pay out twice.
+
 ## [0.8.0-beta.1] - 2026-11-09
 
 Craft your own Event Console, and event salvage is now worth keeping. Requires Neroland Core 1.17.0.

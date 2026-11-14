@@ -23,6 +23,8 @@
   "event.neroevents.market_shock.title": "Market Shock",
   "event.neroevents.market_shock.todo": "Buy low, sell high while it lasts — %s",
   "event.neroevents.market_shock.what_to_do": "Check the market: some prices are moving for a while.",
+  "message.neroevents.faction_war.reputation_gained": "Victory! +%1$s reputation with %2$s.",
+  "message.neroevents.faction_war.reputation_none": "Victory! No reputation with %s this time: you may have reached today's limit for event reputation.",
   "subtitles.neroevents.war_beacon.capture_tick": "Beacon being captured",
   "subtitles.neroevents.war_beacon.captured": "Beacon captured"
 }

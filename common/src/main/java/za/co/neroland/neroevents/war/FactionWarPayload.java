@@ -3,6 +3,7 @@ package za.co.neroland.neroevents.war;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,9 +63,16 @@ import za.co.neroland.neroevents.war.WarSides.Side;
  *       neutral, and neutrals never capture, score or earn.</li>
  *   <li><b>Scoring</b> ({@link WarScoring}) every 20 ticks; capturers are credited OBJECTIVE 1/n.</li>
  *   <li><b>Resolution:</b> higher score wins ({@code SUCCESS}); a tie is {@code ENDED} with no victor. Credited
- *       participants get reputation with their own faction (only with a real {@code ReputationApi} provider,
- *       capped by {@code rewardReputationMaxDeltaPerEvent}); {@code neroevents:war_resolved} fires per faction.</li>
+ *       participants on the winning side get {@code reputation_win} (capped by
+ *       {@code rewardReputationMaxDeltaPerEvent}) as NeroFactions EVENT reputation with their own faction, reason
+ *       {@code neroevents:war_victory}, and are told what was applied (NeroFactions' daily EVENT cap may make it
+ *       0); credited losers lose {@code reputation_loss} through Core's {@code ReputationApi} (only with a real
+ *       provider). {@code neroevents:war_resolved} fires per faction.</li>
  * </ul>
+ *
+ * <p><b>Once per outcome.</b> {@code State.resolved} is set before anything is awarded and is saved with the
+ * state, so a repeated timeout, a re-tick after resolving or a reloaded resolved war awards nothing more; within
+ * one resolve each player is awarded at most once.
  *
  * <p>NeroEvents never writes faction membership: it only reads it. Privacy: player UUIDs live only in the frozen
  * side map and the pending credit queue (memory); nothing player-keyed is saved or logged.
@@ -81,6 +89,13 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
     public static final int PLACEMENT_RETRIES = 6;
     /** Ticks between objective-text refreshes. */
     public static final int TEXT_TICKS = 100;
+    /** The stable NeroFactions award reason for a won war. */
+    public static final Identifier REASON_WAR_VICTORY =
+            Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "war_victory");
+    /** Told to a victor when reputation was applied: amount, faction name. */
+    public static final String MSG_REPUTATION_GAINED = "message.neroevents.faction_war.reputation_gained";
+    /** Told to a victor when nothing was applied (usually the daily event-reputation cap): faction name. */
+    public static final String MSG_REPUTATION_NONE = "message.neroevents.faction_war.reputation_none";
 
     // --- config ----------------------------------------------------------------------------------
 
@@ -494,7 +509,7 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
         return resolveWar(ctx, config, state);
     }
 
-    /** Resolves once: reputation lines and {@code war_resolved}; returns the outcome. */
+    /** Resolves once: victory awards, loss lines and {@code war_resolved}; returns the outcome. */
     static EventOutcome resolveWar(PayloadContext ctx, Config config, State state) {
         drain(ctx, state);
         if (state.resolved) {
@@ -518,6 +533,16 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
         }
         Side win = victor.get();
         Side lose = win.opponent();
+        List<WarScoring.ReputationLine> lines = WarScoring.reputationLines(ctx.contributions().participants(),
+                sides, win, config.reputationWin(), config.reputationLoss(), reputationCap.getAsInt());
+        WarWorld world;
+        try {
+            world = worlds.apply(ctx);
+        } catch (RuntimeException | LinkageError failure) {
+            NeroEventsTelemetry.captureHandledException(failure, TELEMETRY_SOURCE, "reputation");
+            world = null;
+        }
+        awardVictors(world, lines, win == Side.A ? state.nameA : state.nameB);
         Reputation rep = reputation;
         boolean real;
         try {
@@ -526,9 +551,10 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
             real = false;
         }
         if (real) {
-            List<WarScoring.ReputationLine> lines = WarScoring.reputationLines(ctx.contributions().participants(),
-                    sides, win, config.reputationWin(), config.reputationLoss(), reputationCap.getAsInt());
             for (WarScoring.ReputationLine line : lines) {
+                if (line.delta() >= 0) {
+                    continue; // victors are paid through NeroFactions above, never twice
+                }
                 try {
                     rep.adjust(line.player(), line.faction(), line.delta());
                 } catch (RuntimeException | LinkageError failure) {
@@ -542,6 +568,51 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
         WarChannel.resolved(loser, scoring.score(lose), false);
         state.outcome = EventOutcome.SUCCESS;
         return state.outcome;
+    }
+
+    /**
+     * Pays each winning line once as NeroFactions EVENT reputation and tells the player the applied amount. Lines
+     * for a faction NeroFactions no longer defines are skipped silently; a {@code 0} result (usually the daily
+     * EVENT cap) is reported as "nothing gained"; a failed call ({@code -1}) says nothing. Returns how many
+     * players gained reputation. Nothing is logged.
+     */
+    static int awardVictors(@Nullable WarWorld world, List<WarScoring.ReputationLine> lines, String factionName) {
+        if (world == null || lines.isEmpty()) {
+            return 0;
+        }
+        Set<Identifier> known;
+        try {
+            known = world.factionIds();
+        } catch (RuntimeException | LinkageError failure) {
+            NeroEventsTelemetry.captureHandledException(failure, TELEMETRY_SOURCE, "reputation");
+            return 0;
+        }
+        Set<UUID> paid = new HashSet<>();
+        int gained = 0;
+        for (WarScoring.ReputationLine line : lines) {
+            if (line.delta() <= 0 || line.faction() == null || !known.contains(line.faction())
+                    || !paid.add(line.player())) {
+                continue;
+            }
+            int applied;
+            try {
+                applied = world.awardVictory(line.player(), line.faction(), line.delta());
+            } catch (RuntimeException | LinkageError failure) {
+                NeroEventsTelemetry.captureHandledException(failure, TELEMETRY_SOURCE, "reputation");
+                applied = -1;
+            }
+            try {
+                if (applied > 0) {
+                    gained++;
+                    world.tell(line.player(), MSG_REPUTATION_GAINED, applied, factionName);
+                } else if (applied == 0) {
+                    world.tell(line.player(), MSG_REPUTATION_NONE, factionName);
+                }
+            } catch (RuntimeException | LinkageError failure) {
+                NeroEventsTelemetry.captureHandledException(failure, TELEMETRY_SOURCE, "feedback");
+            }
+        }
+        return gained;
     }
 
     @Override
@@ -592,6 +663,11 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
             tag.putDouble("holdFractionA", scoring.holdFraction(Side.A));
             tag.putDouble("holdFractionB", scoring.holdFraction(Side.B));
         }
+        if (state.resolved) {
+            // Saved so a reloaded resolved war can never be resolved (or award) again.
+            tag.putBoolean("resolved", true);
+            tag.putString("outcome", (state.outcome == null ? EventOutcome.ENDED : state.outcome).name());
+        }
         return tag;
     }
 
@@ -619,7 +695,20 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
         scoring.restoreScores(tag.getIntOr("scoreA", 0), tag.getIntOr("scoreB", 0),
                 tag.getDoubleOr("holdFractionA", 0.0D), tag.getDoubleOr("holdFractionB", 0.0D));
         state.scoring = scoring;
+        if (tag.getBooleanOr("resolved", false)) {
+            state.resolved = true;
+            state.outcome = outcomeOf(tag.getStringOr("outcome", ""));
+        }
         return state;
+    }
+
+    private static EventOutcome outcomeOf(String name) {
+        for (EventOutcome outcome : EventOutcome.values()) {
+            if (outcome.name().equals(name)) {
+                return outcome;
+            }
+        }
+        return EventOutcome.ENDED;
     }
 
     @Override
@@ -630,6 +719,12 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
         Identifier b = state.sideB;
         if (world == null || loaded == null || a == null || b == null) {
             return ResumeResult.refuse("no_factions");
+        }
+        if (state.resolved) {
+            // Already decided: the next tick reports the saved outcome and cleanup removes the beacons.
+            state.sides = new WarSides(a, b);
+            LIVE.put(ctx.instance().id(), state);
+            return ResumeResult.ok();
         }
         int colourA = WarColours.of(a);
         int colourB = WarColours.of(b);

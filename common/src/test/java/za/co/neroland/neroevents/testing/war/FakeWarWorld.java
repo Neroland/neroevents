@@ -30,6 +30,12 @@ public final class FakeWarWorld implements WarWorld {
     public final List<BlockPos> captured = new ArrayList<>();
     public final Map<BlockPos, int[]> synced = new HashMap<>();
     public int placements;
+    /** Every victory award asked for, as "faction-path:amount". */
+    public final List<String> awards = new ArrayList<>();
+    /** What {@link #awardVictory} answers: {@code null} = the amount asked (nothing capped). */
+    public Integer awardAnswer;
+    /** Every line told to a player, as "key|arg|arg...". */
+    public final List<String> told = new ArrayList<>();
 
     public FakeWarWorld faction(Identifier faction, UUID... players) {
         factions.add(faction);
@@ -105,5 +111,20 @@ public final class FakeWarWorld implements WarWorld {
     @Override
     public void playCaptured(BlockPos pos) {
         captured.add(pos);
+    }
+
+    @Override
+    public int awardVictory(UUID player, Identifier faction, int amount) {
+        awards.add(faction.getPath() + ":" + amount);
+        return awardAnswer == null ? amount : awardAnswer;
+    }
+
+    @Override
+    public void tell(UUID player, String key, Object... args) {
+        StringBuilder line = new StringBuilder(key);
+        for (Object arg : args) {
+            line.append('|').append(arg);
+        }
+        told.add(line.toString());
     }
 }
