@@ -57,7 +57,7 @@ Each sibling integration is compiled `compileOnly` behind its `compat/` façade,
 | NeroEconomy | credit rewards, market shocks | always on |
 | NeroColonies | colony protection | `nerocolonies_compat=true` |
 | Open Parties and Claims | claim protection | `opac_compat=true` |
-| NeroFactions | faction wars, reputation rewards | `nerofactions_compat=false` (until NeroFactions is published) |
+| NeroFactions | faction wars, reputation rewards | `nerofactions_compat=true` (needs NeroFactions 0.7.0-beta.1 or later) |
 | Nerospace | solar and planetary storms | `nerospace_compat=false` (artifact not resolvable yet) |
 | NeroCreatures | raids, invasions, the world boss | `nerocreatures_compat=false` (artifact not resolvable yet) |
 | NeroAgriculture | slower crops during storms | `neroagriculture_compat=false` (artifact not resolvable yet) |

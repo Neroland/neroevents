@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Faction wars use NeroFactions' public API** and need NeroFactions **0.7.0-beta.1** or later (the
-  optional dependency's version floor is raised to match).
+  optional dependency's version floor is raised to match). The NeroFactions integration is now built into the
+  jar by default, so faction wars run whenever NeroFactions is installed.
 - **Winning a faction war pays NeroFactions event reputation.** Winners get the war's `reputation_win`
   (within `rewardReputationMaxDeltaPerEvent`) once per war, and a chat line says how much NeroFactions
   actually applied, or that nothing was gained when today's event-reputation limit is reached. Losers still
