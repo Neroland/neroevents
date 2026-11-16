@@ -1,0 +1,11 @@
+{
+  "map.layer.neroevents.events": "Events",
+  "map.layer.neroevents.war_zones": "War zones",
+  "map.neroevents.event": "Event",
+  "map.neroevents.phase.active": "Under way",
+  "map.neroevents.phase.upcoming": "Coming up",
+  "map.neroevents.storm": "Storm in progress",
+  "map.neroevents.war.side_a": "Held by the first side",
+  "map.neroevents.war.side_b": "Held by the second side",
+  "map.neroevents.war.side_none": "Unclaimed"
+}

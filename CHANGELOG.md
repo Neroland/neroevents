@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.9.1-beta.1] - 2026-11-16
+
+### Added
+
+- Map layers through Neroland Core's map API: live events at their public location (with their radius), and faction war beacons with the side holding each, under the same rule as the event console, so raids, invasions and events without a public location never appear. An active storm shows as a badge on its dimension. Shown by a map mod that reads Core's map registry; nothing changes without one.
+
 ### Dependencies
 
-- Updated Neroland Core from 1.17.0 to 1.17.6.
+- Updated Neroland Core from 1.17.0 to 1.19.0 (1.19.0 adds the map API).
 - Updated NeroEconomy from 0.5.0-beta.1 to 0.5.1-beta.1.
 - Updated NeroColonies from 0.6.1-beta.1 to 0.8.0-beta.1.
 - Updated NeroFactions from 0.7.0-beta.1 to 0.7.0-beta.2.

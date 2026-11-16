@@ -15,6 +15,7 @@ import za.co.neroland.neroevents.fx.EventParticles;
 import za.co.neroland.neroevents.fx.EventSounds;
 import za.co.neroland.neroevents.item.EventItems;
 import za.co.neroland.neroevents.item.SupplyBeaconDelivery;
+import za.co.neroland.neroevents.map.EventsMapLayers;
 import za.co.neroland.neroevents.network.EventNetwork;
 import za.co.neroland.neroevents.payload.debris.WreckDecay;
 import za.co.neroland.neroevents.platform.Services;
@@ -126,6 +127,8 @@ public final class NeroEventsCommon {
         RewardEvents.init();
         // 7c. Announcement and vote cues, driven by the engine's lifecycle signals.
         EventSounds.init();
+
+        EventsMapLayers.register(); // 7d. Map layers through Core's map registry; no map mod is named.
 
         // 8. Reserved: a NeroLink module, when one exists, goes LAST and swallows its own failures — a
         //    broken companion integration must never take the mod down with it.

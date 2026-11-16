@@ -114,3 +114,5 @@ messages appear on your screen.
 Operators see a small cross on each running or upcoming event; it asks first, then calls the event off
 for everyone (the same as `/neroevents cancel`). Everything a console sends is checked again on the
 server, so a player without permission can never use it.
+
+**On maps.** With a map mod that reads Neroland Core's map registry, the events the console shows with a location appear on the map at the same public spot, faction war beacons show which side holds them, and a storm shows as a badge on its dimension. Raids, invasions and events without a public location never appear.
