@@ -37,6 +37,15 @@ import za.co.neroland.neroevents.testing.storm.FakeStormOps;
 
 class StormPayloadTest {
 
+    @Test
+    void onlyANaturalEndCreditsSurvivors() {
+        assertTrue(StormPayloadBase.ranItsCourse(za.co.neroland.neroevents.event.EventOutcome.ENDED));
+        assertTrue(StormPayloadBase.ranItsCourse(za.co.neroland.neroevents.event.EventOutcome.EXPIRED));
+        assertFalse(StormPayloadBase.ranItsCourse(za.co.neroland.neroevents.event.EventOutcome.ENDED_EARLY));
+        assertFalse(StormPayloadBase.ranItsCourse(za.co.neroland.neroevents.event.EventOutcome.INTERRUPTED));
+        assertFalse(StormPayloadBase.ranItsCourse(null));
+    }
+
     private static final Identifier CINDARA = Identifier.fromNamespaceAndPath("nerospace", "cindara");
     private static final Identifier GREENXERTZ = Identifier.fromNamespaceAndPath("nerospace", "greenxertz");
     private static final Identifier STATION = Identifier.fromNamespaceAndPath("nerospace", "station");

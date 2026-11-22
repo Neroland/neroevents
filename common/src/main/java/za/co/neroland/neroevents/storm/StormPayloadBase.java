@@ -31,8 +31,10 @@ import za.co.neroland.neroevents.event.PayloadContext;
 import za.co.neroland.neroevents.event.PayloadState;
 import za.co.neroland.neroevents.event.PayloadType;
 import za.co.neroland.neroevents.event.ResumeResult;
+import za.co.neroland.neroevents.event.ServerPayloadContext;
 import za.co.neroland.neroevents.event.StartResult;
 import za.co.neroland.neroevents.event.TickResult;
+import za.co.neroland.neroevents.progression.Milestones;
 import za.co.neroland.neroevents.protect.Footprint;
 import za.co.neroland.neroevents.telemetry.NeroEventsTelemetry;
 
@@ -300,6 +302,26 @@ public abstract class StormPayloadBase implements PayloadType<StormPayloadBase.C
         return EventOutcome.ENDED;
     }
 
+    /**
+     * Whether a storm with this outcome ran its course: a natural end, not a stop, a cancel or a restart. Only then
+     * are the players in its dimension credited with {@code neroevents:storm_survived}.
+     */
+    static boolean ranItsCourse(@Nullable EventOutcome outcome) {
+        return outcome == EventOutcome.ENDED || outcome == EventOutcome.SUCCESS || outcome == EventOutcome.EXPIRED;
+    }
+
+    /** Opens {@code storm_survived} for each player present; only their UUID goes to Core's progression store. */
+    private static void creditSurvivors(PayloadContext ctx, List<UUID> present) {
+        Milestones milestones = Milestones.forServer(ctx instanceof ServerPayloadContext s ? s.server() : null);
+        for (UUID player : present) {
+            try {
+                milestones.recordStormSurvived(player);
+            } catch (RuntimeException | LinkageError failure) {
+                NeroEventsTelemetry.captureHandledException(failure, "storm", "milestones");
+            }
+        }
+    }
+
     @Override
     public void onCleanup(PayloadContext ctx, Config config, State state) {
         LIVE.remove(ctx.instance().id());
@@ -310,6 +332,9 @@ public abstract class StormPayloadBase implements PayloadType<StormPayloadBase.C
         state.begun = false;
         ActiveStorms.clear(ctx.dimension(), ctx.instance().id());
         StormChannel.end(ctx.dimension());
+        if (ranItsCourse(ctx.instance().outcome())) {
+            creditSurvivors(ctx, ops.players(ctx));
+        }
         StormSyncPayload none = StormSyncPayload.none(ctx.dimension());
         Set<UUID> told = new HashSet<>();
         for (UUID player : ops.players(ctx)) {

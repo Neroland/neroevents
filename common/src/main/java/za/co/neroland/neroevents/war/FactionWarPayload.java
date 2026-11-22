@@ -45,6 +45,7 @@ import za.co.neroland.neroevents.event.SchedulerSnapshot;
 import za.co.neroland.neroevents.event.ServerPayloadContext;
 import za.co.neroland.neroevents.event.StartResult;
 import za.co.neroland.neroevents.event.TickResult;
+import za.co.neroland.neroevents.progression.Milestones;
 import za.co.neroland.neroevents.payload.PendingCredits;
 import za.co.neroland.neroevents.protect.Footprint;
 import za.co.neroland.neroevents.telemetry.NeroEventsTelemetry;
@@ -560,6 +561,14 @@ public final class FactionWarPayload implements PayloadType<FactionWarPayload.Co
                 } catch (RuntimeException | LinkageError failure) {
                     NeroEventsTelemetry.captureHandledException(failure, TELEMETRY_SOURCE, "reputation");
                 }
+            }
+        }
+        Milestones milestones = Milestones.forServer(ctx instanceof ServerPayloadContext s ? s.server() : null);
+        for (UUID player : WarScoring.victors(ctx.contributions().participants(), sides, win)) {
+            try {
+                milestones.recordWarVictor(player);
+            } catch (RuntimeException | LinkageError failure) {
+                NeroEventsTelemetry.captureHandledException(failure, TELEMETRY_SOURCE, "milestones");
             }
         }
         Identifier winner = win == Side.A ? a : b;

@@ -261,6 +261,20 @@ public final class WarScoring {
      * {@code +min(win, cap)} (victor side) or {@code −min(loss, cap)} (loser side) with their own side's faction;
      * neutrals and unresolved players get nothing. Zero deltas are dropped.
      */
+    /** The credited participants whose frozen side is {@code victor} (empty for a draw). */
+    public static List<UUID> victors(Collection<UUID> participants, WarSides sides, Side victor) {
+        List<UUID> out = new ArrayList<>();
+        if (victor == Side.NEUTRAL) {
+            return out;
+        }
+        for (UUID player : participants) {
+            if (sides.frozenSide(player).orElse(Side.NEUTRAL) == victor) {
+                out.add(player);
+            }
+        }
+        return out;
+    }
+
     public static List<ReputationLine> reputationLines(Collection<UUID> participants, WarSides sides, Side victor,
             int reputationWin, int reputationLoss, int cap) {
         List<ReputationLine> out = new ArrayList<>();

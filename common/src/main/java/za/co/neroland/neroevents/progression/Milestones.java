@@ -22,6 +22,16 @@ public interface Milestones {
 
     boolean recordBossContributor(UUID player);
 
+    /** A player present in a storm's dimension when it ran its course. Default: records nothing. */
+    default boolean recordStormSurvived(UUID player) {
+        return false;
+    }
+
+    /** A credited participant on the winning side of a faction war. Default: records nothing. */
+    default boolean recordWarVictor(UUID player) {
+        return false;
+    }
+
     /** Scope = the boss event's definition id; falling. */
     boolean fireBossDefeated(Identifier bossDefinitionId);
 
@@ -49,6 +59,16 @@ public interface Milestones {
             @Override
             public boolean recordBossContributor(UUID player) {
                 return server != null && EventMilestones.recordBossContributor(server, player);
+            }
+
+            @Override
+            public boolean recordStormSurvived(UUID player) {
+                return server != null && EventMilestones.recordStormSurvived(server, player);
+            }
+
+            @Override
+            public boolean recordWarVictor(UUID player) {
+                return server != null && EventMilestones.recordWarVictor(server, player);
             }
 
             @Override

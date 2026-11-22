@@ -43,6 +43,10 @@ public final class EventMilestones {
     public static final Identifier RAID_REPELLED = gate("raid_repelled");
     /** The player met the contribution floor on a world-boss event. */
     public static final Identifier BOSS_CONTRIBUTOR = gate("boss_contributor");
+    /** The player was online in a storm's dimension when the storm ran its course. */
+    public static final Identifier STORM_SURVIVED = gate("storm_survived");
+    /** The player fought on the winning side of a faction war. */
+    public static final Identifier WAR_VICTOR = gate("war_victor");
 
     /** World channel: an event resolved. Scope = event type id, value = world resolved count. */
     public static final Identifier EVENT_RESOLVED = channel("event_resolved");
@@ -87,6 +91,16 @@ public final class EventMilestones {
     /** Records {@link #BOSS_CONTRIBUTOR} for a participant who met a world boss's contribution floor. */
     public static boolean recordBossContributor(MinecraftServer server, UUID participant) {
         return record(server, participant, BOSS_CONTRIBUTOR);
+    }
+
+    /** Records {@link #STORM_SURVIVED} for a player present in the storm's dimension at its natural end. */
+    public static boolean recordStormSurvived(MinecraftServer server, UUID participant) {
+        return record(server, participant, STORM_SURVIVED);
+    }
+
+    /** Records {@link #WAR_VICTOR} for a credited participant on the winning side of a faction war. */
+    public static boolean recordWarVictor(MinecraftServer server, UUID participant) {
+        return record(server, participant, WAR_VICTOR);
     }
 
     /**

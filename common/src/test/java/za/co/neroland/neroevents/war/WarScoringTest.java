@@ -187,6 +187,20 @@ class WarScoringTest {
     }
 
     @Test
+    void victorsAreTheWinningSideOnly() {
+        UUID red = member(RED);
+        UUID blue = member(BLUE);
+        UUID neutral = member(RED, BLUE);
+        UUID unresolved = member(RED);
+        sides.sideOf(red, p -> members.get(p));
+        sides.sideOf(blue, p -> members.get(p));
+        sides.sideOf(neutral, p -> members.get(p));
+        assertEquals(List.of(red), WarScoring.victors(List.of(red, blue, neutral, unresolved), sides, Side.A));
+        assertEquals(List.of(blue), WarScoring.victors(List.of(red, blue, neutral, unresolved), sides, Side.B));
+        assertEquals(List.of(), WarScoring.victors(List.of(red, blue), sides, Side.NEUTRAL));
+    }
+
+    @Test
     void warResolvedIsRisingForTheVictorOnly() {
         List<ThresholdEvents.ThresholdCrossing> fired = new ArrayList<>();
         WarChannel.useForTests(fired::add);

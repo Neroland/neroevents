@@ -91,7 +91,7 @@ NeroEvents also saves two world-data stores that name no player:
   it. The day is the UTC calendar day of the server clock.
 
 The progression records (`neroevents:first_participation`, `supply_claimed`, `raid_repelled`,
-`boss_contributor` and `hook/supply_beacon`) are yes/no player-scope rows in Neroland Core's
+`boss_contributor`, `storm_survived`, `war_victor` and `hook/supply_beacon`) are yes/no player-scope rows in Neroland Core's
 progression store, covered by Core's PRIVACY.md and erased through Core's shared erasure hook.
 
 ### What is kept in memory only

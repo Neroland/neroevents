@@ -5,9 +5,13 @@ All notable changes to **NeroEvents** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
-
 ## [Unreleased]
+
+## [0.9.2] - 2026-11-26
+
+### Added
+
+- Two player milestones for other mods to read: `neroevents:storm_survived` (you were online in a storm's dimension when it ran its course; a stopped, cancelled or restart-interrupted storm credits nobody) and `neroevents:war_victor` (you were a credited participant on the winning side of a faction war). NeroTrophies can award the Storm Survivor and War Victor trophies from them. Only the player's UUID goes into Core's progression store; nothing is logged.
 
 ## [0.9.1] - 2026-11-21
 
