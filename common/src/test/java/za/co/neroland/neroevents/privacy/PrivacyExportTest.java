@@ -51,6 +51,16 @@ class PrivacyExportTest {
     }
 
     @Test
+    void theCoreSectionDropsTheExportFileNotesAndKeepsTheData() {
+        JsonObject doc = PrivacyExport.forCore(document());
+        JsonObject notes = doc.getAsJsonObject("notes");
+        assertFalse(notes.has("retention"), "Core's export writes no file");
+        assertFalse(notes.get("erasure").getAsString().contains("file"));
+        assertEquals(1, doc.getAsJsonArray("reward_history").size(), "only the subject's own row");
+        assertFalse(PrivacyExport.toJson(doc).contains(other.toString()), "another player's id leaked");
+    }
+
+    @Test
     void theDocumentHasTheDocumentedShape() {
         JsonObject doc = document();
         assertEquals("neroevents", doc.get("mod").getAsString());

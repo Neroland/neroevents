@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.google.gson.JsonObject;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 
@@ -96,19 +98,8 @@ public final class EventsPrivacyActions {
             return Component.translatable("privacy.neroevents.export.cooldown", wait);
         }
         try {
-            List<CrateEntry> crate = new ArrayList<>(RewardCrateState.get(server).entriesFor(player));
-            PrivacyExport.LiveCounts live = PrivacyExport.LiveCounts.NONE;
-            EventEngine engine = EventEngine.current();
-            if (engine != null) {
-                live = engine.liveCountsFor(player);
-                engine.crates().map(c -> c.sessionEntries(player)).ifPresent(crate::addAll);
-            }
-            boolean optedOut = PrivacyOptOuts.get(server).isOptedOut(player);
-            PrivacyExport.Settings settings = new PrivacyExport.Settings(optedOut, cfg.rewardLedgerEnabled,
-                    cfg.ledgerDays(), cfg.crateDays());
-            String path = PrivacyExport.write(PrivacyExport.directory(server), player,
-                    PrivacyExport.build(player, RewardLedgerState.get(server).rowsFor(player), crate, settings, live,
-                            now));
+            String path = PrivacyExport.write(PrivacyExport.directory(server), player, document(server, player, cfg,
+                    now));
             return Component.translatable(solo(server, "privacy.neroevents.export.done"), path);
         } catch (IOException | RuntimeException failure) {
             COOLDOWN.refund(player);
@@ -118,6 +109,30 @@ public final class EventsPrivacyActions {
             NeroEventsCommon.LOGGER.warn("[NeroEvents] A privacy export failed ({}).", failure.getClass().getName());
             return Component.translatable("privacy.neroevents.export.failed");
         }
+    }
+
+    /** The export document for {@code player}, built from the live stores (server thread). Writes nothing. */
+    private static JsonObject document(MinecraftServer server, UUID player, RewardConfig cfg, long now) {
+        List<CrateEntry> crate = new ArrayList<>(RewardCrateState.get(server).entriesFor(player));
+        PrivacyExport.LiveCounts live = PrivacyExport.LiveCounts.NONE;
+        EventEngine engine = EventEngine.current();
+        if (engine != null) {
+            live = engine.liveCountsFor(player);
+            engine.crates().map(c -> c.sessionEntries(player)).ifPresent(crate::addAll);
+        }
+        boolean optedOut = PrivacyOptOuts.get(server).isOptedOut(player);
+        PrivacyExport.Settings settings = new PrivacyExport.Settings(optedOut, cfg.rewardLedgerEnabled,
+                cfg.ledgerDays(), cfg.crateDays());
+        return PrivacyExport.build(player, RewardLedgerState.get(server).rowsFor(player), crate, settings, live, now);
+    }
+
+    /**
+     * NeroEvents' section of Neroland Core's combined export ({@code /neroland data exportme}): the same document
+     * as {@code /neroevents privacy export}, built in memory. No file is written, no cooldown applies and nothing is
+     * logged; the note about the export file's retention is left out because there is no file.
+     */
+    public static JsonObject coreExport(MinecraftServer server, UUID player) {
+        return PrivacyExport.forCore(document(server, player, RewardConfig.fromConfig(), System.currentTimeMillis()));
     }
 
 }

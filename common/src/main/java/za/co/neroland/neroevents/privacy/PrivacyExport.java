@@ -147,6 +147,21 @@ public final class PrivacyExport {
         return root;
     }
 
+    /**
+     * Turns {@link #build}'s document into the section for Neroland Core's combined export, which is handed over in
+     * chat and never written to a file: the notes about the export file are replaced. Mutates and returns
+     * {@code document}.
+     */
+    public static JsonObject forCore(JsonObject document) {
+        JsonObject notes = document.getAsJsonObject("notes");
+        if (notes != null) {
+            notes.remove("retention");
+            notes.addProperty("erasure", "'/neroland data eraseme' removes everything above and forfeits any unclaimed "
+                    + "crate items.");
+        }
+        return document;
+    }
+
     public static String toJson(JsonObject document) {
         return GSON.toJson(document);
     }

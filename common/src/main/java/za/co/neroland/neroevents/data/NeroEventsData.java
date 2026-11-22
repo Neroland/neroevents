@@ -9,8 +9,10 @@ import net.minecraft.server.MinecraftServer;
 
 import za.co.neroland.nerolandcore.data.PlayerDataEraser;
 import za.co.neroland.nerolandcore.data.PlayerDataErasure;
+import za.co.neroland.nerolandcore.data.PlayerDataExport;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
+import za.co.neroland.neroevents.privacy.EventsPrivacyActions;
 
 /**
  * NeroEvents' single entry into Neroland Core's per-player data-erasure hook (POPIA/GDPR).
@@ -83,6 +85,8 @@ public final class NeroEventsData {
     public static void init() {
         if (REGISTERED.compareAndSet(false, true)) {
             PlayerDataErasure.register(ERASER);
+            // The read-side twin: one '/neroland data exportme' covers what one erasure purges.
+            PlayerDataExport.register(NeroEventsCommon.MOD_ID, EventsPrivacyActions::coreExport);
             NeroEventsCommon.LOGGER.debug("[NeroEvents] data-erasure hook registered ({} store(s))",
                     STORES.size());
         }

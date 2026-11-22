@@ -48,6 +48,9 @@ Reports are de-duplicated and hard-capped at 10 events per game session.
   the same player or machine.
 - Errors caused by other mods or by Minecraft itself are filtered out and never sent.
 
+NeroEvents reports through a Sentry client of its own and never touches the shared global Sentry hub,
+so another mod's crash reporter can neither read its reports nor switch it off.
+
 ## How to opt out
 
 Set the following in `config/neroevents.properties` (created on first launch):
@@ -144,6 +147,9 @@ opens the chat with the `/neroland data eraseme` command typed in for you to sen
 - `/neroevents privacy status` — what is kept about you and for how long.
 - `/neroevents privacy export` — everything NeroEvents holds about you, as one JSON file in the world
   folder (ask the server operator for it). It never contains another player's data.
+- `/neroland data exportme` (or an operator's `/neroland data export <uuid>`) — Neroland Core's combined
+  export, which includes the same NeroEvents document under `mods.neroevents`. That copy is built in
+  memory and handed over in chat: no file is written, no export cooldown applies and nothing is logged.
 - `/neroland data eraseme` (or an operator's `/neroland data erase <uuid>`, or Core's inactivity
   sweep) — removes your reward history, your crate, your opt-out row, your export file and everything
   held in memory about you, and refreshes the stores' backups so nothing comes back from them.
