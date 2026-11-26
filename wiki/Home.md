@@ -1,5 +1,9 @@
 # NeroEvents Wiki
 
+Fabric supports Minecraft 1.20 through 1.20.6. Forge supports 1.20 through 1.20.4 and 1.20.6. NeoForge supports 1.20.4 through 1.20.6, with the Forge jar for legacy NeoForge 1.20.1.
+Use Neroland Core 1.24.0 or newer (below 2.0) for the same Minecraft version and loader.
+
+
 Player- and server-owner documentation for **NeroEvents**, part of the Neroland ecosystem. Built on
 **Neroland Core**.
 

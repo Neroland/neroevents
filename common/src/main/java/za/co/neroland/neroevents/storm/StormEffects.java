@@ -44,7 +44,11 @@ public final class StormEffects {
                 new MobEffectInstance(effect, duration, spec.amplifier(), true, false, true)));
     }
 
+    //? if >=1.20.5 {
     static Optional<Holder<MobEffect>> holder(String name) {
+    //?} else {
+    /*static Optional<MobEffect> holder(String name) {
+    *///?}
         return Optional.ofNullable(switch (name) {
             case "weakness" -> MobEffects.WEAKNESS;
             case "hunger" -> MobEffects.HUNGER;

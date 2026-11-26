@@ -287,7 +287,12 @@ public class SupplyPodEntity extends Entity {
         this.lootRolled = input.getBooleanOr("LootRolled", false);
         this.descentTicks = input.getIntOr("DescentTicks", 0);
         this.maxDescentTicks = input.getIntOr("MaxDescentTicks", 600);
+        //? if >=1.20.5 {
         List<ItemStack> items = input.read("Items", ItemStack.OPTIONAL_CODEC.listOf()).orElse(List.of());
+        //?} else {
+        /*var items = net.minecraft.core.NonNullList.withSize(SLOTS, ItemStack.EMPTY);
+        net.minecraft.world.ContainerHelper.loadAllItems(input.tag(), items);
+        *///?}
         container.clearContent();
         for (int i = 0; i < items.size() && i < SLOTS; i++) {
             container.setItem(i, items.get(i));
@@ -321,11 +326,19 @@ public class SupplyPodEntity extends Entity {
         output.putBoolean("LootRolled", lootRolled);
         output.putInt("DescentTicks", descentTicks);
         output.putInt("MaxDescentTicks", maxDescentTicks);
+        //? if >=1.20.5 {
         List<ItemStack> items = new ArrayList<>(SLOTS);
         for (int i = 0; i < SLOTS; i++) {
             items.add(container.getItem(i));
         }
         output.store("Items", ItemStack.OPTIONAL_CODEC.listOf(), items);
+        //?} else {
+        /*var items = net.minecraft.core.NonNullList.withSize(SLOTS, ItemStack.EMPTY);
+        for (int i = 0; i < SLOTS; i++) {
+            items.set(i, container.getItem(i));
+        }
+        net.minecraft.world.ContainerHelper.saveAllItems(output.tag(), items);
+        *///?}
     }
 
     private static @Nullable UUID parseUuid(String raw) {

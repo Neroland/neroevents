@@ -40,16 +40,16 @@ public record EventConditions(List<Identifier> dimensions, Optional<Identifier> 
             Optional.empty(), Optional.empty(), Optional.empty(), 1, List.of(), false);
 
     public static final Codec<EventConditions> CODEC = RecordCodecBuilder.create(inst -> inst.group(
-            Identifier.CODEC.listOf().optionalFieldOf("dimensions", List.of()).forGetter(EventConditions::dimensions),
-            Identifier.CODEC.optionalFieldOf("dimension_tag").forGetter(EventConditions::dimensionTag),
-            Codec.INT.optionalFieldOf("min_online", 1).forGetter(EventConditions::minOnline),
-            Codec.INT.optionalFieldOf("max_online", -1).forGetter(EventConditions::maxOnline),
-            TimeWindow.CODEC.optionalFieldOf("time_of_day").forGetter(EventConditions::timeOfDay),
-            Codec.STRING.listOf().optionalFieldOf("bands").forGetter(EventConditions::bands),
-            Identifier.CODEC.optionalFieldOf("requires_gate").forGetter(EventConditions::requiresGate),
-            Codec.INT.optionalFieldOf("required_gate_holders", 1).forGetter(EventConditions::requiredGateHolders),
-            Codec.STRING.listOf().optionalFieldOf("requires_mods", List.of()).forGetter(EventConditions::requiresMods),
-            Codec.BOOL.optionalFieldOf("allow_empty_dimension", false).forGetter(EventConditions::allowEmptyDimension)
+            DefinitionFields.optional(Identifier.CODEC.listOf(), "dimensions", List.of()).forGetter(EventConditions::dimensions),
+            DefinitionFields.optional(Identifier.CODEC, "dimension_tag").forGetter(EventConditions::dimensionTag),
+            DefinitionFields.optional(Codec.INT, "min_online", 1).forGetter(EventConditions::minOnline),
+            DefinitionFields.optional(Codec.INT, "max_online", -1).forGetter(EventConditions::maxOnline),
+            DefinitionFields.optional(TimeWindow.CODEC, "time_of_day").forGetter(EventConditions::timeOfDay),
+            DefinitionFields.optional(Codec.STRING.listOf(), "bands").forGetter(EventConditions::bands),
+            DefinitionFields.optional(Identifier.CODEC, "requires_gate").forGetter(EventConditions::requiresGate),
+            DefinitionFields.optional(Codec.INT, "required_gate_holders", 1).forGetter(EventConditions::requiredGateHolders),
+            DefinitionFields.optional(Codec.STRING.listOf(), "requires_mods", List.of()).forGetter(EventConditions::requiresMods),
+            DefinitionFields.optional(Codec.BOOL, "allow_empty_dimension", false).forGetter(EventConditions::allowEmptyDimension)
     ).apply(inst, EventConditions::new));
 
     public EventConditions {

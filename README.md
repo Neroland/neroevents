@@ -13,9 +13,11 @@ and kill switches.
 
 ## Build targets
 
+- **Minecraft 1.20.x.** Fabric supports Minecraft 1.20 through 1.20.6. Forge supports 1.20 through 1.20.4 and 1.20.6. NeoForge supports 1.20.4 through 1.20.6, with the Forge jar for legacy NeoForge 1.20.1.
+  Use Neroland Core 1.24.0 or newer (below 2.0) for the same Minecraft version and loader.
 - **Minecraft:** 1.21.1, 1.21.4, 1.21.5, 1.21.8 (also 1.21.7), 1.21.10 (also 1.21.9), 1.21.11, 26.1.2, 26.2 and 26.3
-- **Loaders:** NeoForge, MinecraftForge/Forge, Fabric (the "27 cells")
-- **Java:** 21 for the 1.21.x cells, 25 for 26.x (build with JDK 25; Gradle provisions 21)
+- **Loaders:** NeoForge, MinecraftForge/Forge, Fabric
+- **Java:** 17 through Minecraft 1.20.4, 21 from Minecraft 1.20.5 through 1.21.x, and 25 for 26.x
 - Mod id: `neroevents` · package `za.co.neroland.neroevents`
 - Required: Neroland Core (see [USING-CORE.md](USING-CORE.md)). Everything else is optional.
 

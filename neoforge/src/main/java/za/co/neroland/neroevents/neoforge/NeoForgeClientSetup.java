@@ -9,15 +9,21 @@ import net.minecraft.world.entity.EntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+//? if >=1.20.5 {
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+//?}
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+//? if >=1.20.5 {
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+//?}
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+//? if >=1.20.5 {
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+//?}
 import net.neoforged.neoforge.common.NeoForge;
 
 import za.co.neroland.neroevents.NeroEventsCommon;
@@ -59,8 +65,14 @@ public final class NeoForgeClientSetup {
         modEventBus.addListener(NeoForgeClientSetup::onRegisterParticleProviders);
         modEventBus.addListener((RegisterMenuScreensEvent event) ->
                 event.register(ConsoleBlocks.EVENT_CONSOLE_MENU.get(), EventConsoleScreen::new));
+        //? if >=1.20.5 {
         modEventBus.addListener((RegisterGuiLayersEvent event) -> event.registerAboveAll(
                 Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "event_hud"), (g, delta) -> EventHud.render(g)));
+        //?} else {
+        /*modEventBus.addListener((net.neoforged.neoforge.client.event.RegisterGuiOverlaysEvent event) ->
+                event.registerAboveAll(Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "event_hud"),
+                        (gui, graphics, delta, width, height) -> EventHud.render(graphics)));
+        *///?}
         modEventBus.addListener((RegisterKeyMappingsEvent event) -> {
             event.register(EventsClient.DISMISS_HUD);
             event.register(EventsClient.OPEN_HUD_SETTINGS);
@@ -72,12 +84,24 @@ public final class NeoForgeClientSetup {
         /*modEventBus.addListener((RegisterColorHandlersEvent.Block event) ->
                 event.register(ConsoleTint.INSTANCE, ConsoleBlocks.EVENT_CONSOLE.get()));
         *///?}
+        //? if >=1.20.5 {
         modContainer.registerExtensionPoint(IConfigScreenFactory.class,
                 (IConfigScreenFactory) (container, parent) -> new EventHudConfigScreen(parent));
         NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post event) -> {
             EventsClient.tick();
             GalleryCaptureHarness.tick();
         });
+        //?} else {
+        /*modContainer.registerExtensionPoint(net.neoforged.neoforge.client.ConfigScreenHandler.ConfigScreenFactory.class,
+                () -> new net.neoforged.neoforge.client.ConfigScreenHandler.ConfigScreenFactory(
+                        (minecraft, parent) -> new EventHudConfigScreen(parent)));
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.TickEvent.ClientTickEvent event) -> {
+            if (event.phase == net.neoforged.neoforge.event.TickEvent.Phase.END) {
+                EventsClient.tick();
+                GalleryCaptureHarness.tick();
+            }
+        });
+        *///?}
         // The payload effects (trails, impact flash, pod beacon) and the client-only /nsevgallery and /nsevrender.
         EventFxClient.install();
         NeoForge.EVENT_BUS.addListener((RegisterClientCommandsEvent event) -> {

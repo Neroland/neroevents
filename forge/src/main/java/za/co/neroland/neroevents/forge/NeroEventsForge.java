@@ -29,7 +29,12 @@ import za.co.neroland.neroevents.progression.QuestHooks;
 @Mod(NeroEventsCommon.MOD_ID)
 public final class NeroEventsForge {
 
+    //? if >=1.20.5 {
     public NeroEventsForge(FMLJavaModLoadingContext context) {
+    //?} else {
+    /*public NeroEventsForge() {
+        FMLJavaModLoadingContext context = FMLJavaModLoadingContext.get();
+    *///?}
         NeroEventsCommon.LOGGER.info("[NeroEvents] Forge bootstrap");
         // Common init declares the payloads; the channel below is sealed the moment it is built, so
         // that ordering is mandatory on Forge.
@@ -69,12 +74,7 @@ public final class NeroEventsForge {
         });
         //?} else {
         /*// Forge before 1.21.6 (EventBus 6): one shared game bus, listeners typed by their lambda parameter.
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((TickEvent.ServerTickEvent.Post event) -> {
-            QuestHooks.tick(event.getServer());
-            EventEngine.tick(event.getServer());
-            ConsoleServer.tick(event.getServer());
-            GalleryShowcase.tick(event.getServer());
-        });
+        registerServerTick();
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> {
             GalleryShowcase.onServerStopping(event.getServer());
             EventEngine.onServerStopping(event.getServer());
@@ -89,4 +89,26 @@ public final class NeroEventsForge {
             ForgeClientSetup.init(context);
         }
     }
+
+    //? if >=1.20.5 && <1.21.6 {
+    /*private static void registerServerTick() {
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((TickEvent.ServerTickEvent.Post event) -> tick(event.getServer()));
+    }
+    *///?} elif <1.20.5 {
+    /*private static void registerServerTick() {
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((TickEvent.ServerTickEvent event) -> {
+            if (event.phase == TickEvent.Phase.END) {
+                tick(event.getServer());
+            }
+        });
+    }
+    *///?}
+    //? if <1.21.6 {
+    /*private static void tick(net.minecraft.server.MinecraftServer server) {
+        QuestHooks.tick(server);
+        EventEngine.tick(server);
+        ConsoleServer.tick(server);
+        GalleryShowcase.tick(server);
+    }
+    *///?}
 }

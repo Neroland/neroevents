@@ -81,8 +81,13 @@ public final class DebrisCrashPayload implements PayloadType<DebrisCrashPayload.
     public record Config(List<String> variants, int fallHeight, double fallBlocksPerTick, Identifier salvageLootTable,
             long salvageLootBudget, int salvageWindowTicks) implements PayloadConfig {
 
-        private static final Codec<List<String>> VARIANTS = Codec.STRING.listOf().validate(list -> list.isEmpty()
-                ? DataResult.error(() -> "variants must not be empty") : DataResult.success(list));
+        private static final Codec<List<String>> VARIANTS = Codec.STRING.listOf()
+                .flatXmap(Config::checkVariants, Config::checkVariants);
+
+        private static DataResult<List<String>> checkVariants(List<String> variants) {
+            return variants.isEmpty() ? DataResult.error(() -> "variants must not be empty")
+                    : DataResult.success(variants);
+        }
 
         public static final MapCodec<Config> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 VARIANTS.optionalFieldOf("variants", ALL_VARIANTS).forGetter(Config::variants),

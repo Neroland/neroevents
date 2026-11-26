@@ -2,7 +2,9 @@ package za.co.neroland.neroevents.payload.meteor;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+//? if >=1.20.5 {
 import net.minecraft.network.codec.ByteBufCodecs;
+//?}
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -17,14 +19,28 @@ import za.co.neroland.neroevents.NeroEventsCommon;
  */
 public record ImpactFlashPayload(BlockPos pos, byte severityOrdinal, boolean soft) implements CustomPacketPayload {
 
+    //? if >=1.20.5 {
     public static final CustomPacketPayload.Type<ImpactFlashPayload> TYPE = new CustomPacketPayload.Type<>(
             Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "impact_flash"));
+    //?} else {
+    /*public static final CustomPacketPayload.Type<ImpactFlashPayload> TYPE = new CustomPacketPayload.Type<>(
+            Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "impact_flash"), ImpactFlashPayload.class);
+    *///?}
 
+    //? if >=1.20.5 {
     public static final StreamCodec<RegistryFriendlyByteBuf, ImpactFlashPayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, ImpactFlashPayload::pos,
             ByteBufCodecs.BYTE, ImpactFlashPayload::severityOrdinal,
             ByteBufCodecs.BOOL, ImpactFlashPayload::soft,
             ImpactFlashPayload::new);
+    //?} else {
+    /*public static final StreamCodec<RegistryFriendlyByteBuf, ImpactFlashPayload> STREAM_CODEC = StreamCodec.of(
+            (buffer, payload) -> {
+                buffer.writeBlockPos(payload.pos());
+                buffer.writeByte(payload.severityOrdinal());
+                buffer.writeBoolean(payload.soft());
+            }, buffer -> new ImpactFlashPayload(buffer.readBlockPos(), buffer.readByte(), buffer.readBoolean()));
+    *///?}
 
     @Override
     public CustomPacketPayload.Type<ImpactFlashPayload> type() {

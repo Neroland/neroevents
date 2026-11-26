@@ -294,13 +294,20 @@ public class EventHudConfigScreen extends Screen {
         drawBody(g, mouseX, mouseY);
         super.extractRenderState(g, mouseX, mouseY, partialTick); // the buttons
     }
-    //?} else {
+    //?} elif >=1.20.2 {
     /*// Before 26.1 Screen.render(..) (or the frame, from 1.21.6) draws the blurred background first; the panel
     // goes on top of it here, then render(..) draws the buttons.
     @Override
     public void renderBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(g, mouseX, mouseY, partialTick);
         drawBody(g, mouseX, mouseY);
+    }
+    *///?} else {
+    /*@Override
+    public void render(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(g);
+        drawBody(g, mouseX, mouseY);
+        super.render(g, mouseX, mouseY, partialTick);
     }
     *///?}
 

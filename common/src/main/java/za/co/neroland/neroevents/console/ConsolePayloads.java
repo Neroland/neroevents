@@ -41,9 +41,15 @@ public final class ConsolePayloads {
     private ConsolePayloads() {
     }
 
+    //? if >=1.20.5 {
     private static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> typeOf(String path) {
         return new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, path));
     }
+    //?} else {
+    /*private static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> typeOf(String path, Class<T> payloadClass) {
+        return new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, path), payloadClass);
+    }
+    *///?}
 
     // --- shared row types --------------------------------------------------------------------------------
 
@@ -377,7 +383,11 @@ public final class ConsolePayloads {
 
         public static final ConsoleClaim INSTANCE = new ConsoleClaim();
         public static final CustomPacketPayload.Type<ConsoleClaim> TYPE = typeOf("console_claim");
+        //? if >=1.20.5 {
         public static final StreamCodec<FriendlyByteBuf, ConsoleClaim> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+        //?} else {
+        /*public static final StreamCodec<FriendlyByteBuf, ConsoleClaim> STREAM_CODEC = StreamCodec.of((buffer, payload) -> {}, buffer -> INSTANCE);
+        *///?}
 
         @Override
         public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
@@ -418,7 +428,11 @@ public final class ConsolePayloads {
 
         public static final ConsoleRefresh INSTANCE = new ConsoleRefresh();
         public static final CustomPacketPayload.Type<ConsoleRefresh> TYPE = typeOf("console_refresh");
+        //? if >=1.20.5 {
         public static final StreamCodec<FriendlyByteBuf, ConsoleRefresh> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+        //?} else {
+        /*public static final StreamCodec<FriendlyByteBuf, ConsoleRefresh> STREAM_CODEC = StreamCodec.of((buffer, payload) -> {}, buffer -> INSTANCE);
+        *///?}
 
         @Override
         public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {

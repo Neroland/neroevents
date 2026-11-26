@@ -94,7 +94,7 @@ public final class MarketShockPayload implements PayloadType<MarketShockPayload.
     public record Config(List<Shock> shocks) implements PayloadConfig {
 
         static final MapCodec<Config> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
-                Shock.CODEC.listOf().validate(Config::checkSize).fieldOf("shocks").forGetter(Config::shocks)
+                Shock.CODEC.listOf().flatXmap(Config::checkSize, Config::checkSize).fieldOf("shocks").forGetter(Config::shocks)
         ).apply(inst, Config::new));
 
         public Config {

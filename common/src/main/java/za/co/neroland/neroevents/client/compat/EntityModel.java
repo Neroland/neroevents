@@ -30,9 +30,16 @@ public abstract class EntityModel<S extends EntityRenderState> extends Model {
         this.root.getAllParts().forEach(ModelPart::resetPose);
     }
 
+    //? if >=1.21 {
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer consumer, int light, int overlay, int color) {
         this.root.render(poseStack, consumer, light, overlay, color);
     }
+    //?} else {
+    /^@Override
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer consumer, int light, int overlay, float red, float green, float blue, float alpha) {
+        this.root.render(poseStack, consumer, light, overlay, red, green, blue, alpha);
+    }
+    ^///?}
 }
 *///?}

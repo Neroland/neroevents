@@ -154,11 +154,21 @@ public class EventConsoleRenderer implements BlockEntityRenderer<EventConsoleBlo
 
     private static void vertex(VertexConsumer c, PoseStack.Pose pose, float x, float y, float z, float u, float v,
             float nx, float nz, int argb) {
+        //? if >=1.21 {
         c.addVertex(pose, x, y, z)
                 .setColor((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >>> 24) & 0xFF)
                 .setUv(u, v)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
                 .setLight(EventColours.FULL_BRIGHT)
                 .setNormal(pose, nx, 0.0F, nz);
+        //?} else {
+        /*c.vertex(pose.pose(), x, y, z)
+                .color((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >>> 24) & 0xFF)
+                .uv(u, v)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
+                .uv2(EventColours.FULL_BRIGHT)
+                .normal(pose, nx, 0.0F, nz)
+                .endVertex();
+        *///?}
     }
 }

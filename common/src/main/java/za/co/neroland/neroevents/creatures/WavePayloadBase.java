@@ -31,6 +31,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 import org.jetbrains.annotations.Nullable;
 
+import za.co.neroland.neroevents.event.DefinitionFields;
 import za.co.neroland.neroevents.compat.creatures.CreaturesCompat;
 import za.co.neroland.neroevents.event.EventDefinition;
 import za.co.neroland.neroevents.event.EventInstance;
@@ -111,16 +112,16 @@ public abstract class WavePayloadBase implements PayloadType<WavePayloadBase.Con
 
         public static final MapCodec<Config> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 WaveTable.sized(WaveTable.Wave.CODEC.listOf(), 1, 8, "waves").fieldOf("waves").forGetter(Config::waves),
-                Codec.doubleRange(0.0D, 1.0D).optionalFieldOf("scale_per_online", 0.25D).forGetter(Config::scalePerOnline),
-                Codec.doubleRange(0.25D, 1.0D).optionalFieldOf("solo_scale", 0.6D).forGetter(Config::soloScale),
-                Codec.intRange(1, 64).optionalFieldOf("max_per_wave", 24).forGetter(Config::maxPerWave),
-                Codec.intRange(8, 64).optionalFieldOf("spawn_radius_min", 16).forGetter(Config::spawnRadiusMin),
-                Codec.intRange(8, 64).optionalFieldOf("spawn_radius_max", 28).forGetter(Config::spawnRadiusMax),
-                Codec.intRange(1, 8).optionalFieldOf("spawn_per_tick", 2).forGetter(Config::spawnPerTick),
-                Codec.doubleRange(0.0D, 1.0D).optionalFieldOf("success_kill_fraction", 0.5D)
+                DefinitionFields.optional(Codec.doubleRange(0.0D, 1.0D), "scale_per_online", 0.25D).forGetter(Config::scalePerOnline),
+                DefinitionFields.optional(Codec.doubleRange(0.25D, 1.0D), "solo_scale", 0.6D).forGetter(Config::soloScale),
+                DefinitionFields.optional(Codec.intRange(1, 64), "max_per_wave", 24).forGetter(Config::maxPerWave),
+                DefinitionFields.optional(Codec.intRange(8, 64), "spawn_radius_min", 16).forGetter(Config::spawnRadiusMin),
+                DefinitionFields.optional(Codec.intRange(8, 64), "spawn_radius_max", 28).forGetter(Config::spawnRadiusMax),
+                DefinitionFields.optional(Codec.intRange(1, 8), "spawn_per_tick", 2).forGetter(Config::spawnPerTick),
+                DefinitionFields.optional(Codec.doubleRange(0.0D, 1.0D), "success_kill_fraction", 0.5D)
                         .forGetter(Config::successKillFraction),
-                Codec.BOOL.optionalFieldOf("survival_credit", true).forGetter(Config::survivalCredit),
-                Codec.BOOL.optionalFieldOf("block_damage", false).forGetter(Config::blockDamage)
+                DefinitionFields.optional(Codec.BOOL, "survival_credit", true).forGetter(Config::survivalCredit),
+                DefinitionFields.optional(Codec.BOOL, "block_damage", false).forGetter(Config::blockDamage)
         ).apply(inst, Config::new));
 
         int ringMin() {

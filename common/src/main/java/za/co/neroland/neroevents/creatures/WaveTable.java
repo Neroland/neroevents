@@ -57,9 +57,10 @@ public final class WaveTable {
 
     /** A list codec bounded to {@code [min, max]} entries. */
     static <T> Codec<List<T>> sized(Codec<List<T>> codec, int min, int max, String what) {
-        return codec.validate(list -> list.size() < min || list.size() > max
+        java.util.function.Function<List<T>, DataResult<List<T>>> check = list -> list.size() < min || list.size() > max
                 ? DataResult.error(() -> what + " needs " + min + " to " + max + " entries, got " + list.size())
-                : DataResult.success(list));
+                : DataResult.success(list);
+        return codec.flatXmap(check, check);
     }
 
     /** The per-wave ceiling: {@code max_per_wave}, never above {@link #MAX_BUDGET}. */

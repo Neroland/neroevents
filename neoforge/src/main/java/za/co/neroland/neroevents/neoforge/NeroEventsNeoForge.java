@@ -9,7 +9,9 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+//? if >=1.20.5 {
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+//?}
 
 import za.co.neroland.nerolandcore.registry.RegistrationProvider;
 
@@ -33,13 +35,15 @@ public final class NeroEventsNeoForge {
         // attaches them to our mod event bus.
         RegistrationProvider.attach(modEventBus);
         NeoForgeEventNetwork.register(modEventBus);
-        // Quest hook delivery (pending hook gates on login) and the event engine ride the server tick.
-        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> QuestHooks.tick(event.getServer()));
-        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> EventEngine.tick(event.getServer()));
-        // The HUD push and the open consoles' refresh, once a second.
-        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> ConsoleServer.tick(event.getServer()));
-        // The creative gallery's station loops and demo (no-op without a gallery session); dropped on stop.
-        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> GalleryShowcase.tick(event.getServer()));
+        //? if >=1.20.5 {
+        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> tick(event.getServer()));
+        //?} else {
+        /*NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.TickEvent.ServerTickEvent event) -> {
+            if (event.phase == net.neoforged.neoforge.event.TickEvent.Phase.END) {
+                tick(event.getServer());
+            }
+        });
+        *///?}
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) ->
                 GalleryShowcase.onServerStopping(event.getServer()));
         // Running events save their resumable state when the server (or a single-player world) closes.
@@ -49,13 +53,23 @@ public final class NeroEventsNeoForge {
         //? if >=26.1 {
         NeoForge.EVENT_BUS.addListener((LivingDamageEvent.Post e) ->
                 EventDamageHooks.afterDamage(e.getEntity(), e.getSource(), e.getInflictedDamage()));
-        //?} else {
+        //?} else if >=1.21 {
         /*NeoForge.EVENT_BUS.addListener((LivingDamageEvent.Post e) ->
                 EventDamageHooks.afterDamage(e.getEntity(), e.getSource(), e.getNewDamage()));
+        *///?} else {
+        /*NeoForge.EVENT_BUS.addListener((LivingDamageEvent e) ->
+                EventDamageHooks.afterDamage(e.getEntity(), e.getSource(), e.getAmount()));
         *///?}
         // Client-only: the payload entities' renderers. Gated so client classes never load on a dedicated server.
         if (FMLEnvironment.getDist() == Dist.CLIENT) {
             NeoForgeClientSetup.init(modEventBus, modContainer);
         }
+    }
+
+    private static void tick(net.minecraft.server.MinecraftServer server) {
+        QuestHooks.tick(server);
+        EventEngine.tick(server);
+        ConsoleServer.tick(server);
+        GalleryShowcase.tick(server);
     }
 }

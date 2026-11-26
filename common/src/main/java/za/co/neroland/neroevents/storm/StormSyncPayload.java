@@ -1,7 +1,9 @@
 package za.co.neroland.neroevents.storm;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
+//? if >=1.20.5 {
 import net.minecraft.network.codec.ByteBufCodecs;
+//?}
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -24,9 +26,15 @@ import za.co.neroland.neroevents.NeroEventsCommon;
 public record StormSyncPayload(Identifier dimension, byte variant, byte intensity, int rampTicks, short windYaw)
         implements CustomPacketPayload {
 
+    //? if >=1.20.5 {
     public static final CustomPacketPayload.Type<StormSyncPayload> TYPE =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "storm_sync"));
+    //?} else {
+    /*public static final CustomPacketPayload.Type<StormSyncPayload> TYPE =
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "storm_sync"), StormSyncPayload.class);
+    *///?}
 
+    //? if >=1.20.5 {
     public static final StreamCodec<RegistryFriendlyByteBuf, StormSyncPayload> STREAM_CODEC = StreamCodec.composite(
             Identifier.STREAM_CODEC, StormSyncPayload::dimension,
             ByteBufCodecs.BYTE, StormSyncPayload::variant,
@@ -34,6 +42,17 @@ public record StormSyncPayload(Identifier dimension, byte variant, byte intensit
             ByteBufCodecs.VAR_INT, StormSyncPayload::rampTicks,
             ByteBufCodecs.SHORT, StormSyncPayload::windYaw,
             StormSyncPayload::new);
+    //?} else {
+    /*public static final StreamCodec<RegistryFriendlyByteBuf, StormSyncPayload> STREAM_CODEC = StreamCodec.of(
+            (buffer, payload) -> {
+                buffer.writeResourceLocation(payload.dimension());
+                buffer.writeByte(payload.variant());
+                buffer.writeByte(payload.intensity());
+                buffer.writeVarInt(payload.rampTicks());
+                buffer.writeShort(payload.windYaw());
+            }, buffer -> new StormSyncPayload(buffer.readResourceLocation(), buffer.readByte(), buffer.readByte(),
+                    buffer.readVarInt(), buffer.readShort()));
+    *///?}
 
     /** The packet for an active storm. */
     public static StormSyncPayload active(Identifier dimension, StormVariant variant, int intensity, int rampTicks,

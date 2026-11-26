@@ -36,10 +36,12 @@ public final class NeroEventsFabric implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 EventCommands.register(dispatcher));
         // Event-entity damage (raid waves, the boss): observed after it was applied; one map lookup otherwise.
+        //? if >=1.21 {
         ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
             if (!blocked) {
                 EventDamageHooks.afterDamage(entity, source, damageTaken);
             }
         });
+        //?}
     }
 }

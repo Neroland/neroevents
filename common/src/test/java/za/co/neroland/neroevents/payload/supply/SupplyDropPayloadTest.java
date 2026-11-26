@@ -251,7 +251,11 @@ class SupplyDropPayloadTest {
     @Test
     void podTablesRollEachPoolOncePerLootRoll() throws Exception {
         for (int tier = 1; tier <= 3; tier++) {
+            //? if >=1.21 {
             String path = "/data/neroevents/loot_table/pods/supply_tier" + tier + ".json";
+            //?} else {
+            /*String path = "/data/neroevents/loot_tables/pods/supply_tier" + tier + ".json";
+            *///?}
             try (java.io.InputStream in = SupplyDropPayloadTest.class.getResourceAsStream(path)) {
                 assertTrue(in != null, path);
                 com.google.gson.JsonObject root = com.google.gson.JsonParser.parseReader(

@@ -40,8 +40,12 @@ public final class LootRolls {
             return out;
         }
         try {
+            //? if >=1.20.5 {
             LootTable loot = level.getServer().reloadableRegistries()
                     .getLootTable(ResourceKey.create(Registries.LOOT_TABLE, table));
+            //?} else {
+            /*LootTable loot = level.getServer().getLootData().getLootTable(table);
+            *///?}
             if (loot == LootTable.EMPTY) {
                 NeroEventsCommon.LOGGER.debug("[NeroEvents] loot table {} is missing or empty", table);
                 return out;

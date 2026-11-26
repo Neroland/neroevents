@@ -8,7 +8,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.client.ConfigScreenHandler;
+//? if >=1.20.5 {
 import net.minecraftforge.client.event.AddGuiOverlayLayersEvent;
+//?}
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
@@ -90,21 +92,26 @@ public final class ForgeClientSetup {
         modBus.addListener(ForgeClientSetup::onClientSetup);
         modBus.addListener(ForgeClientSetup::onRegisterEntityRenderers);
         modBus.addListener(ForgeClientSetup::onRegisterParticleProviders);
-        modBus.addListener(ForgeClientSetup::onAddGuiLayers);
+        registerHud(modBus);
         modBus.addListener((RegisterKeyMappingsEvent event) -> {
             event.register(EventsClient.DISMISS_HUD);
             event.register(EventsClient.OPEN_HUD_SETTINGS);
         });
         modBus.addListener(ForgeClientSetup::onRegisterBlockColors);
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((TickEvent.ClientTickEvent.Post event) -> clientTick());
+        registerClientTick();
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(ForgeClientSetup::onRegisterClientCommands);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(
                 (ClientPlayerNetworkEvent.LoggingOut event) -> loggedOut());
         *///?}
         // The payload effects (trails, impact flash, pod beacon) and the client-only /nsevgallery and /nsevrender.
         EventFxClient.install();
+        //? if >=1.20.5 {
         context.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> new EventHudConfigScreen(parent)));
+        //?} else {
+        /*net.minecraftforge.fml.ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
+                () -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> new EventHudConfigScreen(parent)));
+        *///?}
     }
 
     private static void clientTick() {
@@ -119,10 +126,35 @@ public final class ForgeClientSetup {
         EventNetwork.clearClientCaches();
     }
 
+    //? if >=1.20.5 && <1.21.6 {
+    /*private static void registerHud(net.minecraftforge.eventbus.api.IEventBus modBus) {
+        modBus.addListener(ForgeClientSetup::onAddGuiLayers);
+    }
+
+    private static void registerClientTick() {
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((TickEvent.ClientTickEvent.Post event) -> clientTick());
+    }
+    *///?} elif <1.20.5 {
+    /*private static void registerHud(net.minecraftforge.eventbus.api.IEventBus modBus) {
+        modBus.addListener((net.minecraftforge.client.event.RegisterGuiOverlaysEvent event) ->
+                event.registerAboveAll("event_hud", (gui, graphics, delta, width, height) -> EventHud.render(graphics)));
+    }
+
+    private static void registerClientTick() {
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((TickEvent.ClientTickEvent event) -> {
+            if (event.phase == TickEvent.Phase.END) {
+                clientTick();
+            }
+        });
+    }
+    *///?}
+
+    //? if >=1.20.5 {
     private static void onAddGuiLayers(AddGuiOverlayLayersEvent event) {
         event.getLayeredDraw().add(
                 Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "event_hud"), (g, delta) -> EventHud.render(g));
     }
+    //?}
 
     private static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event) {
         //? if >=26.1 {

@@ -82,7 +82,9 @@ public class SupplyBeaconItem extends Item {
         if (!outcome.consume()) {
             return InteractionResult.FAIL;
         }
-        serverPlayer.getItemInHand(hand).consume(1, serverPlayer);
+        if (!serverPlayer.getAbilities().instabuild) {
+            serverPlayer.getItemInHand(hand).shrink(1);
+        }
         return InteractionResult.SUCCESS;
     }
 }

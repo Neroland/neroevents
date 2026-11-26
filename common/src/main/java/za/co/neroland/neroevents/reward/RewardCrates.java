@@ -218,7 +218,7 @@ public final class RewardCrates {
         int accepted = 0;
         int left = count;
         while (left > 0) {
-            ItemStack stack = new ItemStack(item, Math.min(left, item.getDefaultMaxStackSize()));
+            ItemStack stack = new ItemStack(item, Math.min(left, item.getDefaultInstance().getMaxStackSize()));
             int size = stack.getCount();
             player.getInventory().add(stack);
             int went = size - stack.getCount();

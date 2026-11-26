@@ -13,6 +13,7 @@ plugins {
 
 // MC version comes from the Stonecutter node (e.g. :fabric:26.1.2), not a global property.
 def mc = stonecutter.current.version
+def mc120 = mc == '1.20' || mc.startsWith('1.20.')
 // Minecraft before 26.1 ships obfuscated, so those cells need mappings and a remapped jar.
 def obfuscated = mc.startsWith('1.')
 apply plugin: obfuscated ? 'net.fabricmc.fabric-loom-remap' : 'net.fabricmc.fabric-loom'
@@ -22,9 +23,11 @@ apply plugin: obfuscated ? 'net.fabricmc.fabric-loom-remap' : 'net.fabricmc.fabr
 def mcCeiling = project.findProperty("mc_ceiling_${mc}") ?: mc.tokenize('.').with { "${it[0]}.${it[1].toInteger() + 1}" }
 def mcFloor = project.findProperty("mc_floor_${mc}") ?: mc
 def fabricApi = project.findProperty("fabric_api_version_${mc}")
-def jeiVersion = project.findProperty("jei_version_${mc}")
+def jeiMc = mc == '1.20.5' ? '1.20.6' : mc
+def jeiVersion = project.findProperty("jei_version_${jeiMc}")
 def emiFile = project.findProperty("emi_file_fabric_${mc}")
-def nerolandcoreVersion = project.findProperty('nerolandcore_version')
+def nerolandcoreVersion = rootProject.property('nerolandcore_version')
+def neroeconomyVersion = rootProject.property('neroeconomy_version')
 
 // This node's projectDir is <loader>/versions/<v>; the authoritative loader source +
 // resources live in the BRANCH root (fabric/). Resolve branch-root paths via the parent.
@@ -38,6 +41,7 @@ def branchDir = project.parent.projectDir
 // sibling artifact at all. Manifest floors are the compiled versions (ecosystem floor rule).
 def compatOn = { String flag -> (rootProject.findProperty(flag) ?: 'true').toString().trim() == 'true' }
 def siblingIds = ['nerospace', 'nerocreatures', 'nerocolonies', 'neroagriculture', 'nerofactions']
+def siblingVersion = { id -> rootProject.property("${id}_version") }
 def siblingPkg = [nerospace: 'nerospace', nerocreatures: 'creatures', nerocolonies: 'colonies', neroagriculture: 'agriculture', nerofactions: 'factions']
 def siblingCls = [nerospace: 'Nerospace', nerocreatures: 'Creatures', nerocolonies: 'Colonies', neroagriculture: 'Agriculture', nerofactions: 'Factions']
 def siblingRun = [nerospace: 'withNerospace', nerocreatures: 'withNeroCreatures', nerocolonies: 'withNeroColonies', neroagriculture: 'withNeroAgriculture', nerofactions: 'withNeroFactions']
@@ -96,6 +100,9 @@ sourceSets.main.java.srcDir rootProject.ext.commonJava
 sourceSets.main.resources.srcDir rootProject.ext.commonResources
 
 dependencies {
+    if (mc120) {
+        compileOnly 'io.github.llamalad7:mixinextras-common:0.4.1'
+    }
     minecraft "com.mojang:minecraft:${mc}"
     if (obfuscated) {
         // Obfuscated 1.21.x: Mojang's official names, remapped to intermediary on jar. Mod dependencies
@@ -126,16 +133,16 @@ dependencies {
 
     // NeroEconomy — OPTIONAL. compileOnly: never bundled, never a hard requirement. Only the economy bridge
     // class imports it, and only after isModLoaded("neroeconomy"), so NeroEvents runs without it.
-    add(siblingCompileOnly, "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${rootProject.neroeconomy_version}")
+    add(siblingCompileOnly, "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${neroeconomyVersion}")
     // Dev clients load NeroEconomy only with -PwithNeroEconomy; the default run proves it stays optional.
     if (project.hasProperty('withNeroEconomy')) {
-        add(siblingRuntimeOnly, "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${rootProject.neroeconomy_version}")
+        add(siblingRuntimeOnly, "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${neroeconomyVersion}")
     }
 
     // Optional siblings — compileOnly, never bundled, never required (see the compat block above).
     siblingIds.each { id ->
         if (siblingOn[id]) {
-            def coord = "za.co.neroland.${id}:${id}-fabric-${mc}:${rootProject.property("${id}_version")}"
+            def coord = "za.co.neroland.${id}:${id}-fabric-${mc}:${siblingVersion(id)}"
             add(siblingCompileOnly, coord)
             // Dev clients load a sibling only with -PwithNerospace / -PwithNeroCreatures / -PwithNeroColonies /
             // -PwithNeroAgriculture / -PwithNeroFactions.
@@ -159,12 +166,12 @@ dependencies {
     // against the Fabric JEI mod at dev runtime. JEI is a soft dependency (compile-time API only; the mod
     // is runtime-only). Same per-MC version as NeoForge (jei_version_<mc>, BlameJared maven from the root).
     if (jeiVersion) {
-        compileOnly "mezz.jei:jei-${mc}-common-api:${jeiVersion}"
+        compileOnly "mezz.jei:jei-${jeiMc}-common-api:${jeiVersion}"
         // 1.21.x: the Mojang-named common API is enough to compile the shared plugin; the Fabric JEI jars
         // are intermediary-named there, so they are only wired on de-obfuscated 26.x.
         if (!obfuscated) {
-            compileOnly "mezz.jei:jei-${mc}-fabric-api:${jeiVersion}"
-            runtimeOnly "mezz.jei:jei-${mc}-fabric:${jeiVersion}"
+            compileOnly "mezz.jei:jei-${jeiMc}-fabric-api:${jeiVersion}"
+            if (mc != '1.20.5') runtimeOnly "mezz.jei:jei-${jeiMc}-fabric:${jeiVersion}"
         }
     }
 
@@ -186,6 +193,7 @@ dependencies {
 // Run & Debug works — while values stay dynamic (sourced from gradle.properties).
 def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
     def props = [
+        java_version: project.javaRelease,
         mod_id               : rootProject.mod_id,
         mod_version          : rootProject.mod_version,
         mod_name             : rootProject.mod_name,
@@ -196,11 +204,11 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
         minecraft_version_ceiling: mcCeiling,
         nerolandcore_version : nerolandcoreVersion,
         // fabric.mod.json "suggests" entries for the optional siblings: `, "<modid>": ">=<floor>"` or "".
-        nerospace_suggest       : siblingOn.nerospace ? ", \"nerospace\": \">=${rootProject.nerospace_version}\"" : '',
+        nerospace_suggest       : siblingOn.nerospace ? ", \"nerospace\": \">=${siblingVersion('nerospace')}\"" : '',
         nerocreatures_suggest   : siblingOn.nerocreatures ? ", \"nerocreatures\": \">=${rootProject.nerocreatures_version}\"" : '',
-        nerocolonies_suggest    : siblingOn.nerocolonies ? ", \"nerocolonies\": \">=${rootProject.nerocolonies_version}\"" : '',
+        nerocolonies_suggest    : siblingOn.nerocolonies ? ", \"nerocolonies\": \">=${siblingVersion('nerocolonies')}\"" : '',
         neroagriculture_suggest : siblingOn.neroagriculture ? ", \"neroagriculture\": \">=${rootProject.neroagriculture_version}\"" : '',
-        nerofactions_suggest    : siblingOn.nerofactions ? ", \"nerofactions\": \">=${rootProject.nerofactions_version}\"" : '',
+        nerofactions_suggest    : siblingOn.nerofactions ? ", \"nerofactions\": \">=${siblingVersion('nerofactions')}\"" : '',
         opac_suggest            : opacOn ? ", \"openpartiesandclaims\": \">=${opacVersion}\"" : '',
     ]
     inputs.properties(props)

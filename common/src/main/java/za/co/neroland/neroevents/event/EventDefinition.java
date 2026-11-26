@@ -47,9 +47,9 @@ public record EventDefinition(Identifier id, Identifier type, EventCategory cate
         public static final Set<String> KEYS = Set.of("title", "what_to_do", "announce");
 
         public static final Codec<Display> CODEC = RecordCodecBuilder.create(inst -> inst.group(
-                Codec.STRING.optionalFieldOf("title", "").forGetter(Display::title),
-                Codec.STRING.optionalFieldOf("what_to_do", "").forGetter(Display::whatToDo),
-                Codec.STRING.optionalFieldOf("announce", "").forGetter(Display::announce)
+                DefinitionFields.optional(Codec.STRING, "title", "").forGetter(Display::title),
+                DefinitionFields.optional(Codec.STRING, "what_to_do", "").forGetter(Display::whatToDo),
+                DefinitionFields.optional(Codec.STRING, "announce", "").forGetter(Display::announce)
         ).apply(inst, Display::new));
     }
 
@@ -58,11 +58,11 @@ public record EventDefinition(Identifier id, Identifier type, EventCategory cate
             boolean locationPublic) {
 
         static final MapCodec<Flags> MAP_CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
-                Codec.BOOL.optionalFieldOf("enabled", true).forGetter(Flags::enabled),
-                Codec.BOOL.optionalFieldOf("destructive", false).forGetter(Flags::destructive),
-                Codec.BOOL.optionalFieldOf("consent_exempt", false).forGetter(Flags::consentExempt),
-                Codec.BOOL.optionalFieldOf("calm_exempt", false).forGetter(Flags::calmExempt),
-                Codec.BOOL.optionalFieldOf("location_public", false).forGetter(Flags::locationPublic)
+                DefinitionFields.optional(Codec.BOOL, "enabled", true).forGetter(Flags::enabled),
+                DefinitionFields.optional(Codec.BOOL, "destructive", false).forGetter(Flags::destructive),
+                DefinitionFields.optional(Codec.BOOL, "consent_exempt", false).forGetter(Flags::consentExempt),
+                DefinitionFields.optional(Codec.BOOL, "calm_exempt", false).forGetter(Flags::calmExempt),
+                DefinitionFields.optional(Codec.BOOL, "location_public", false).forGetter(Flags::locationPublic)
         ).apply(inst, Flags::new));
     }
 
@@ -83,17 +83,17 @@ public record EventDefinition(Identifier id, Identifier type, EventCategory cate
     public static final Codec<Raw> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             Identifier.CODEC.fieldOf("type").forGetter(Raw::type),
             Codec.STRING.fieldOf("category").forGetter(Raw::category),
-            Codec.STRING.optionalFieldOf("severity").forGetter(Raw::severity),
-            Display.CODEC.optionalFieldOf("display", new Display("", "", "")).forGetter(Raw::display),
-            Codec.INT.optionalFieldOf("weight").forGetter(Raw::weight),
-            Codec.LONG.optionalFieldOf("cooldown_ticks", DEFAULT_COOLDOWN_TICKS).forGetter(Raw::cooldownTicks),
-            Codec.INT.optionalFieldOf("announce_ticks", DEFAULT_ANNOUNCE_TICKS).forGetter(Raw::announceTicks),
-            Codec.INT.optionalFieldOf("duration_ticks", DEFAULT_DURATION_TICKS).forGetter(Raw::durationTicks),
+            DefinitionFields.optional(Codec.STRING, "severity").forGetter(Raw::severity),
+            DefinitionFields.optional(Display.CODEC, "display", new Display("", "", "")).forGetter(Raw::display),
+            DefinitionFields.optional(Codec.INT, "weight").forGetter(Raw::weight),
+            DefinitionFields.optional(Codec.LONG, "cooldown_ticks", DEFAULT_COOLDOWN_TICKS).forGetter(Raw::cooldownTicks),
+            DefinitionFields.optional(Codec.INT, "announce_ticks", DEFAULT_ANNOUNCE_TICKS).forGetter(Raw::announceTicks),
+            DefinitionFields.optional(Codec.INT, "duration_ticks", DEFAULT_DURATION_TICKS).forGetter(Raw::durationTicks),
             Flags.MAP_CODEC.forGetter(Raw::flags),
-            EventConditions.CODEC.optionalFieldOf("conditions", EventConditions.DEFAULT).forGetter(Raw::conditions),
-            EventBounds.CODEC.optionalFieldOf("bounds", EventBounds.DEFAULT).forGetter(Raw::bounds),
-            JSON.optionalFieldOf("payload", new JsonObject()).forGetter(Raw::payload),
-            RewardSpec.RAW_CODEC.optionalFieldOf("rewards", NO_REWARDS).forGetter(Raw::rewards)
+            DefinitionFields.optional(EventConditions.CODEC, "conditions", EventConditions.DEFAULT).forGetter(Raw::conditions),
+            DefinitionFields.optional(EventBounds.CODEC, "bounds", EventBounds.DEFAULT).forGetter(Raw::bounds),
+            DefinitionFields.optional(JSON, "payload", new JsonObject()).forGetter(Raw::payload),
+            DefinitionFields.optional(RewardSpec.RAW_CODEC, "rewards", NO_REWARDS).forGetter(Raw::rewards)
     ).apply(inst, Raw::new));
 
     public EventDefinition {

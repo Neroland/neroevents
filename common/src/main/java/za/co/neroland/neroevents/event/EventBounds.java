@@ -59,9 +59,9 @@ public record EventBounds(Kind kind, int radius, boolean fallbackToDensity) {
     }
 
     public static final Codec<EventBounds> CODEC = RecordCodecBuilder.create(inst -> inst.group(
-            Kind.CODEC.optionalFieldOf("kind", Kind.RADIUS).forGetter(EventBounds::kind),
-            Codec.INT.optionalFieldOf("radius", DEFAULT_RADIUS).forGetter(EventBounds::radius),
-            Codec.BOOL.optionalFieldOf("fallback_to_density", true).forGetter(EventBounds::fallbackToDensity)
+            DefinitionFields.optional(Kind.CODEC, "kind", Kind.RADIUS).forGetter(EventBounds::kind),
+            DefinitionFields.optional(Codec.INT, "radius", DEFAULT_RADIUS).forGetter(EventBounds::radius),
+            DefinitionFields.optional(Codec.BOOL, "fallback_to_density", true).forGetter(EventBounds::fallbackToDensity)
     ).apply(inst, EventBounds::new));
 
     public boolean radiusValid() {
