@@ -40,6 +40,11 @@ import za.co.neroland.nerolandcore.map.MapViewer;
  * set), and the console rule re-checked on every query: raids, invasions, private and finished events never appear,
  * pins sit on the public anchor, a war's beacons carry the holding side, and storms are a badge, not a layer.
  */
+//? if <1.20.3 {
+/*// Minecraft 1.20.2 builds any registry key through BuiltInRegistries, which needs a game bootstrap this
+// plain-JVM test does not have. The layers are the same code on every cell and are checked on all the others.
+@org.junit.jupiter.api.Disabled("1.20.2: registry keys need a bootstrapped game")
+*///?}
 class EventsMapLayersTest {
 
     static final Identifier HOME_ID = Identifier.fromNamespaceAndPath("neroevents_test", "home_test");

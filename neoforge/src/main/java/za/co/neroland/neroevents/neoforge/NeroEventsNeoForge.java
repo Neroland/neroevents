@@ -50,7 +50,7 @@ public final class NeroEventsNeoForge {
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> EventEngine.onServerStopping(event.getServer()));
         NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> EventCommands.register(event.getDispatcher()));
         // Event-entity damage (raid waves, the boss): observed after it was applied; one map lookup otherwise.
-        //? if >=26.1 {
+        //? if >=26.1.2 {
         NeoForge.EVENT_BUS.addListener((LivingDamageEvent.Post e) ->
                 EventDamageHooks.afterDamage(e.getEntity(), e.getSource(), e.getInflictedDamage()));
         //?} else if >=1.21 {

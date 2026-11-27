@@ -27,7 +27,7 @@ Everything else NeroEvents adds comes from events, never from a crafting table:
 | Item | Where it comes from |
 | --- | --- |
 | Meteor Slag, Cooled Crust | Meteor Shower craters; mine them and they drop themselves |
-| Embedded Meteor Ore | Meteor Shower craters; it drops Nero alloy or starsteel dust, never itself |
+| Embedded Meteor Ore | Meteor Shower craters; it drops Nero alloy or starsteel dust, never itself. A Neroland Core block (`nerolandcore:embedded_meteor_ore`) since Core 1.25.0 |
 | Crater Pocket | The heart of a crater; breaking it rolls its loot once |
 | Hull Plating, Scorched Panel, Bent Strut | Debris Crash wrecks; they drop themselves (wrecks slowly decay) |
 | Salvage Crate | Debris Crash wrecks; empty it, then it breaks to nothing |

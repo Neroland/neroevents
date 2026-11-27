@@ -49,8 +49,6 @@
   "block.neroevents.cooled_crust.tooltip": "The glassy floor of a fresh crater.",
   "block.neroevents.crater_pocket": "Crater Pocket",
   "block.neroevents.crater_pocket.tooltip": "The hot heart of a crater. Break it for loot and credit.",
-  "block.neroevents.embedded_meteor_ore": "Embedded Meteor Ore",
-  "block.neroevents.embedded_meteor_ore.tooltip": "Meteor rock with raw material caught inside. Mine it.",
   "block.neroevents.event_console": "Event Console",
   "block.neroevents.event_console.tooltip": "Shows live, upcoming and past events, and your rewards.",
   "block.neroevents.hull_plating": "Hull Plating",

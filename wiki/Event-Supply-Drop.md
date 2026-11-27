@@ -16,11 +16,19 @@ Head for the pod and open it. The **first player to open it claims the drop** (t
 pod counts as taking part, and when the event ends everyone who took part shares its rewards — see
 [Rewards](Rewards.md). A pod nobody opens pays nobody.
 
+You can also **break a landed pod**: hit it like a minecart (an axe or pickaxe takes three hits, a bare
+hand or other item takes more; it recovers if you stop for five seconds). It spills whatever is still
+inside and drops a little salvage (salvage plating, sometimes a conduit or iron nuggets). Breaking it
+counts exactly like opening it: if nobody has opened it yet, you claim the drop. Once broken the event
+ends on its next tick. A pod still falling under its canopy cannot be broken, and nothing but a
+player's own hits can break it — explosions, arrows, fire and mobs leave it alone.
+
 ## What it changes
 
 The pod lands only where it can see the sky, and it breaks, replaces and places no blocks. An emptied
 pod stays for a while, then goes; an unopened one stays a little longer. Its loot goes into the
-opener's inventory like any container; event rewards wait in the reward crate.
+opener's inventory like any container; event rewards wait in the reward crate. The salvage a broken pod
+drops comes from the loot table `neroevents:entities/supply_pod`, which a data pack can replace.
 
 ## The three supply drops
 

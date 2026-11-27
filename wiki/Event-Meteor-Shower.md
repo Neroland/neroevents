@@ -31,6 +31,10 @@ pocket. A crater **never** lands:
 In those cases the meteor lands softly: no crater, only the pocket. A few craters per chunk and per
 shower at most; further meteors land softly too.
 
+Embedded Meteor Ore is a Neroland Core block (`nerolandcore:embedded_meteor_ore`) since Core 1.25.0. Craters still
+place it, and blocks from older worlds load as the Core block. Without NeroEvents, Core's Ore Reclaimer turns it into
+Deepslate Iron Ore.
+
 ## The two meteor events
 
 | Event | Where |

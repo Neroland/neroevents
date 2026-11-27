@@ -35,10 +35,12 @@ public final class CorePayloadBlocks {
             key -> new Block(BlockBehaviour.Properties.of().setId(key).mapColor(MapColor.COLOR_BROWN)
                     .strength(1.2F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.TUFF)));
 
-    /** Meteor rock with a Core material caught inside (drops through its block loot table). */
-    public static final RegistryEntry<Block> EMBEDDED_METEOR_ORE = BLOCKS.register("embedded_meteor_ore",
-            key -> new Block(BlockBehaviour.Properties.of().setId(key).mapColor(MapColor.COLOR_BLACK)
-                    .strength(3.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.BASALT)));
+    /**
+     * Meteor rock with a Core material caught inside (drops through its block loot table). Moved to Neroland Core
+     * 1.25.0 as {@code nerolandcore:embedded_meteor_ore}; old worlds remap there. Craters still place it.
+     */
+    public static final RegistryEntry<? extends Block> EMBEDDED_METEOR_ORE =
+            za.co.neroland.nerolandcore.ore.CoreOres.EMBEDDED_METEOR_ORE;
 
     /** The loot heart of a crater: breaking it rolls the pocket table and credits the breaker. */
     public static final RegistryEntry<Block> CRATER_POCKET = BLOCKS.register("crater_pocket",

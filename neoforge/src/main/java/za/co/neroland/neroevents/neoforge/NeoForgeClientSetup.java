@@ -19,7 +19,9 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 //?}
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+//? if >=1.20.4 {
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+//?}
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 //? if >=1.20.5 {
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -63,8 +65,14 @@ public final class NeoForgeClientSetup {
     public static void init(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(NeoForgeClientSetup::onRegisterEntityRenderers);
         modEventBus.addListener(NeoForgeClientSetup::onRegisterParticleProviders);
+        //? if >=1.20.4 {
         modEventBus.addListener((RegisterMenuScreensEvent event) ->
                 event.register(ConsoleBlocks.EVENT_CONSOLE_MENU.get(), EventConsoleScreen::new));
+        //?} else {
+        /*modEventBus.addListener((net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) ->
+                event.enqueueWork(() -> net.minecraft.client.gui.screens.MenuScreens.register(
+                        ConsoleBlocks.EVENT_CONSOLE_MENU.get(), EventConsoleScreen::new)));
+        *///?}
         //? if >=1.20.5 {
         modEventBus.addListener((RegisterGuiLayersEvent event) -> event.registerAboveAll(
                 Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "event_hud"), (g, delta) -> EventHud.render(g)));

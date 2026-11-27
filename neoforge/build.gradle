@@ -25,6 +25,8 @@ def jeiVersion = project.findProperty("jei_version_${jeiMc}")
 def emiFile = project.findProperty("emi_file_neoforge_${mc}")
 def nerolandcoreVersion = rootProject.property('nerolandcore_version')
 def neroeconomyVersion = rootProject.property('neroeconomy_version')
+// A cell NeroEconomy has no build for compiles against a neighbouring line (neroeconomy_mc_* in gradle.properties).
+def neroeconomyMc = (rootProject.findProperty("neroeconomy_mc_neoforge_${mc}") ?: rootProject.findProperty("neroeconomy_mc_${mc}") ?: mc).toString()
 
 // This node's projectDir is <loader>/versions/<v>; the authoritative loader source +
 // templates live in the BRANCH root (neoforge/). Resolve branch-root paths via the parent.
@@ -43,7 +45,9 @@ def siblingPkg = [nerospace: 'nerospace', nerocreatures: 'creatures', nerocoloni
 def siblingCls = [nerospace: 'Nerospace', nerocreatures: 'Creatures', nerocolonies: 'Colonies', neroagriculture: 'Agriculture', nerofactions: 'Factions']
 def siblingRun = [nerospace: 'withNerospace', nerocreatures: 'withNeroCreatures', nerocolonies: 'withNeroColonies', neroagriculture: 'withNeroAgriculture', nerofactions: 'withNeroFactions']
 // `<x>_compat_<mc>=false` switches a sibling off for this Minecraft version only (no build of it for this line).
-def siblingOn = siblingIds.collectEntries { id -> [(id): compatOn("${id}_compat") && compatOn("${id}_compat_${mc}")] }
+// `<x>_compat_neoforge_<mc>=false` does the same for this loader only.
+def siblingOn = siblingIds.collectEntries { id -> [(id): compatOn("${id}_compat") && compatOn("${id}_compat_${mc}")
+        && compatOn("${id}_compat_neoforge_${mc}")] }
 def opacVersion = rootProject.findProperty("opac_version_${mc}")
 def opacOn = compatOn('opac_compat') && opacVersion != null
 siblingIds.each { id ->
@@ -125,10 +129,10 @@ dependencies {
 
     // NeroEconomy — OPTIONAL. compileOnly: never bundled, never a hard requirement. Only the economy bridge
     // class imports it, and only after isModLoaded("neroeconomy"), so NeroEvents runs without it.
-    compileOnly "za.co.neroland.neroeconomy:neroeconomy-neoforge-${mc}:${neroeconomyVersion}"
+    compileOnly "za.co.neroland.neroeconomy:neroeconomy-neoforge-${neroeconomyMc}:${neroeconomyVersion}"
     // Dev clients load NeroEconomy only with -PwithNeroEconomy; the default run proves it stays optional.
-    if (project.hasProperty('withNeroEconomy')) {
-        runtimeOnly "za.co.neroland.neroeconomy:neroeconomy-neoforge-${mc}:${neroeconomyVersion}"
+    if (project.hasProperty('withNeroEconomy') && neroeconomyMc == mc) {
+        runtimeOnly "za.co.neroland.neroeconomy:neroeconomy-neoforge-${neroeconomyMc}:${neroeconomyVersion}"
     }
 
     // Optional siblings — compileOnly, never bundled, never required (see the compat block above).
@@ -186,6 +190,7 @@ def tomlDep = { String modId, String floor, String reqKey, String reqVal ->
     "\n[[dependencies.${rootProject.mod_id}]]\nmodId = \"${modId}\"\n${reqKey} = ${reqVal}\nversionRange = \"[${floor},)\"\nordering = \"AFTER\"\nside = \"BOTH\"\n"
 }
 def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    def legacyMixins = stonecutter.eval(mc, '<1.20.4')
     def props = [
         mod_id                 : rootProject.mod_id,
         mod_version            : rootProject.mod_version,
@@ -212,15 +217,25 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
             name = 'mods.toml'
             filter { line -> line.replace('type = "required"', 'mandatory = true')
                                  .replace('type = "optional"', 'mandatory = false') }
+            // NeoForge before 20.4 has no [[mixins]] table: the config is declared in the jar manifest instead.
+            if (legacyMixins) {
+                filter { line -> line == '[[mixins]]' || line == 'config = "neroevents-common.mixins.json"' ? '' : line }
+            }
         }
     }
     into layout.buildDirectory.dir('generated/sources/modMetadata')
 }
 sourceSets.main.resources.srcDir generateModMetadata
 
-// NeoForge 20.5's POM predates the ModDevGradle variants. The original userdev jar supplies the
-// game patches and the original POM supplies dependencies for the compile and test classpaths.
-if (mc == '1.20.5') {
+if (stonecutter.eval(mc, '<1.20.4')) {
+    tasks.named('jar', Jar) {
+        manifest.attributes('MixinConfigs': 'neroevents-common.mixins.json')
+    }
+}
+
+// These NeoForge POMs (20.2, 20.3, 20.5) predate the ModDevGradle variants. The original userdev jar supplies
+// the game patches and the original POM supplies dependencies for the compile and test classpaths.
+if (mc in ['1.20.2', '1.20.3', '1.20.5']) {
     dependencies.components.withModule('net.neoforged:neoforge') { details ->
         if (details.id.version == neoVersion) {
             details.withVariant('sources') {

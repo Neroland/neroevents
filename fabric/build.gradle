@@ -28,6 +28,8 @@ def jeiVersion = project.findProperty("jei_version_${jeiMc}")
 def emiFile = project.findProperty("emi_file_fabric_${mc}")
 def nerolandcoreVersion = rootProject.property('nerolandcore_version')
 def neroeconomyVersion = rootProject.property('neroeconomy_version')
+// A cell NeroEconomy has no build for compiles against a neighbouring line (neroeconomy_mc_* in gradle.properties).
+def neroeconomyMc = (rootProject.findProperty("neroeconomy_mc_fabric_${mc}") ?: rootProject.findProperty("neroeconomy_mc_${mc}") ?: mc).toString()
 
 // This node's projectDir is <loader>/versions/<v>; the authoritative loader source +
 // resources live in the BRANCH root (fabric/). Resolve branch-root paths via the parent.
@@ -46,7 +48,9 @@ def siblingPkg = [nerospace: 'nerospace', nerocreatures: 'creatures', nerocoloni
 def siblingCls = [nerospace: 'Nerospace', nerocreatures: 'Creatures', nerocolonies: 'Colonies', neroagriculture: 'Agriculture', nerofactions: 'Factions']
 def siblingRun = [nerospace: 'withNerospace', nerocreatures: 'withNeroCreatures', nerocolonies: 'withNeroColonies', neroagriculture: 'withNeroAgriculture', nerofactions: 'withNeroFactions']
 // `<x>_compat_<mc>=false` switches a sibling off for this Minecraft version only (no build of it for this line).
-def siblingOn = siblingIds.collectEntries { id -> [(id): compatOn("${id}_compat") && compatOn("${id}_compat_${mc}")] }
+// `<x>_compat_fabric_<mc>=false` does the same for this loader only.
+def siblingOn = siblingIds.collectEntries { id -> [(id): compatOn("${id}_compat") && compatOn("${id}_compat_${mc}")
+        && compatOn("${id}_compat_fabric_${mc}")] }
 def opacVersion = rootProject.findProperty("opac_version_${mc}")
 def opacOn = compatOn('opac_compat') && opacVersion != null
 siblingIds.each { id ->
@@ -133,10 +137,10 @@ dependencies {
 
     // NeroEconomy — OPTIONAL. compileOnly: never bundled, never a hard requirement. Only the economy bridge
     // class imports it, and only after isModLoaded("neroeconomy"), so NeroEvents runs without it.
-    add(siblingCompileOnly, "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${neroeconomyVersion}")
+    add(siblingCompileOnly, "za.co.neroland.neroeconomy:neroeconomy-fabric-${neroeconomyMc}:${neroeconomyVersion}")
     // Dev clients load NeroEconomy only with -PwithNeroEconomy; the default run proves it stays optional.
-    if (project.hasProperty('withNeroEconomy')) {
-        add(siblingRuntimeOnly, "za.co.neroland.neroeconomy:neroeconomy-fabric-${mc}:${neroeconomyVersion}")
+    if (project.hasProperty('withNeroEconomy') && neroeconomyMc == mc) {
+        add(siblingRuntimeOnly, "za.co.neroland.neroeconomy:neroeconomy-fabric-${neroeconomyMc}:${neroeconomyVersion}")
     }
 
     // Optional siblings — compileOnly, never bundled, never required (see the compat block above).

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-27
+
+### Added
+
+- Builds for Minecraft 1.21.3, 26.1 and 26.1.1 on Fabric, Forge and NeoForge, and for NeoForge 1.20.2 and 1.20.3, matching
+  Neroland Core's cells. They need Neroland Core 1.25.0 or newer. The Nerospace, NeroColonies and NeroFactions integrations
+  are not in these builds yet, and NeroEconomy has no build for these lines either, so its paid features stay off there.
+
+### Changed
+
+- Embedded Meteor Ore moved to Neroland Core 1.25.0 as `nerolandcore:embedded_meteor_ore`. Meteor craters still place it
+  and its drops are unchanged; old worlds load `neroevents:embedded_meteor_ore` as the Core block. Needs Neroland Core
+  1.25.0 or newer.
+- A landed supply pod can now be broken by a player (an axe or pickaxe takes three hits). It spills what it still
+  holds plus a little salvage from the new loot table `neroevents:entities/supply_pod` (data-pack replaceable).
+  Breaking it counts as opening it, so an unopened pod is claimed by whoever breaks it. Explosions, projectiles,
+  fire and mobs still cannot hurt it, a falling pod cannot be broken, and nothing is recorded about who broke it.
+
 ## [0.10.1]
 
 - Fabric supports Minecraft 1.20 through 1.20.6. Forge supports 1.20 through 1.20.4 and 1.20.6. NeoForge supports 1.20.4 through 1.20.6, with the Forge jar for legacy NeoForge 1.20.1.

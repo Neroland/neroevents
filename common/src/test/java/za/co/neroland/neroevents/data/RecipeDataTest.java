@@ -29,7 +29,7 @@ class RecipeDataTest {
     /** Event-only things: a recipe would bypass the event (or quest) that places or awards them. */
     private static final Set<String> NEVER_CRAFTED = Set.of(
             "neroevents:war_beacon", "neroevents:salvage_crate", "neroevents:crater_pocket",
-            "neroevents:embedded_meteor_ore", "neroevents:supply_beacon");
+            "neroevents:supply_beacon");
     /** Event-placed blocks that must not drop themselves when broken. */
     private static final Set<String> NO_SELF_DROP = Set.of("war_beacon", "salvage_crate", "crater_pocket");
     /** The salvage items: each needs at least one use (a recipe ingredient or a commodity entry). */

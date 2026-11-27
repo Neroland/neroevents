@@ -298,6 +298,55 @@ class SupplyDropPayloadTest {
     }
 
     @Test
+    void breakingAnUnopenedPodClaimsItAndResolvesSuccess() {
+        type.onStart(ctx, config, state);
+        pods.landed = true;
+        tick();
+        SupplyDropPayload.onPodBroken(instance.id(), pods.pod, CoreFixtures.ALICE, clock.now());
+        pods.present = false; // the entity removed itself
+        assertEquals(TickResult.resolved(EventOutcome.SUCCESS), tick());
+        assertEquals(1, state.openCount());
+        // Cleanup after a break finds nothing to remove and does not throw.
+        type.onCleanup(ctx, config, state);
+    }
+
+    @Test
+    void breakingAfterAnOpenerIsTheOnceKeyedLootCredit() {
+        type.onStart(ctx, config, state);
+        SupplyDropPayload.onPodOpened(instance.id(), pods.pod, CoreFixtures.ALICE, clock.now());
+        SupplyDropPayload.onPodBroken(instance.id(), pods.pod, CoreFixtures.BOB, clock.now());
+        List<PendingCredits.Pending> queued = state.pending().snapshot();
+        assertEquals(2, queued.size());
+        assertEquals(pods.pod, queued.get(0).attribution());
+        assertEquals(ContributionTable.Kind.LOOT, queued.get(1).kind());
+        assertEquals("pod:" + pods.pod, queued.get(1).onceKey());
+    }
+
+    @Test
+    void breakingAfterTheEventCreditsNobody() {
+        type.onStart(ctx, config, state);
+        type.onCleanup(ctx, config, state);
+        SupplyDropPayload.onPodBroken(instance.id(), pods.pod, CoreFixtures.ALICE, clock.now());
+        assertEquals(0, state.pending().size());
+    }
+
+    /** A broken pod's salvage is a datapack loot table, small and separate from the budgeted contents. */
+    @Test
+    void salvageTableShipsAndIsSmall() throws Exception {
+        //? if >=1.21 {
+        String path = "/data/neroevents/loot_table/entities/supply_pod.json";
+        //?} else {
+        /*String path = "/data/neroevents/loot_tables/entities/supply_pod.json";
+        *///?}
+        try (java.io.InputStream in = SupplyDropPayloadTest.class.getResourceAsStream(path)) {
+            assertTrue(in != null, path);
+            com.google.gson.JsonObject root = com.google.gson.JsonParser.parseReader(
+                    new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+            assertTrue(root.getAsJsonArray("pools").size() <= 2, path);
+        }
+    }
+
+    @Test
     void podInAnUnloadedChunkKeepsWaiting() {
         type.onStart(ctx, config, state);
         pods.present = false;

@@ -136,7 +136,9 @@ The example under each type is the definition this mod ships, copied as-is.
 ### `neroevents:supply_drop` (Neroland Core only)
 
 A supply pod falls where it can see the sky and breaks no blocks; the first player to open it claims
-the drop.
+the drop. A player can also break a landed pod by hand (an axe or pickaxe is faster): it spills its
+remaining contents plus a roll of `neroevents:entities/supply_pod` (salvage, outside `pod_loot_budget`),
+and breaking counts as opening it.
 
 | Key | Range | Default | What it does |
 | --- | --- | --- | --- |

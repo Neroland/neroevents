@@ -3,7 +3,7 @@
   "values": [
     "neroevents:meteor_slag",
     "neroevents:cooled_crust",
-    "neroevents:embedded_meteor_ore",
+    "nerolandcore:embedded_meteor_ore",
     "neroevents:crater_pocket"
   ]
 }

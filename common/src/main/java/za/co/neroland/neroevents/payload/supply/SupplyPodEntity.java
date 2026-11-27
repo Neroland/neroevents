@@ -11,10 +11,15 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.ContainerUser;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -36,9 +41,11 @@ import za.co.neroland.neroevents.payload.PayloadSounds;
 import za.co.neroland.neroevents.payload.registry.CorePayloadEntities;
 
 /**
- * The supply pod ({@code neroevents:supply_pod}): a plain, AI-less, indestructible entity that descends at a
- * constant parachute speed with a slow drift, lands, rolls its loot once into a 27-slot container and opens as a
- * vanilla chest menu. All gameplay is server-side; the client renders from the synced position and the
+ * The supply pod ({@code neroevents:supply_pod}): a plain, AI-less entity that descends at a constant parachute
+ * speed with a slow drift, lands, rolls its loot once into a 27-slot container and opens as a vanilla chest menu.
+ * Once landed, a player can break it by hand (an axe or pickaxe is faster): it spills what it still holds and
+ * drops a little salvage from {@link #SALVAGE_TABLE}. Nothing else can hurt it (explosions, projectiles, fire,
+ * mobs), and a pod still under its canopy or a gallery display pod cannot be broken. All gameplay is server-side; the client renders from the synced position and the
  * {@code tier}, {@code landed} and {@code open} flags (canopy detach, hatch swing).
  *
  * <p>Carries the event instance id as a saved field ({@code NeroEventsInstance}) — Fabric has no persistent
@@ -56,6 +63,15 @@ public class SupplyPodEntity extends Entity {
 
     public static final int SLOTS = 27;
     private static final Component TITLE = Component.translatable("entity.neroevents.supply_pod");
+    /** What a broken pod drops besides its contents (datapack-overridable). */
+    public static final Identifier SALVAGE_TABLE = Identifier.fromNamespaceAndPath(za.co.neroland.neroevents.NeroEventsCommon.MOD_ID,
+            "entities/supply_pod");
+    /** Break progress needed; a hit adds {@link #TOOL_HIT} with an axe or pickaxe, {@link #HAND_HIT} otherwise. */
+    static final int BREAK_AT = 12;
+    static final int TOOL_HIT = 4;
+    static final int HAND_HIT = 1;
+    /** Progress resets when the pod is not hit for this long (ticks). */
+    static final int HIT_RESET_TICKS = 100;
 
     private @Nullable UUID instanceId;
     private double descent = 0.35D;
@@ -68,6 +84,9 @@ public class SupplyPodEntity extends Entity {
     private boolean lootRolled;
     private int descentTicks;
     private int maxDescentTicks = 600;
+    /** Server only, not saved: break progress and the tick of the last hit. */
+    private int breakProgress;
+    private int lastHitTick = Integer.MIN_VALUE / 2;
     private final PodContainer container = new PodContainer();
     /** Client only: the tick the landed flag was first seen (−1 = not landed), and the hatch's 0..1 swing. */
     private int clientLandedAt = -1;
@@ -256,12 +275,73 @@ public class SupplyPodEntity extends Entity {
 
     //? if >=1.21.2 {
     @Override
-    public boolean hurtServer(ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float amount) {
+    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+        return onHit(level, source);
+    }
     //?} else {
     /*@Override
-    public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
+    public boolean hurt(DamageSource source, float amount) {
+        return level() instanceof ServerLevel serverLevel && onHit(serverLevel, source);
+    }
     *///?}
-        return false; // indestructible
+
+    /**
+     * A hit (server). Only a landed event pod, and only a player's own melee hit, counts; everything else
+     * (explosions, projectiles, fire, mobs, spectators) leaves it untouched. Creative players break it at once.
+     */
+    private boolean onHit(ServerLevel level, DamageSource source) {
+        if (isRemoved() || !isLanded() || instanceId == null || !(source.getEntity() instanceof ServerPlayer player)
+                || source.getDirectEntity() != player || player.isSpectator()) {
+            return false;
+        }
+        if (player.getAbilities().instabuild) {
+            breakPod(level, player, false);
+            return true;
+        }
+        if (tickCount - lastHitTick > HIT_RESET_TICKS) {
+            breakProgress = 0;
+        }
+        lastHitTick = tickCount;
+        ItemStack tool = player.getMainHandItem();
+        breakProgress += tool.is(ItemTags.AXES) || tool.is(ItemTags.PICKAXES) ? TOOL_HIT : HAND_HIT;
+        if (breakProgress >= BREAK_AT) {
+            breakPod(level, player, true);
+        } else {
+            level.playSound(null, getX(), getY(), getZ(), SoundEvents.METAL_HIT, SoundSource.BLOCKS, 0.8F, 0.9F);
+        }
+        return true;
+    }
+
+    /**
+     * Breaks the pod: credits the breaker exactly as opening it would (the first to reach the contents claims the
+     * drop), spills whatever is still inside, adds the salvage roll (survival only) and removes the pod. The
+     * container is emptied before anything is dropped and the pod is gone in the same call, so open menus close
+     * on their next validity check and nothing can be both taken and dropped. Records nobody.
+     */
+    private void breakPod(ServerLevel level, ServerPlayer player, boolean salvage) {
+        rollLoot(level); // no-op once rolled at landing
+        UUID instance = instanceId;
+        if (instance != null) {
+            SupplyDropPayload.onPodBroken(level.getServer(), instance, getUUID(), player);
+        }
+        List<ItemStack> drops = new ArrayList<>();
+        for (int i = 0; i < SLOTS; i++) {
+            ItemStack stack = container.removeItemNoUpdate(i);
+            if (!stack.isEmpty()) {
+                drops.add(stack);
+            }
+        }
+        if (salvage) {
+            drops.addAll(LootRolls.roll(level, SALVAGE_TABLE, 1, seedBase ^ getUUID().getMostSignificantBits(),
+                    blockPosition()));
+        }
+        container.setChanged();
+        this.entityData.set(DATA_OPEN, false);
+        discard();
+        for (ItemStack stack : drops) {
+            Containers.dropItemStack(level, getX(), getY() + 0.5D, getZ(), stack);
+        }
+        level.playSound(null, getX(), getY(), getZ(), SoundEvents.METAL_BREAK, SoundSource.BLOCKS, 1.0F, 0.8F);
     }
 
     //? if >=1.21.6 {

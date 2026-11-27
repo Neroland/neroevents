@@ -27,8 +27,9 @@ public final class CorePayloadItems {
 
     public static final RegistryEntry<BlockItem> METEOR_SLAG = blockItem("meteor_slag", CorePayloadBlocks.METEOR_SLAG);
     public static final RegistryEntry<BlockItem> COOLED_CRUST = blockItem("cooled_crust", CorePayloadBlocks.COOLED_CRUST);
+    /** Neroland Core's item since Core 1.25.0 ({@code nerolandcore:embedded_meteor_ore}). */
     public static final RegistryEntry<BlockItem> EMBEDDED_METEOR_ORE =
-            blockItem("embedded_meteor_ore", CorePayloadBlocks.EMBEDDED_METEOR_ORE);
+            za.co.neroland.nerolandcore.ore.CoreOres.EMBEDDED_METEOR_ORE_ITEM;
     public static final RegistryEntry<BlockItem> CRATER_POCKET = blockItem("crater_pocket", CorePayloadBlocks.CRATER_POCKET);
     public static final RegistryEntry<BlockItem> HULL_PLATING = blockItem("hull_plating", CorePayloadBlocks.HULL_PLATING);
     public static final RegistryEntry<BlockItem> SCORCHED_PANEL =

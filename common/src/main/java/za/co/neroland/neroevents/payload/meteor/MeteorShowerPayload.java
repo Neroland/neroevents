@@ -76,7 +76,8 @@ public final class MeteorShowerPayload implements PayloadType<MeteorShowerPayloa
     public static final Identifier ID = Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID, "meteor_shower");
     public static final Identifier DEFAULT_POCKET_LOOT = Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID,
             "craters/pocket");
-    public static final Identifier DEFAULT_ORE = Identifier.fromNamespaceAndPath(NeroEventsCommon.MOD_ID,
+    /** Neroland Core's Embedded Meteor Ore (moved there in Core 1.25.0). */
+    public static final Identifier DEFAULT_ORE = Identifier.fromNamespaceAndPath("nerolandcore",
             "embedded_meteor_ore");
     /** At most this many meteors spawn in one tick; the rest wait. */
     static final int MAX_SPAWNS_PER_TICK = 3;

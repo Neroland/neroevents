@@ -385,6 +385,21 @@ public final class SupplyDropPayload implements PayloadType<SupplyDropPayload.Co
         state.openCount++;
     }
 
+    /**
+     * A player broke a landed pod (server thread). Breaking reaches the contents just as opening does, so it is
+     * credited the same way: the first to reach them claims the drop, anyone else gets the pod's once-keyed loot
+     * credit. The event then resolves on its next tick because the pod is gone (and cleanup finds nothing to
+     * remove).
+     */
+    public static void onPodBroken(MinecraftServer server, UUID instanceId, UUID podUuid, ServerPlayer player) {
+        onPodBroken(instanceId, podUuid, player.getUUID(), server.overworld().getGameTime());
+    }
+
+    /** The pure core of {@link #onPodBroken(MinecraftServer, UUID, UUID, ServerPlayer)}. No-op when not live. */
+    public static void onPodBroken(UUID instanceId, UUID podUuid, UUID player, long now) {
+        onPodOpened(instanceId, podUuid, player, now);
+    }
+
     /** Whether an instance is live on this server (the pod's hooks are no-ops otherwise). */
     public static boolean isLive(UUID instanceId) {
         return instanceId != null && LIVE.containsKey(instanceId);
