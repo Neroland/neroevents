@@ -38,7 +38,7 @@ jobs:
       version: ${{ steps.check.outputs.version }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7 # v6
+        uses: actions/checkout@v7.0.1 # v6
         with:
           # Tags are the release ledger - fetch them for the existence check.
           fetch-depth: 1
@@ -133,7 +133,7 @@ jobs:
       matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7 # v6
+        uses: actions/checkout@v7.0.1 # v6
         with:
           fetch-depth: 1
 
@@ -215,7 +215,7 @@ jobs:
       VERSION: ${{ needs.detect.outputs.version }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7 # v6
+        uses: actions/checkout@v7.0.1 # v6
         with:
           fetch-depth: 1
 
@@ -453,7 +453,7 @@ jobs:
       contents: write # create the GitHub Release + v<version> tag
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7 # v6
+        uses: actions/checkout@v7.0.1 # v6
         with:
           fetch-depth: 0
           fetch-tags: true
